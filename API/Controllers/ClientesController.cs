@@ -1,32 +1,45 @@
-﻿using MediatR;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
+using MediatR;
+using CRMVEXA.Application.Commands.Clientes;
+using CRMVEXA.Application.DTOs;
 
+namespace CRMVEXA.API.Controllers;
 
-namespace CRMVEXA.API.Controllers
+[ApiController]
+[Route("api/[controller]")]
+public class ClientesController : ControllerBase
 {
-    [ApiController]
-    [Route("api/[controller]")]
-    public class ClientesController : ControllerBase
+    private readonly IMediator _mediator;
+
+    public ClientesController(IMediator mediator)
     {
-        private readonly IMediator _mediator;
+        _mediator = mediator;
+    }
 
-        public ClientesController(IMediator mediator)
-        {
-            _mediator = mediator;
-        }
+    [HttpPost]
+    public async Task<ActionResult<int>> Criar([FromBody] CriarClienteCommand command)
+    {
+        var id = await _mediator.Send(command);
+        return CreatedAtAction(nameof(ObterPorId), new { id }, id);
+    }
 
-        [HttpPost]
-        public async Task<ActionResult<int>> Criar([FromBody] CriarClienteCommand command)
-        {
-            var id = await _mediator.Send(command);
-            return CreatedAtAction(nameof(ObterPorId), new { id }, id);
-        }
+    [HttpGet("{id}")]
+    public async Task<ActionResult<ClienteDto>> ObterPorId(int id)
+    {
+        // Implemente a query: ObterClientePorIdQuery
+        // Exemplo:
+        // var cliente = await _mediator.Send(new ObterClientePorIdQuery(id));
+        // return Ok(cliente);
+        return Ok(); // placeholder
+    }
 
-        [HttpGet("{id}")]
-        public async Task<ActionResult<ClienteDto>> ObterPorId(int id)
-        {
-            // Implemente a Query (ObterClientePorIdQuery) na Application/Queries se quiser GET completo
-            return Ok(); // Placeholder
-        }
+    [HttpGet]
+    public async Task<ActionResult<IEnumerable<ClienteDto>>> Listar()
+    {
+        // Implemente a query: ListarClientesQuery
+        // Exemplo:
+        // var clientes = await _mediator.Send(new ListarClientesQuery());
+        // return Ok(clientes);
+        return Ok(); // placeholder
     }
 }
