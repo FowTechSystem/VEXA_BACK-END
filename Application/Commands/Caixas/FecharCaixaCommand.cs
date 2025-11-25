@@ -1,12 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using MediatR;
 
 namespace CRMVEXA.Application.Commands.Caixas
 {
-    internal class FecharCaixaCommand
-    {
-    }
+    public record FecharCaixaCommand(
+        int CaixaId,
+        decimal SaldoFinal,
+        string? Observacoes
+    ) : IRequest<bool>;
 }

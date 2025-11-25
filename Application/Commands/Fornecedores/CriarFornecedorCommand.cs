@@ -1,12 +1,18 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using MediatR;
 
 namespace CRMVEXA.Application.Commands.Fornecedores
 {
-    internal class CriarFornecedorCommand
-    {
-    }
+    public record CriarFornecedorCommand(
+        string Nome,
+        string? RazaoSocial,
+        string? CNPJ,
+        string? NomeRepresentante,
+        string Telefone,
+        string? WhatsApp,
+        string? Email,
+        string? Endereco,
+        string? CategoriaProdutos,
+        string? CondicaoPagamento,
+        string? Observacoes
+    ) : IRequest<int>;
 }

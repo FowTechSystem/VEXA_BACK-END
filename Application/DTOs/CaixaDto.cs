@@ -1,12 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace CRMVEXA.Application.DTOs
+﻿namespace CRMVEXA.Application.DTOs
 {
-    internal class CaixaDto
+    public class CaixaDto
     {
+        public int Id { get; set; }
+        public DateTime DataAbertura { get; set; }
+        public DateTime? DataFechamento { get; set; }
+        public decimal SaldoInicial { get; set; }
+        public decimal SaldoFinal { get; set; }
+        public int UsuarioId { get; set; }
+        public string? Observacoes { get; set; }
+        public bool Aberto { get; set; }
     }
 }

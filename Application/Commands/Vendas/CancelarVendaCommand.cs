@@ -1,12 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using MediatR;
 
 namespace CRMVEXA.Application.Commands.Vendas
 {
-    internal class CancelarVendaCommand
-    {
-    }
+    public record CancelarVendaCommand(
+        int Id // Id da venda que será cancelada
+    ) : IRequest<bool>;
 }

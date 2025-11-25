@@ -1,12 +1,8 @@
-﻿using System;
+﻿using MediatR;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using CRMVEXA.Application.DTOs;
 
 namespace CRMVEXA.Application.Queries.Clientes
 {
-    internal class ListarClientesQuery
-    {
-    }
+    public record ListarClientesQuery() : IRequest<IEnumerable<ClienteDto>>;
 }

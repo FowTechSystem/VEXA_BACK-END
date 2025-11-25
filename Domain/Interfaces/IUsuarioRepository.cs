@@ -1,12 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using CRMVEXA.Domain.Entities;
 
 namespace CRMVEXA.Domain.Interfaces
 {
-    internal interface IUsuarioRepository
+    public interface IUsuarioRepository
     {
+        Task<Usuario?> ObterPorIdAsync(int id);
+        Task<IEnumerable<Usuario>> ObterTodosAsync();
+        Task<Usuario> AdicionarAsync(Usuario usuario);
+        Task AtualizarAsync(Usuario usuario);
+        Task RemoverAsync(int id);
     }
 }

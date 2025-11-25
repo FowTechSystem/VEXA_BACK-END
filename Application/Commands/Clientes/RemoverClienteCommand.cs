@@ -1,12 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using MediatR;
 
 namespace CRMVEXA.Application.Commands.Clientes
 {
-    internal class RemoverClienteCommand
-    {
-    }
+    public record RemoverClienteCommand(
+        int Id // Id do cliente para remover
+    ) : IRequest<bool>;
 }

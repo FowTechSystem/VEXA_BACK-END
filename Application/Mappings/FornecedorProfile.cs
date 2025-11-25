@@ -1,12 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using AutoMapper;
+using CRMVEXA.Application.DTOs;
+using CRMVEXA.Domain.Entities;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace CRMVEXA.Application.Mappings
 {
-    internal class FornecedorProfile
+    public class FornecedorProfile : Profile
     {
+        public FornecedorProfile()
+        {
+            CreateMap<Fornecedor, FornecedorDto>();
+        }
     }
 }

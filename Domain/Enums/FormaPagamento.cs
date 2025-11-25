@@ -1,12 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace CRMVEXA.Domain.Enums
+﻿namespace CRMVEXA.Domain.Enums
 {
-    internal class FormaPagamento
+    public enum FormaPagamento
     {
+        Dinheiro,
+        Pix,
+        CartaoCredito,
+        CartaoDebito,
+        Crediario
     }
 }

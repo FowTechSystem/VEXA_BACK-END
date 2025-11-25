@@ -1,12 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using FluentValidation;
+using CRMVEXA.Application.Commands.Vendas;
 
 namespace CRMVEXA.Application.Validators
 {
-    internal class CriarVendaValidator
+    public class CriarVendaValidator : AbstractValidator<CriarVendaCommand>
     {
+        public CriarVendaValidator()
+        {
+            RuleFor(x => x.CodigoVenda).NotEmpty().MaximumLength(50);
+            RuleFor(x => x.FormaPagamento).NotEmpty();
+            RuleFor(x => x.UsuarioId).GreaterThan(0);
+            RuleFor(x => x.Itens).NotEmpty();
+        }
     }
 }

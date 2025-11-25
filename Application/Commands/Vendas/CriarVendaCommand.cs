@@ -1,12 +1,15 @@
-﻿using System;
+﻿using MediatR;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using CRMVEXA.Application.DTOs;
 
 namespace CRMVEXA.Application.Commands.Vendas
 {
-    internal class CriarVendaCommand
-    {
-    }
+    public record CriarVendaCommand(
+        string CodigoVenda,
+        int? ClienteId,
+        decimal Desconto,
+        string FormaPagamento,
+        int UsuarioId,
+        List<ItemVendaDto> Itens
+    ) : IRequest<int>;
 }

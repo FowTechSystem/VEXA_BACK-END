@@ -1,12 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace CRMVEXA.Domain.Enums
+﻿namespace CRMVEXA.Domain.Enums
 {
-    internal class CargoUsuario
+    public enum CargoUsuario
     {
+        Vendedor,
+        Gerente,
+        Administrador
     }
 }
