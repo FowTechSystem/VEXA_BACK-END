@@ -1,42 +1,35 @@
-﻿using CRMVEXA.Domain.ValueObjects;
-
-namespace CRMVEXA.Domain.Entities
+﻿namespace CRMVEXA.Domain.Entities
 {
-    public class Cliente
+    public class Caixa
     {
         public int Id { get; private set; }
-        public string NomeCompleto { get; private set; }
-        public string? CPF { get; private set; }
-        public string Telefone { get; private set; }
-        public string WhatsApp { get; private set; }
-        public string? Email { get; private set; }
-        public DateTime? DataNascimento { get; private set; }
-        public Endereco Endereco { get; private set; }
-        public string? Preferencias { get; private set; }
+        public DateTime DataAbertura { get; private set; }
+        public DateTime? DataFechamento { get; private set; }
+        public decimal SaldoInicial { get; private set; }
+        public decimal SaldoFinal { get; private set; }
+        public int UsuarioId { get; private set; }
         public string? Observacoes { get; private set; }
-        public DateTime DataCadastro { get; private set; }
+        public bool Aberto { get; private set; }
 
-        private Cliente() { }
+        // Construtor protegido para uso do Entity Framework
+        protected Caixa() { }
 
-        public Cliente(
-            string nomeCompleto,
-            string telefone,
-            string whatsApp,
-            Endereco endereco)
+        // Construtor público para criação manual
+        public Caixa(int usuarioId, decimal saldoInicial)
         {
-            NomeCompleto = nomeCompleto;
-            Telefone = telefone;
-            WhatsApp = whatsApp;
-            Endereco = endereco;
-            DataCadastro = DateTime.UtcNow;
+            UsuarioId = usuarioId;
+            SaldoInicial = saldoInicial;
+            SaldoFinal = saldoInicial;
+            DataAbertura = DateTime.UtcNow;
+            Aberto = true;
         }
 
-        public void Atualizar(string nomeCompleto, string telefone, string whatsApp, string? email)
+        public void Fechar(decimal saldoFinal, string? observacoes)
         {
-            NomeCompleto = nomeCompleto;
-            Telefone = telefone;
-            WhatsApp = whatsApp;
-            Email = email;
+            SaldoFinal = saldoFinal;
+            DataFechamento = DateTime.UtcNow;
+            Observacoes = observacoes;
+            Aberto = false;
         }
     }
 }

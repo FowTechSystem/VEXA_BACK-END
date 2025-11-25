@@ -49,3 +49,12 @@ dotnet add package Microsoft.AspNetCore.Mvc -
 dotnet add package MediatR
 dotnet add package MediatR.Extensions.Microsoft.DependencyInjection
 
+PS E:\CRMVEXA> dotnet add package AutoMapper
+>>dotnet add package AutoMapper.Extensions.Microsoft.DependencyInjection
+dotnet add package FluentValidation
+dotnet add package FluentValidation.DependencyInjectionExtensions
+dotnet add package Microsoft.EntityFrameworkCore --version 9.0.0
+dotnet add package Microsoft.EntityFrameworkCore.Design --version 9.0.0
+
+
+

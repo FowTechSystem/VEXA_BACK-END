@@ -10,8 +10,10 @@ namespace CRMVEXA.Infrastructure.Data.Configurations
         {
             builder.HasKey(x => x.Id);
             builder.Property(x => x.DataAbertura).IsRequired();
-            builder.Property(x => x.SaldoInicial).HasColumnType("decimal(18,2)");
-            builder.Property(x => x.SaldoFinal).HasColumnType("decimal(18,2)");
+            builder.Property(x => x.SaldoInicial)
+                   .HasColumnType("decimal(18,2)");
+            builder.Property(x => x.SaldoFinal)
+                   .HasColumnType("decimal(18,2)");
             builder.Property(x => x.Aberto).IsRequired();
         }
     }
