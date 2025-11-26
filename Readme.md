@@ -1,42 +1,42 @@
-Explicação de cada pasta
+ExplicaÃ§Ã£o de cada pasta
 API
-Controllers: Controllers REST da sua aplicação (ClienteController, ProdutoController, etc).
+Controllers: Controllers REST da sua aplicaÃ§Ã£o (ClienteController, ProdutoController, etc).
 
-Extensions: Métodos de extensão para configuração, DI extra, mapeamento, etc.
+Extensions: MÃ©todos de extensÃ£o para configuraÃ§Ã£o, DI extra, mapeamento, etc.
 
-Middlewares: Middlewares customizados (exemplo: tratamento de exceções, logs).
+Middlewares: Middlewares customizados (exemplo: tratamento de exceÃ§Ãµes, logs).
 
 Application
-Commands: Lógica de operações (CriarClienteCommand, AtualizarProdutoCommand) usando CQRS e MediatR.
+Commands: LÃ³gica de operaÃ§Ãµes (CriarClienteCommand, AtualizarProdutoCommand) usando CQRS e MediatR.
 
-Queries: Lógica de consulta/consulta (ObterClientePorIdQuery, ListarProdutosQuery).
+Queries: LÃ³gica de consulta/consulta (ObterClientePorIdQuery, ListarProdutosQuery).
 
 DTOs: Data Transfer Objects (padronizam dados entre camadas).
 
-Validators: Validações via FluentValidation.
+Validators: ValidaÃ§Ãµes via FluentValidation.
 
 Mappings: Perfis do AutoMapper para entidades/DTOs.
 
-Services: Serviços auxiliares, como geração de etiquetas, relatórios.
+Services: ServiÃ§os auxiliares, como geraÃ§Ã£o de etiquetas, relatÃ³rios.
 
 Domain
-Entities: Entidades do domínio (Cliente, Produto, Venda, Fornecedor, Usuario, Caixa, ItemVenda, MovimentacaoCaixa, MovimentacaoEstoque).
+Entities: Entidades do domÃ­nio (Cliente, Produto, Venda, Fornecedor, Usuario, Caixa, ItemVenda, MovimentacaoCaixa, MovimentacaoEstoque).
 
 ValueObjects: Objetos de valor (exemplo: Endereco).
 
-Enums: Enumerações (Genero, StatusVenda, FormaPagamento, TipoMovimentacao).
+Enums: EnumeraÃ§Ãµes (Genero, StatusVenda, FormaPagamento, TipoMovimentacao).
 
-Interfaces: Interfaces dos repositórios e UnitOfWork, exemplo: IClienteRepository, IProdutoRepository, IUnitOfWork.
+Interfaces: Interfaces dos repositÃ³rios e UnitOfWork, exemplo: IClienteRepository, IProdutoRepository, IUnitOfWork.
 
 Infrastructure
-Data: DbContext (AppDbContext) e arquivos de configuração do mapeamento fluent API.
+Data: DbContext (AppDbContext) e arquivos de configuraÃ§Ã£o do mapeamento fluent API.
 
-Repositories: Implementação concreta dos repositórios (ClienteRepository, ProdutoRepository, etc).
+Repositories: ImplementaÃ§Ã£o concreta dos repositÃ³rios (ClienteRepository, ProdutoRepository, etc).
 
-Configurations: Classes de configuração separada para cada entidade (usado no Fluent API do EF Core).
+Configurations: Classes de configuraÃ§Ã£o separada para cada entidade (usado no Fluent API do EF Core).
 
-Arquivos de configuração
-appsettings.json: Conexão banco, configurações gerais.
+Arquivos de configuraÃ§Ã£o
+appsettings.json: ConexÃ£o banco, configuraÃ§Ãµes gerais.
 
 Program.cs: Bootstrap/service registration/startup.
 
@@ -48,6 +48,12 @@ Pacotes necessario
 dotnet add package Microsoft.AspNetCore.Mvc -
 dotnet add package MediatR
 dotnet add package MediatR.Extensions.Microsoft.DependencyInjection
+
+
+REST nÃ£o Ã© sÃ³ GET, POST, PUT e DELETE.
+
+REST Ã© um jeito padronizado de criar APIs:
+usar mÃ©todos corretos + URLs bem feitas + respostas padronizadas + sem sessÃ£o no servidor.
 
 PS E:\CRMVEXA> dotnet add package AutoMapper
 >>dotnet add package AutoMapper.Extensions.Microsoft.DependencyInjection
