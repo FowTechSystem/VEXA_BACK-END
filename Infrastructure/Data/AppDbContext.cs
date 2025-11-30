@@ -1,7 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using CRMVEXA.Domain.Entities;
-using System.Collections.Generic;
-using System.Reflection.Emit;
 
 namespace CRMVEXA.Infrastructure.Data
 {
