@@ -2,7 +2,13 @@
 
 namespace CRMVEXA.Application.Commands.Clientes
 {
-    public record RemoverClienteCommand(
-        int Id // Id do cliente para remover
-    ) : IRequest<bool>;
+    public class DeletarClienteCommand : IRequest<bool>
+    {
+        public int Id { get; set; }
+
+        public DeletarClienteCommand(int id)
+        {
+            Id = id;
+        }
+    }
 }
