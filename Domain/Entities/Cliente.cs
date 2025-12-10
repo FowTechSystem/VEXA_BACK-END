@@ -17,7 +17,7 @@ public class Cliente
     public DateTime DataCadastro { get; private set; }
 
     // Construtor protegido para EF Core
-    protected Cliente() { }
+    public Cliente() { }
 
     // Construtor público para criação manual
     public Cliente(
