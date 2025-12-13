@@ -13,8 +13,8 @@ namespace CRMVEXA.Infrastructure.Data.Configurations
             builder.Property(x => x.Telefone).IsRequired().HasMaxLength(20);
             builder.OwnsOne(x => x.Endereco, endereco =>
             {
-                endereco.Property(e => e.Rua).HasMaxLength(150);
-                endereco.Property(e => e.CEP).HasMaxLength(8);
+                //endereco.Property(e => e.Rua).HasMaxLength(150);
+                //endereco.Property(e => e.CEP).HasMaxLength(8);
             });
         }
     }

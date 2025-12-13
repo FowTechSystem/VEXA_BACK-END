@@ -6,6 +6,36 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 	<ItemGroup>
+	  <Compile Remove="Application\Commands\**" />
+	  <Compile Remove="Application\DTOs\**" />
+	  <Compile Remove="Application\Handlers\**" />
+	  <Compile Remove="Application\Mappings\**" />
+	  <Compile Remove="Application\Queries\**" />
+	  <Compile Remove="Application\Services\**" />
+	  <Compile Remove="Domain\ValueObjects\**" />
+	  <Content Remove="Application\Commands\**" />
+	  <Content Remove="Application\DTOs\**" />
+	  <Content Remove="Application\Handlers\**" />
+	  <Content Remove="Application\Mappings\**" />
+	  <Content Remove="Application\Queries\**" />
+	  <Content Remove="Application\Services\**" />
+	  <Content Remove="Domain\ValueObjects\**" />
+	  <EmbeddedResource Remove="Application\Commands\**" />
+	  <EmbeddedResource Remove="Application\DTOs\**" />
+	  <EmbeddedResource Remove="Application\Handlers\**" />
+	  <EmbeddedResource Remove="Application\Mappings\**" />
+	  <EmbeddedResource Remove="Application\Queries\**" />
+	  <EmbeddedResource Remove="Application\Services\**" />
+	  <EmbeddedResource Remove="Domain\ValueObjects\**" />
+	  <None Remove="Application\Commands\**" />
+	  <None Remove="Application\DTOs\**" />
+	  <None Remove="Application\Handlers\**" />
+	  <None Remove="Application\Mappings\**" />
+	  <None Remove="Application\Queries\**" />
+	  <None Remove="Application\Services\**" />
+	  <None Remove="Domain\ValueObjects\**" />
+	</ItemGroup>
+	<ItemGroup>
 	  <None Remove=".editorconfig" />
 	</ItemGroup>
 

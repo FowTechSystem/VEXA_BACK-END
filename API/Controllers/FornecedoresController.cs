@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using MediatR;
-using CRMVEXA.Application.Commands.Fornecedores;
-using CRMVEXA.Application.DTOs;
+
 
 namespace CRMVEXA.API.Controllers
 {
@@ -16,25 +15,25 @@ namespace CRMVEXA.API.Controllers
             _mediator = mediator;
         }
 
-        [HttpPost]
-        public async Task<ActionResult<int>> Criar([FromBody] CriarFornecedorCommand command)
-        {
-            var id = await _mediator.Send(command);
-            return CreatedAtAction(nameof(ObterPorId), new { id }, id);
-        }
+        //[HttpPost]
+        //public async Task<ActionResult<int>> Criar([FromBody] CriarFornecedorCommand command)
+        //{
+        //    var id = await _mediator.Send(command);
+        //    return CreatedAtAction(nameof(ObterPorId), new { id }, id);
+        //}
 
-        [HttpGet("{id}")]
-        public async Task<ActionResult<FornecedorDto>> ObterPorId(int id)
-        {
-            // Implemente a query: ObterFornecedorPorIdQuery
-            return Ok(); // placeholder
-        }
+        //[HttpGet("{id}")]
+        //public async Task<ActionResult<FornecedorDto>> ObterPorId(int id)
+        //{
+        //    // Implemente a query: ObterFornecedorPorIdQuery
+        //    return Ok(); // placeholder
+        //}
 
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<FornecedorDto>>> Listar()
-        {
-            // Implemente a query: ListarFornecedoresQuery
-            return Ok(); // placeholder
-        }
+        //[HttpGet]
+        //public async Task<ActionResult<IEnumerable<FornecedorDto>>> Listar()
+        //{
+        //    // Implemente a query: ListarFornecedoresQuery
+        //    return Ok(); // placeholder
+        //}
     }
 }

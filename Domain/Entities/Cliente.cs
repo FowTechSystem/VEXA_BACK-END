@@ -1,36 +1,35 @@
-﻿using CRMVEXA.Domain.ValueObjects;
-
-namespace CRMVEXA.Domain.Entities;
+﻿namespace CRMVEXA.Domain.Entities;
 
 public class Cliente
 {
     public int Id { get; private set; }
-    public string NomeCompleto { get; private set; }
-    public string? CPF { get; private set; }
-    public string Telefone { get; private set; }
-    public string WhatsApp { get; private set; }
-    public string? Email { get; private set; }
-    public DateTime? DataNascimento { get; private set; }
-    public Endereco Endereco { get; private set; }
-    public string? Preferencias { get; private set; }
-    public string? Observacoes { get; private set; }
-    public DateTime DataCadastro { get; private set; }
+    public string NomeCompleto { get; set; }
+    public string? CPF { get; set; }
+    public string Telefone { get; set; }
+    public string WhatsApp { get; set; }
+    public string? Email { get; set; }
+    public DateTime? DataNascimento { get; set; }
+    public Endereco Endereco { get; set; }
+    public string? Preferencias { get; set; }
+    public string? Observacoes { get; set; }
+    public DateTime DataCadastro { get; set; }
 
     // Construtor protegido para EF Core
     public Cliente() { }
 
-    // Construtor público para criação manual
-    public Cliente(
-        string nomeCompleto,
-        string telefone,
-        string whatsApp,
-        Endereco endereco)
+    public Cliente(string nomeCompleto, string? cPF, string telefone, string whatsApp, string? email,
+        DateTime? dataNascimento, Endereco endereco, string? preferencias, string? observacoes, DateTime dataCadastro)
     {
         NomeCompleto = nomeCompleto;
+        CPF = cPF;
         Telefone = telefone;
         WhatsApp = whatsApp;
+        Email = email;
+        DataNascimento = dataNascimento;
         Endereco = endereco;
-        DataCadastro = DateTime.UtcNow;
+        Preferencias = preferencias;
+        Observacoes = observacoes;
+        DataCadastro = dataCadastro;
     }
 
     public void AtualizarDados(
