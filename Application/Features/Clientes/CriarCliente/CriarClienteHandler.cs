@@ -23,11 +23,11 @@ public class CriarClienteHandler : IRequestHandler<CriarClienteRequest, int>
                 Telefone = request.telefone,
                 WhatsApp = request.whatsApp,
                 Email = request.email,
-                DataNascimento = request.dataNascimento,
+                DataNascimento = request.dataNascimento?.ToUniversalTime(), // ← ADICIONE AQUI
                 Endereco = request.endereco,
                 Preferencias = request.preferencias,
                 Observacoes = request.observacoes,
-                DataCadastro = request.dataCadastro
+                DataCadastro = request.dataCadastro.ToUniversalTime() // ← E AQUI
             };
 
             _context.Clientes.Add(cliente);

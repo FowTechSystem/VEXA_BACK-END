@@ -65,6 +65,7 @@ namespace CRMVEXA.Infrastructure.Migrations
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<string>("CPF")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<DateTime>("DataCadastro")
@@ -93,7 +94,6 @@ namespace CRMVEXA.Infrastructure.Migrations
                         .HasColumnType("character varying(20)");
 
                     b.Property<string>("WhatsApp")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.HasKey("Id");
@@ -365,32 +365,10 @@ namespace CRMVEXA.Infrastructure.Migrations
 
             modelBuilder.Entity("CRMVEXA.Domain.Entities.Cliente", b =>
                 {
-                    b.OwnsOne("CRMVEXA.Domain.ValueObjects.Endereco", "Endereco", b1 =>
+                    b.OwnsOne("CRMVEXA.Domain.Entities.Endereco", "Endereco", b1 =>
                         {
                             b1.Property<int>("ClienteId")
                                 .HasColumnType("integer");
-
-                            b1.Property<string>("Bairro")
-                                .IsRequired()
-                                .HasColumnType("text");
-
-                            b1.Property<string>("CEP")
-                                .IsRequired()
-                                .HasMaxLength(8)
-                                .HasColumnType("character varying(8)");
-
-                            b1.Property<string>("Cidade")
-                                .IsRequired()
-                                .HasColumnType("text");
-
-                            b1.Property<string>("Numero")
-                                .IsRequired()
-                                .HasColumnType("text");
-
-                            b1.Property<string>("Rua")
-                                .IsRequired()
-                                .HasMaxLength(150)
-                                .HasColumnType("character varying(150)");
 
                             b1.HasKey("ClienteId");
 
@@ -400,8 +378,7 @@ namespace CRMVEXA.Infrastructure.Migrations
                                 .HasForeignKey("ClienteId");
                         });
 
-                    b.Navigation("Endereco")
-                        .IsRequired();
+                    b.Navigation("Endereco");
                 });
 
             modelBuilder.Entity("CRMVEXA.Domain.Entities.ItemVenda", b =>

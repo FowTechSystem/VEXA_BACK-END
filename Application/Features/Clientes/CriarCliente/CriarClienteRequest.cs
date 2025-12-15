@@ -1,8 +1,18 @@
-﻿using CRMVEXA.Domain.Entities;
-using MediatR;
+﻿using MediatR;
+using CRMVEXA.Domain.Entities;
 
 namespace CRMVEXA.Application.Features.Clientes.CriarCliente;
 
-public sealed record CriarClienteRequest(string nomeCompleto, string cPF, string? telefone, string? whatsApp, string? email,
-        DateTime? dataNascimento, Endereco? endereco, string? preferencias, string? observacoes, DateTime dataCadastro) : IRequest<int>;
-
+public class CriarClienteRequest : IRequest<int>
+{
+    public string nomeCompleto { get; set; }
+    public string cPF { get; set; }
+    public string? telefone { get; set; }
+    public string? whatsApp { get; set; }
+    public string? email { get; set; }
+    public DateTime? dataNascimento { get; set; }
+    public Endereco? endereco { get; set; }
+    public string? preferencias { get; set; }
+    public string? observacoes { get; set; }
+    public DateTime dataCadastro { get; set; }
+}

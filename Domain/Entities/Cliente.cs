@@ -2,14 +2,16 @@
 
 public class Cliente
 {
-    public int Id { get; private set; }
+    public int Id { get; set; }
     public string NomeCompleto { get; set; }
-    public string? CPF { get; set; }
-    public string Telefone { get; set; }
-    public string WhatsApp { get; set; }
+    public string CPF { get; set; }
+    public string? Telefone { get; set; }
+    public string? WhatsApp { get; set; }
     public string? Email { get; set; }
     public DateTime? DataNascimento { get; set; }
-    public Endereco Endereco { get; set; }
+
+    public Endereco? Endereco { get; set; } // ← Já está opcional aqui
+
     public string? Preferencias { get; set; }
     public string? Observacoes { get; set; }
     public DateTime DataCadastro { get; set; }
