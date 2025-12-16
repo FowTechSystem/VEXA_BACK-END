@@ -6,6 +6,9 @@ var builder = WebApplication.CreateBuilder(args);
 
 // ============ CONFIGURAÇÕES DE SERVIÇOS ============
 
+// ADICIONAR ESTA LINHA - Corrige problema de DateTime com PostgreSQL
+AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
+
 // 1. Configurar DbContext (Entity Framework com PostgreSQL)
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(
@@ -52,6 +55,10 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+// Servir arquivos estáticos (fotos de clientes)
+app.UseStaticFiles();
+
 app.UseRouting();
 
 // CORS antes de Authorization

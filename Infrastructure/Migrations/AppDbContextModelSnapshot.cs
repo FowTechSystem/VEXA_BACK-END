@@ -64,9 +64,13 @@ namespace CRMVEXA.Infrastructure.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
+                    b.Property<string>("CNPJ")
+                        .HasMaxLength(18)
+                        .HasColumnType("character varying(18)");
+
                     b.Property<string>("CPF")
-                        .IsRequired()
-                        .HasColumnType("text");
+                        .HasMaxLength(14)
+                        .HasColumnType("character varying(14)");
 
                     b.Property<DateTime>("DataCadastro")
                         .HasColumnType("timestamp with time zone");
@@ -75,7 +79,12 @@ namespace CRMVEXA.Infrastructure.Migrations
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Email")
-                        .HasColumnType("text");
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("FotoUrl")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
 
                     b.Property<string>("NomeCompleto")
                         .IsRequired()
@@ -88,17 +97,21 @@ namespace CRMVEXA.Infrastructure.Migrations
                     b.Property<string>("Preferencias")
                         .HasColumnType("text");
 
+                    b.Property<string>("RG")
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
                     b.Property<string>("Telefone")
-                        .IsRequired()
                         .HasMaxLength(20)
                         .HasColumnType("character varying(20)");
 
                     b.Property<string>("WhatsApp")
-                        .HasColumnType("text");
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
 
                     b.HasKey("Id");
 
-                    b.ToTable("Clientes");
+                    b.ToTable("Clientes", (string)null);
                 });
 
             modelBuilder.Entity("CRMVEXA.Domain.Entities.Fornecedor", b =>
@@ -369,6 +382,41 @@ namespace CRMVEXA.Infrastructure.Migrations
                         {
                             b1.Property<int>("ClienteId")
                                 .HasColumnType("integer");
+
+                            b1.Property<string>("Bairro")
+                                .IsRequired()
+                                .HasMaxLength(100)
+                                .HasColumnType("character varying(100)")
+                                .HasColumnName("Endereco_Bairro");
+
+                            b1.Property<string>("Cep")
+                                .IsRequired()
+                                .HasMaxLength(10)
+                                .HasColumnType("character varying(10)")
+                                .HasColumnName("Endereco_Cep");
+
+                            b1.Property<string>("Cidade")
+                                .IsRequired()
+                                .HasMaxLength(100)
+                                .HasColumnType("character varying(100)")
+                                .HasColumnName("Endereco_Cidade");
+
+                            b1.Property<string>("Complemento")
+                                .HasMaxLength(200)
+                                .HasColumnType("character varying(200)")
+                                .HasColumnName("Endereco_Complemento");
+
+                            b1.Property<string>("Numero")
+                                .IsRequired()
+                                .HasMaxLength(20)
+                                .HasColumnType("character varying(20)")
+                                .HasColumnName("Endereco_Numero");
+
+                            b1.Property<string>("Rua")
+                                .IsRequired()
+                                .HasMaxLength(200)
+                                .HasColumnType("character varying(200)")
+                                .HasColumnName("Endereco_Rua");
 
                             b1.HasKey("ClienteId");
 

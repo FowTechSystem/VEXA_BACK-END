@@ -1,9 +1,10 @@
-﻿using CRMVEXA.Domain.Entities;
-using CRMVEXA.Infrastructure.Data;
+﻿using CRMVEXA.Infrastructure.Data;
+using MediatR;
+using Microsoft.EntityFrameworkCore;
 
 namespace CRMVEXA.Application.Features.Clientes.DeleteCliente;
 
-public class DeleteClienteHandler
+public class DeleteClienteHandler : IRequestHandler<DeleteClienteRequest, bool>  // ← ADICIONAR IRequestHandler
 {
     private readonly AppDbContext _context;
 
@@ -14,7 +15,8 @@ public class DeleteClienteHandler
 
     public async Task<bool> Handle(DeleteClienteRequest request, CancellationToken cancellationToken)
     {
-        var cliente = await _context.Clientes.FindAsync(new object[] { request.id }, cancellationToken);
+        var cliente = await _context.Clientes
+            .FirstOrDefaultAsync(c => c.Id == request.id, cancellationToken);
 
         if (cliente == null)
             return false;
@@ -24,5 +26,4 @@ public class DeleteClienteHandler
 
         return true;
     }
-
 }

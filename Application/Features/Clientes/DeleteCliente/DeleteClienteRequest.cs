@@ -1,6 +1,8 @@
-﻿namespace CRMVEXA.Application.Features.Clientes.DeleteCliente;
+﻿using MediatR;
 
-public class DeleteClienteRequest
+namespace CRMVEXA.Application.Features.Clientes.DeleteCliente;
+
+public class DeleteClienteRequest : IRequest<bool> 
 {
     public int id { get; set; }
 }
