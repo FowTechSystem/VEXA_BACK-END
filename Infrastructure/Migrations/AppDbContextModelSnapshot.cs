@@ -34,10 +34,10 @@ namespace CRMVEXA.Infrastructure.Migrations
                         .HasColumnType("boolean");
 
                     b.Property<DateTime>("DataAbertura")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<DateTime?>("DataFechamento")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("Observacoes")
                         .HasColumnType("text");
@@ -73,16 +73,16 @@ namespace CRMVEXA.Infrastructure.Migrations
                         .HasColumnType("character varying(14)");
 
                     b.Property<DateTime>("DataCadastro")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<DateTime?>("DataNascimento")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("Email")
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)");
 
-                    b.Property<string>("FotoUrl")
+                    b.Property<string>("FotoBase64")
                         .HasMaxLength(500)
                         .HasColumnType("character varying(500)");
 
@@ -132,7 +132,7 @@ namespace CRMVEXA.Infrastructure.Migrations
                         .HasColumnType("text");
 
                     b.Property<DateTime>("DataCadastro")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("Email")
                         .HasColumnType("text");
@@ -350,7 +350,7 @@ namespace CRMVEXA.Infrastructure.Migrations
                         .HasColumnType("character varying(50)");
 
                     b.Property<DateTime>("DataHora")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<decimal>("Desconto")
                         .HasColumnType("numeric");

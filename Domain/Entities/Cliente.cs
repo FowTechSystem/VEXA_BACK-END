@@ -1,12 +1,13 @@
-﻿namespace CRMVEXA.Domain.Entities;
+﻿// CRMVEXA.Domain/Entities/Cliente.cs
+namespace CRMVEXA.Domain.Entities;
 
 public class Cliente
 {
     public int Id { get; set; }
     public string NomeCompleto { get; set; }
     public string? CPF { get; set; }
-    public string? RG { get; set; } // NOVO
-    public string? CNPJ { get; set; } // NOVO
+    public string? RG { get; set; }
+    public string? CNPJ { get; set; }
     public string? Telefone { get; set; }
     public string? WhatsApp { get; set; }
     public string? Email { get; set; }
@@ -16,10 +17,12 @@ public class Cliente
 
     public string? Preferencias { get; set; }
     public string? Observacoes { get; set; }
-    public string? FotoUrl { get; set; } // NOVO
+
+    public string? FotoBase64 { get; set; }
+
     public DateTime DataCadastro { get; set; }
 
-    // Construtor protegido para EF Core
+
     public Cliente() { }
 
     public Cliente(
@@ -35,7 +38,7 @@ public class Cliente
         DateTime dataCadastro,
         string? rg = null,
         string? cnpj = null,
-        string? fotoUrl = null)
+        string? fotoBase64 = null)
     {
         NomeCompleto = nomeCompleto;
         CPF = cpf;
@@ -49,7 +52,7 @@ public class Cliente
         Preferencias = preferencias;
         Observacoes = observacoes;
         DataCadastro = dataCadastro;
-        FotoUrl = fotoUrl;
+        FotoBase64 = fotoBase64;
     }
 
     public void AtualizarDados(
@@ -63,7 +66,8 @@ public class Cliente
         DateTime? dataNascimento = null,
         string? preferencias = null,
         string? observacoes = null,
-        string? fotoUrl = null)
+        string? fotoBase64 = null)
+
     {
         NomeCompleto = nomeCompleto;
         Telefone = telefone;
@@ -75,6 +79,6 @@ public class Cliente
         DataNascimento = dataNascimento;
         Preferencias = preferencias;
         Observacoes = observacoes;
-        FotoUrl = fotoUrl;
+        FotoBase64 = fotoBase64;
     }
 }

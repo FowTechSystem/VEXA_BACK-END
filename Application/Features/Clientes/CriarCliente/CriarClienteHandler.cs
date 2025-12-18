@@ -12,7 +12,7 @@ public class CriarClienteHandler : IRequestHandler<CriarClienteRequest, int>
         _context = context;
     }
 
-    public async Task<int> Handle(CriarClienteRequest request, CancellationToken cancellationToken)
+    public async Task<int> Handle(CriarClienteRequest request, CancellationToken cancellationToken) 
     {
         try
         {
@@ -23,11 +23,14 @@ public class CriarClienteHandler : IRequestHandler<CriarClienteRequest, int>
                 Telefone = request.telefone,
                 WhatsApp = request.whatsApp,
                 Email = request.email,
-                DataNascimento = request.dataNascimento?.ToUniversalTime(), // ← ADICIONE AQUI
+                DataNascimento = request.dataNascimento?.ToUniversalTime(),
                 Endereco = request.endereco,
                 Preferencias = request.preferencias,
                 Observacoes = request.observacoes,
-                DataCadastro = request.dataCadastro.ToUniversalTime() // ← E AQUI
+                DataCadastro = request.dataCadastro.ToUniversalTime(),
+                RG = request.rg,
+                CNPJ = request.cnpj,
+                FotoBase64 = request.FotoBase64
             };
 
             _context.Clientes.Add(cliente);

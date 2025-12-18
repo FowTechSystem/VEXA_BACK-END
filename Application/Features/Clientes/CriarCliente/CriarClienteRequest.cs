@@ -15,4 +15,7 @@ public class CriarClienteRequest : IRequest<int>
     public string? preferencias { get; set; }
     public string? observacoes { get; set; }
     public DateTime dataCadastro { get; set; }
+    public string? rg { get; set; }
+    public string? cnpj { get; set; }
+    public string? FotoBase64 { get; set; }
 }

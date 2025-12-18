@@ -37,7 +37,9 @@ namespace CRMVEXA.Application.Features.Clientes.UpdateCliente.Validators
                 cpf: request.Cpf,
                 dataNascimento: request.DataNascimento,
                 preferencias: request.Preferencias,
-                observacoes: request.Observacoes
+                observacoes: request.Observacoes,
+                fotoBase64 : request.FotoUrl
+
             );
 
             if (cliente.Endereco is null)

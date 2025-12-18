@@ -32,7 +32,7 @@ namespace CRMVEXA.Infrastructure.Data.Configurations
             builder.Property(x => x.Email)
                 .HasMaxLength(100);
 
-            builder.Property(x => x.FotoUrl)
+            builder.Property(x => x.FotoBase64)
                 .HasMaxLength(500);
 
             builder.Property(x => x.DataCadastro)

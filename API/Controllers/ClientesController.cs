@@ -99,7 +99,6 @@ namespace CRMVEXA.API.Controllers
             }
         }
 
-        // NOVO: Endpoint de Upload de Foto
         [HttpPost("upload-foto")]
         public async Task<ActionResult> UploadFoto(IFormFile file)
         {
@@ -108,37 +107,29 @@ namespace CRMVEXA.API.Controllers
 
             try
             {
-                // Validar tipo de arquivo
                 var extensoesPermitidas = new[] { ".jpg", ".jpeg", ".png", ".gif", ".webp" };
                 var extensao = Path.GetExtension(file.FileName).ToLowerInvariant();
 
                 if (!extensoesPermitidas.Contains(extensao))
                     return BadRequest(new { sucesso = false, mensagem = "Formato de arquivo não permitido. Use JPG, PNG, GIF ou WEBP." });
 
-                // Validar tamanho (máximo 5MB)
                 if (file.Length > 5 * 1024 * 1024)
                     return BadRequest(new { sucesso = false, mensagem = "Arquivo muito grande. Tamanho máximo: 5MB." });
-
-                // Gerar nome único
+                  
                 var nomeArquivo = $"{Guid.NewGuid()}{extensao}";
 
-                // Pasta de uploads
                 var pastaUploads = Path.Combine(_environment.ContentRootPath, "wwwroot", "uploads", "clientes");
 
-                // Criar pasta se não existir
                 if (!Directory.Exists(pastaUploads))
                     Directory.CreateDirectory(pastaUploads);
 
-                // Caminho completo
                 var caminhoCompleto = Path.Combine(pastaUploads, nomeArquivo);
 
-                // Salvar arquivo
                 using (var stream = new FileStream(caminhoCompleto, FileMode.Create))
                 {
                     await file.CopyToAsync(stream);
                 }
 
-                // URL do arquivo
                 var url = $"/uploads/clientes/{nomeArquivo}";
 
                 return Ok(new { sucesso = true, url });
