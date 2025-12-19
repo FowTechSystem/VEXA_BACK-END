@@ -1,8 +1,4 @@
-﻿using CRMVEXA.Application.Features.Clientes.CriarCliente;
-using CRMVEXA.Application.Features.Clientes.DeleteCliente;
-using CRMVEXA.Application.Features.Clientes.GetListaClientes;
-using CRMVEXA.Application.Features.Clientes.UpdateCliente;
-using CRMVEXA.Application.Features.Fornecedor.CreateFornecedor;
+﻿using CRMVEXA.Application.Features.Fornecedor.CreateFornecedor;
 using CRMVEXA.Application.Features.Fornecedor.DeleteFornecedor;
 using CRMVEXA.Application.Features.Fornecedor.GetFornecedor;
 using CRMVEXA.Application.Features.Fornecedor.UpdateClienteFornecedor;
@@ -25,7 +21,7 @@ public class FornecedoresController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<ActionResult<GetFornecedorResponse>> Listar(  [FromQuery] string? filtro, [FromQuery] string? valor,
+    public async Task<ActionResult<GetFornecedorResponse>> Listar([FromQuery] string? filtro, [FromQuery] string? valor,
            [FromQuery] int pagina = 1, [FromQuery] int tamanho = 10)
     {
         try

@@ -13,7 +13,7 @@ public class Cliente
     public string? Email { get; set; }
     public DateTime? DataNascimento { get; set; }
 
-    public Endereco? Endereco { get; set; }
+    public Endereco Endereco { get; set; }
 
     public string? Preferencias { get; set; }
     public string? Observacoes { get; set; }

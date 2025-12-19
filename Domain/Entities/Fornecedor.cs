@@ -10,16 +10,18 @@ public class Fornecedor
     public string? Telefone { get; set; }
     public string? WhatsApp { get; set; }
     public string? Email { get; set; }
-    public string? Endereco { get; set; }
+    public Endereco Endereco { get; set; }
     public string? CategoriaProdutos { get; set; }
     public string? CondicaoPagamento { get; set; }
     public string? Observacoes { get; set; }
     public DateTime DataCadastro { get; set; }
 
+    public ICollection<Endereco> Enderecos { get; set; }
+
     public Fornecedor() { }
 
     public Fornecedor(string nome, string? razaoSocial, string? cNPJ, string? nomeRepresentante,
-        string? telefone, string? whatsApp, string? email, string? endereco, string? categoriaProdutos,
+        string? telefone, string? whatsApp, string? email, Endereco endereco, string? categoriaProdutos,
         string? condicaoPagamento, string? observacoes, DateTime dataCadastro)
     {
         Nome = nome;
@@ -37,7 +39,7 @@ public class Fornecedor
     }
 
     public void AtualizarDados(string nome, string? razaoSocial, string? cnpj, string? nomeRepresentante,
-        string? telefone, string? whatsApp, string? email, string? endereco, string? categoriaProdutos, 
+        string? telefone, string? whatsApp, string? email, Endereco endereco, string? categoriaProdutos,
         string? condicaoPagamento, string? observacoes, DateTime dataCadastro)
     {
         Nome = nome;
@@ -53,4 +55,5 @@ public class Fornecedor
         Observacoes = observacoes;
         DataCadastro = dataCadastro;
     }
+
 }

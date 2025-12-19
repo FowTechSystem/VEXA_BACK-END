@@ -1,4 +1,5 @@
 ﻿using CRMVEXA.Application.Features.Fornecedor.UpdateClienteFornecedor;
+using CRMVEXA.Domain.Entities;
 using CRMVEXA.Infrastructure.Data;
 using MediatR;
 
@@ -23,6 +24,18 @@ public class UpdateFornecedorHandler : IRequestHandler<UpdateFornecedorRequest, 
                 throw new Exception("Fornecedor não encontrado.");
             }
 
+
+            Endereco enderecoAtualizado = null;
+
+            enderecoAtualizado.AtualizarEndereco(
+                rua: request.Rua ?? string.Empty,
+                numero: request.Numero ?? string.Empty,
+                bairro: request.Bairro ?? string.Empty,
+                cidade: request.Cidade ?? string.Empty,
+                cep: request.Cep ?? string.Empty,
+                complemento: request.Complemento
+            );
+
             fornecedor.AtualizarDados(
                 nome: request.Nome,
                 razaoSocial: request.RazaoSocial,
@@ -31,7 +44,7 @@ public class UpdateFornecedorHandler : IRequestHandler<UpdateFornecedorRequest, 
                 telefone: request.Telefone,
                 whatsApp: request.WhatsApp,
                 email: request.Email,
-                endereco: request.Endereco,
+                endereco:  enderecoAtualizado,
                 categoriaProdutos: request.CategoriaProdutos,
                 condicaoPagamento: request.CondicaoPagamento,
                 observacoes: request.Observacoes,

@@ -17,7 +17,17 @@ public class CreateFornecedorHandler : IRequestHandler<CreateFornecedorRequest, 
     {
         try
         {
-            CRMVEXA.Domain.Entities.Fornecedor fornecedor = 
+            Endereco endereco = new Endereco
+            (
+                request.Rua ?? string.Empty,
+                request.Numero ?? string.Empty,
+                request.Bairro ?? string.Empty,
+                request.Cidade ?? string.Empty,
+                request.Cep ?? string.Empty,
+                request.Complemento
+            );
+            
+            CRMVEXA.Domain.Entities.Fornecedor fornecedor =
                 new CRMVEXA.Domain.Entities.Fornecedor
                 (
                     request.Nome,
@@ -27,7 +37,7 @@ public class CreateFornecedorHandler : IRequestHandler<CreateFornecedorRequest, 
                     request.Telefone,
                     request.WhatsApp,
                     request.Email,
-                    request.Endereco,
+                    endereco,
                     request.CategoriaProdutos,
                     request.CondicaoPagamento,
                     request.Observacoes,

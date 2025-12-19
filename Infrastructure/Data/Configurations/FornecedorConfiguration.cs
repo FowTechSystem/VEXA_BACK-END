@@ -10,7 +10,6 @@ namespace CRMVEXA.Infrastructure.Data.Configurations
         {
             builder.HasKey(x => x.Id);
             builder.Property(x => x.Nome).IsRequired().HasMaxLength(200);
-            builder.Property(x => x.Telefone).IsRequired().HasMaxLength(20);
         }
     }
 }

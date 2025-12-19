@@ -38,33 +38,10 @@ namespace CRMVEXA.Infrastructure.Data.Configurations
             builder.Property(x => x.DataCadastro)
                 .IsRequired();
 
-            // Configurar Endereco como Owned Entity
-            builder.OwnsOne(x => x.Endereco, endereco =>
-            {
-                endereco.Property(e => e.Rua)
-                    .HasColumnName("Endereco_Rua")
-                    .HasMaxLength(200);
-
-                endereco.Property(e => e.Numero)
-                    .HasColumnName("Endereco_Numero")
-                    .HasMaxLength(20);
-
-                endereco.Property(e => e.Bairro)
-                    .HasColumnName("Endereco_Bairro")
-                    .HasMaxLength(100);
-
-                endereco.Property(e => e.Cidade)
-                    .HasColumnName("Endereco_Cidade")
-                    .HasMaxLength(100);
-
-                endereco.Property(e => e.Cep)
-                    .HasColumnName("Endereco_Cep")
-                    .HasMaxLength(10);
-
-                endereco.Property(e => e.Complemento)
-                    .HasColumnName("Endereco_Complemento")
-                    .HasMaxLength(200);
-            });
+            builder.HasOne(c => c.Endereco)
+                .WithMany(e => e.Clientes)
+                .HasForeignKey(c => c.Id)
+                .OnDelete(DeleteBehavior.Restrict);
 
             builder.ToTable("Clientes");
         }

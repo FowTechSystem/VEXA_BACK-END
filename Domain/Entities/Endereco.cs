@@ -2,6 +2,7 @@
 
 public class Endereco
 {
+    public int Id { get; set; }
     public string Rua { get; set; }
     public string Numero { get; set; }
     public string Bairro { get; set; }
@@ -9,7 +10,9 @@ public class Endereco
     public string Cep { get; set; }
     public string? Complemento { get; set; }
 
-    // Construtor protegido para EF Core
+    public ICollection<Fornecedor> Fornecedores { get; set; }
+    public ICollection<Cliente> Clientes { get; set; }
+
     public Endereco() { }
 
     public Endereco(string rua, string numero, string bairro, string cidade, string cep, string? complemento = null)

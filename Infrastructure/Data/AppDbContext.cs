@@ -18,6 +18,14 @@ namespace CRMVEXA.Infrastructure.Data
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);
+
+            modelBuilder.Entity<Endereco>().ToTable("Enderecos");
+
+            modelBuilder.Entity<Fornecedor>()
+                .HasMany(f => f.Enderecos)
+                .WithMany(e => e.Fornecedores)
+                .UsingEntity(j => j.ToTable("FornecedorEndereco"));
+
             base.OnModelCreating(modelBuilder);
         }
     }
