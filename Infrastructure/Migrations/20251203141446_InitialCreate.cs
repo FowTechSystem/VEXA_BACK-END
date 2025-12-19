@@ -67,7 +67,7 @@ namespace CRMVEXA.Infrastructure.Migrations
                     RazaoSocial = table.Column<string>(type: "text", nullable: true),
                     CNPJ = table.Column<string>(type: "text", nullable: true),
                     NomeRepresentante = table.Column<string>(type: "text", nullable: true),
-                    Telefone = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: false),
+                    Telefone = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: true),
                     WhatsApp = table.Column<string>(type: "text", nullable: true),
                     Email = table.Column<string>(type: "text", nullable: true),
                     Endereco = table.Column<string>(type: "text", nullable: true),
