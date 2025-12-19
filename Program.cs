@@ -1,6 +1,7 @@
 ﻿using CRMVEXA.Application.Features.Clientes.CriarCliente;
 using CRMVEXA.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
+using System.Text.Json; 
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,8 +20,13 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 builder.Services.AddMediatR(cfg =>
     cfg.RegisterServicesFromAssembly(typeof(CriarClienteRequest).Assembly));
 
-// 3. Adicionar Controllers
-builder.Services.AddControllers();
+// 3. Adicionar Controllers COM CONFIGURAÇÃO JSON
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+        options.JsonSerializerOptions.PropertyNameCaseInsensitive = true; // ← ACEITA nome, Nome ou NOME
+    });
 
 // 4. Configurar CORS para React/Vue frontend
 builder.Services.AddCors(options =>

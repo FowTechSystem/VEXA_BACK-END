@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace CRMVEXA.Application.Features.Clientes.DeleteCliente;
 
-public class DeleteClienteHandler : IRequestHandler<DeleteClienteRequest, bool>  // ← ADICIONAR IRequestHandler
+public class DeleteClienteHandler : IRequestHandler<DeleteClienteRequest, bool>  
 {
     private readonly AppDbContext _context;
 

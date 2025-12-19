@@ -64,3 +64,8 @@ dotnet add package Microsoft.EntityFrameworkCore.Design --version 9.0.0
 
 
 
+
+Migracoes 
+
+dotnet ef migrations add AtualizarFornecedor
+dotnet ef database update

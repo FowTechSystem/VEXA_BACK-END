@@ -1,28 +1,56 @@
-﻿namespace CRMVEXA.Domain.Entities
+﻿namespace CRMVEXA.Domain.Entities;
+
+public class Fornecedor
 {
-    public class Fornecedor
+    public int Id { get; set; }
+    public string Nome { get; set; }
+    public string? RazaoSocial { get; set; }
+    public string? CNPJ { get; set; }
+    public string? NomeRepresentante { get; set; }
+    public string? Telefone { get; set; }
+    public string? WhatsApp { get; set; }
+    public string? Email { get; set; }
+    public string? Endereco { get; set; }
+    public string? CategoriaProdutos { get; set; }
+    public string? CondicaoPagamento { get; set; }
+    public string? Observacoes { get; set; }
+    public DateTime DataCadastro { get; set; }
+
+    public Fornecedor() { }
+
+    public Fornecedor(string nome, string? razaoSocial, string? cNPJ, string? nomeRepresentante,
+        string? telefone, string? whatsApp, string? email, string? endereco, string? categoriaProdutos,
+        string? condicaoPagamento, string? observacoes, DateTime dataCadastro)
     {
-        public int Id { get; private set; }
-        public string Nome { get; private set; }
-        public string? RazaoSocial { get; private set; }
-        public string? CNPJ { get; private set; }
-        public string? NomeRepresentante { get; private set; }
-        public string Telefone { get; private set; }
-        public string? WhatsApp { get; private set; }
-        public string? Email { get; private set; }
-        public string? Endereco { get; private set; }
-        public string? CategoriaProdutos { get; private set; }
-        public string? CondicaoPagamento { get; private set; }
-        public string? Observacoes { get; private set; }
-        public DateTime DataCadastro { get; private set; }
+        Nome = nome;
+        RazaoSocial = razaoSocial;
+        CNPJ = cNPJ;
+        NomeRepresentante = nomeRepresentante;
+        Telefone = telefone;
+        WhatsApp = whatsApp;
+        Email = email;
+        Endereco = endereco;
+        CategoriaProdutos = categoriaProdutos;
+        CondicaoPagamento = condicaoPagamento;
+        Observacoes = observacoes;
+        DataCadastro = dataCadastro;
+    }
 
-        private Fornecedor() { }
-
-        public Fornecedor(string nome, string telefone)
-        {
-            Nome = nome;
-            Telefone = telefone;
-            DataCadastro = DateTime.UtcNow;
-        }
+    public void AtualizarDados(string nome, string? razaoSocial, string? cnpj, string? nomeRepresentante,
+        string? telefone, string? whatsApp, string? email, string? endereco, string? categoriaProdutos, 
+        string? condicaoPagamento, string? observacoes, DateTime dataCadastro)
+    {
+        Nome = nome;
+        RazaoSocial = razaoSocial;
+        CNPJ = cnpj;
+        NomeRepresentante = nomeRepresentante;
+        Telefone = telefone;
+        WhatsApp = whatsApp;
+        Email = email;
+        Endereco = endereco;
+        CategoriaProdutos = categoriaProdutos;
+        CondicaoPagamento = condicaoPagamento;
+        Observacoes = observacoes;
+        DataCadastro = dataCadastro;
     }
 }

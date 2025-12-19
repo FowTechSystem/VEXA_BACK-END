@@ -15,6 +15,12 @@ namespace CRMVEXA.API.Controllers
             _mediator = mediator;
         }
 
+        [HttpGet]
+        public IActionResult Listar()
+        {
+            return Ok(new { mensagem = "Endpoint de vendas funcionando" });
+        }
+
         //[HttpPost]
         //public async Task<ActionResult<int>> Criar([FromBody] CriarVendaCommand command)
         //{
