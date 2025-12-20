@@ -8,6 +8,7 @@ namespace CRMVEXA.Application.Features.Fornecedor.GetFornecedor;
 public class GetFornecedorHandler : IRequestHandler<GetFornecedorRequest, GetFornecedorResponse>
 {
     private readonly AppDbContext _context;
+
     public GetFornecedorHandler(AppDbContext context)
     {
         _context = context;
@@ -15,7 +16,10 @@ public class GetFornecedorHandler : IRequestHandler<GetFornecedorRequest, GetFor
 
     public async Task<GetFornecedorResponse> Handle(GetFornecedorRequest request, CancellationToken cancellationToken)
     {
-        var query = _context.Fornecedores.AsQueryable();
+        var query = _context.Fornecedores
+            .Include(f => f.Enderecos)  
+            .AsQueryable();
+
         if (!string.IsNullOrWhiteSpace(request.Valor))
         {
             if (request.Filtro?.ToLower() == "cnpj")
@@ -27,13 +31,16 @@ public class GetFornecedorHandler : IRequestHandler<GetFornecedorRequest, GetFor
                 query = query.Where(c => c.RazaoSocial.ToLower().Contains(request.Valor.ToLower()));
             }
         }
+
         var totalRegistros = await query.CountAsync(cancellationToken);
         var totalPaginas = (int)Math.Ceiling(totalRegistros / (double)request.Tamanho);
+
         var fornecedores = await query
             .OrderBy(c => c.RazaoSocial)
             .Skip((request.Pagina - 1) * request.Tamanho)
             .Take(request.Tamanho)
             .ToListAsync(cancellationToken);
+
         return new GetFornecedorResponse
         {
             Fornecedor = fornecedores,
