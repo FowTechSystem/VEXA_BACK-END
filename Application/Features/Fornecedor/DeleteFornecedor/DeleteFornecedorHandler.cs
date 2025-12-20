@@ -27,5 +27,3 @@ public class DeleteFornecedorHandler : IRequestHandler<DeleteFornecedorRequest, 
         return true;
     }
 }
-
-

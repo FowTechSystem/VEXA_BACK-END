@@ -114,6 +114,58 @@ namespace CRMVEXA.Infrastructure.Migrations
                     b.ToTable("Clientes", (string)null);
                 });
 
+            modelBuilder.Entity("CRMVEXA.Domain.Entities.Endereco", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Bairro")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("Cep")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("character varying(10)");
+
+                    b.Property<string>("Cidade")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<int?>("ClienteId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Complemento")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<int?>("FornecedorId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Numero")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<string>("Rua")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ClienteId");
+
+                    b.HasIndex("FornecedorId");
+
+                    b.ToTable("Enderecos", (string)null);
+                });
+
             modelBuilder.Entity("CRMVEXA.Domain.Entities.Fornecedor", b =>
                 {
                     b.Property<int>("Id")
@@ -137,9 +189,6 @@ namespace CRMVEXA.Infrastructure.Migrations
                     b.Property<string>("Email")
                         .HasColumnType("text");
 
-                    b.Property<string>("Endereco")
-                        .HasColumnType("text");
-
                     b.Property<string>("Nome")
                         .IsRequired()
                         .HasMaxLength(200)
@@ -155,9 +204,7 @@ namespace CRMVEXA.Infrastructure.Migrations
                         .HasColumnType("text");
 
                     b.Property<string>("Telefone")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("character varying(20)");
+                        .HasColumnType("text");
 
                     b.Property<string>("WhatsApp")
                         .HasColumnType("text");
@@ -376,57 +423,21 @@ namespace CRMVEXA.Infrastructure.Migrations
                     b.ToTable("Vendas");
                 });
 
-            modelBuilder.Entity("CRMVEXA.Domain.Entities.Cliente", b =>
+            modelBuilder.Entity("CRMVEXA.Domain.Entities.Endereco", b =>
                 {
-                    b.OwnsOne("CRMVEXA.Domain.Entities.Endereco", "Endereco", b1 =>
-                        {
-                            b1.Property<int>("ClienteId")
-                                .HasColumnType("integer");
+                    b.HasOne("CRMVEXA.Domain.Entities.Cliente", "Cliente")
+                        .WithMany("Enderecos")
+                        .HasForeignKey("ClienteId")
+                        .OnDelete(DeleteBehavior.Cascade);
 
-                            b1.Property<string>("Bairro")
-                                .IsRequired()
-                                .HasMaxLength(100)
-                                .HasColumnType("character varying(100)")
-                                .HasColumnName("Endereco_Bairro");
+                    b.HasOne("CRMVEXA.Domain.Entities.Fornecedor", "Fornecedor")
+                        .WithMany("Enderecos")
+                        .HasForeignKey("FornecedorId")
+                        .OnDelete(DeleteBehavior.Cascade);
 
-                            b1.Property<string>("Cep")
-                                .IsRequired()
-                                .HasMaxLength(10)
-                                .HasColumnType("character varying(10)")
-                                .HasColumnName("Endereco_Cep");
+                    b.Navigation("Cliente");
 
-                            b1.Property<string>("Cidade")
-                                .IsRequired()
-                                .HasMaxLength(100)
-                                .HasColumnType("character varying(100)")
-                                .HasColumnName("Endereco_Cidade");
-
-                            b1.Property<string>("Complemento")
-                                .HasMaxLength(200)
-                                .HasColumnType("character varying(200)")
-                                .HasColumnName("Endereco_Complemento");
-
-                            b1.Property<string>("Numero")
-                                .IsRequired()
-                                .HasMaxLength(20)
-                                .HasColumnType("character varying(20)")
-                                .HasColumnName("Endereco_Numero");
-
-                            b1.Property<string>("Rua")
-                                .IsRequired()
-                                .HasMaxLength(200)
-                                .HasColumnType("character varying(200)")
-                                .HasColumnName("Endereco_Rua");
-
-                            b1.HasKey("ClienteId");
-
-                            b1.ToTable("Clientes");
-
-                            b1.WithOwner()
-                                .HasForeignKey("ClienteId");
-                        });
-
-                    b.Navigation("Endereco");
+                    b.Navigation("Fornecedor");
                 });
 
             modelBuilder.Entity("CRMVEXA.Domain.Entities.ItemVenda", b =>
@@ -436,6 +447,16 @@ namespace CRMVEXA.Infrastructure.Migrations
                         .HasForeignKey("VendaId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("CRMVEXA.Domain.Entities.Cliente", b =>
+                {
+                    b.Navigation("Enderecos");
+                });
+
+            modelBuilder.Entity("CRMVEXA.Domain.Entities.Fornecedor", b =>
+                {
+                    b.Navigation("Enderecos");
                 });
 
             modelBuilder.Entity("CRMVEXA.Domain.Entities.Venda", b =>

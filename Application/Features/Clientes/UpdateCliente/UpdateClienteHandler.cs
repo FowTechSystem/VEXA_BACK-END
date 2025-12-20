@@ -17,7 +17,7 @@ namespace CRMVEXA.Application.Features.Clientes.UpdateCliente.Validators
         public async Task<UpdateClienteResponse> Handle(UpdateClienteRequest request, CancellationToken cancellationToken)
         {
             var cliente = await _context.Clientes
-                .Include(c => c.Endereco)
+                .Include(c => c.Enderecos)
                 .FirstOrDefaultAsync(c => c.Id == request.Id, cancellationToken);
 
             if (cliente is null)
@@ -29,33 +29,52 @@ namespace CRMVEXA.Application.Features.Clientes.UpdateCliente.Validators
                 };
             }
 
+ 
             cliente.AtualizarDados(
                 nomeCompleto: request.NomeCompleto,
                 telefone: request.Telefone,
                 whatsApp: request.WhatsApp,
                 email: request.Email,
                 cpf: request.Cpf,
+                rg: request.Rg,
+                cnpj: request.Cnpj,
                 dataNascimento: request.DataNascimento,
                 preferencias: request.Preferencias,
                 observacoes: request.Observacoes,
-                fotoBase64 : request.FotoUrl
-
+                fotoBase64: request.FotoUrl
             );
 
-            if (cliente.Endereco is null)
+            var enderecoExistente = await _context.Set<Endereco>()
+                .FirstOrDefaultAsync(e =>
+                    e.Rua == request.Rua &&
+                    e.Numero == request.Numero &&
+                    e.Bairro == request.Bairro &&
+                    e.Cidade == request.Cidade &&
+                    e.Cep == request.Cep &&
+                    e.Complemento == request.Complemento,
+                    cancellationToken);
+
+            if (enderecoExistente != null)
             {
-                cliente.Endereco = new Endereco(
-                    rua: request.Rua,
-                    numero: request.Numero,
-                    bairro: request.Bairro,
-                    cidade: request.Cidade,
-                    cep: request.Cep,
-                    complemento: request.Complemento
-                );
+                if (!cliente.Enderecos.Any(e => e.Id == enderecoExistente.Id))
+                {
+                    cliente.AdicionarEndereco(enderecoExistente);
+                }
+                else
+                {
+                    enderecoExistente.AtualizarEndereco(
+                        request.Rua,
+                        request.Numero,
+                        request.Bairro,
+                        request.Cidade,
+                        request.Cep,
+                        request.Complemento
+                    );
+                }
             }
             else
             {
-                cliente.Endereco.AtualizarEndereco(
+                var novoEndereco = new Endereco(
                     rua: request.Rua,
                     numero: request.Numero,
                     bairro: request.Bairro,
@@ -63,6 +82,8 @@ namespace CRMVEXA.Application.Features.Clientes.UpdateCliente.Validators
                     cep: request.Cep,
                     complemento: request.Complemento
                 );
+
+                cliente.AdicionarEndereco(novoEndereco);
             }
 
             await _context.SaveChangesAsync(cancellationToken);

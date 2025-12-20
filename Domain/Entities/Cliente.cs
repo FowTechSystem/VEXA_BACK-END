@@ -1,5 +1,4 @@
-﻿// CRMVEXA.Domain/Entities/Cliente.cs
-namespace CRMVEXA.Domain.Entities;
+﻿namespace CRMVEXA.Domain.Entities;
 
 public class Cliente
 {
@@ -12,16 +11,12 @@ public class Cliente
     public string? WhatsApp { get; set; }
     public string? Email { get; set; }
     public DateTime? DataNascimento { get; set; }
-
-    public Endereco Endereco { get; set; }
-
     public string? Preferencias { get; set; }
     public string? Observacoes { get; set; }
-
     public string? FotoBase64 { get; set; }
-
     public DateTime DataCadastro { get; set; }
 
+    public ICollection<Endereco> Enderecos { get; set; } = new List<Endereco>();
 
     public Cliente() { }
 
@@ -32,7 +27,6 @@ public class Cliente
         string whatsApp,
         string? email,
         DateTime? dataNascimento,
-        Endereco? endereco,
         string? preferencias,
         string? observacoes,
         DateTime dataCadastro,
@@ -48,11 +42,11 @@ public class Cliente
         WhatsApp = whatsApp;
         Email = email;
         DataNascimento = dataNascimento;
-        Endereco = endereco;
         Preferencias = preferencias;
         Observacoes = observacoes;
         DataCadastro = dataCadastro;
         FotoBase64 = fotoBase64;
+        Enderecos = new List<Endereco>();
     }
 
     public void AtualizarDados(
@@ -67,7 +61,6 @@ public class Cliente
         string? preferencias = null,
         string? observacoes = null,
         string? fotoBase64 = null)
-
     {
         NomeCompleto = nomeCompleto;
         Telefone = telefone;
@@ -80,5 +73,19 @@ public class Cliente
         Preferencias = preferencias;
         Observacoes = observacoes;
         FotoBase64 = fotoBase64;
+    }
+
+
+    public void AdicionarEndereco(Endereco endereco)
+    {
+        if (!Enderecos.Contains(endereco))
+        {
+            Enderecos.Add(endereco);
+        }
+    }
+
+    public void RemoverEndereco(Endereco endereco)
+    {
+        Enderecos.Remove(endereco);
     }
 }

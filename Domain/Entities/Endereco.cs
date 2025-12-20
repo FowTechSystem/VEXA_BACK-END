@@ -10,8 +10,13 @@ public class Endereco
     public string Cep { get; set; }
     public string? Complemento { get; set; }
 
-    public ICollection<Fornecedor> Fornecedores { get; set; }
-    public ICollection<Cliente> Clientes { get; set; }
+
+    public int? FornecedorId { get; set; }
+    public int? ClienteId { get; set; }
+
+
+    public Fornecedor? Fornecedor { get; set; }
+    public Cliente? Cliente { get; set; }
 
     public Endereco() { }
 

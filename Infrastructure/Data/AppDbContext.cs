@@ -14,17 +14,23 @@ namespace CRMVEXA.Infrastructure.Data
         public DbSet<Usuario> Usuarios { get; set; }
         public DbSet<Venda> Vendas { get; set; }
         public DbSet<ItemVenda> ItensVenda { get; set; }
+        public DbSet<Endereco> Enderecos { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);
 
-            modelBuilder.Entity<Endereco>().ToTable("Enderecos");
-
             modelBuilder.Entity<Fornecedor>()
                 .HasMany(f => f.Enderecos)
-                .WithMany(e => e.Fornecedores)
-                .UsingEntity(j => j.ToTable("FornecedorEndereco"));
+                .WithOne(e => e.Fornecedor)
+                .HasForeignKey(e => e.FornecedorId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<Cliente>()
+                .HasMany(c => c.Enderecos)
+                .WithOne(e => e.Cliente)
+                .HasForeignKey(e => e.ClienteId)
+                .OnDelete(DeleteBehavior.Cascade);
 
             base.OnModelCreating(modelBuilder);
         }

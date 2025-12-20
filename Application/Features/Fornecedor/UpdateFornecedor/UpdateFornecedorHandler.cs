@@ -2,12 +2,14 @@
 using CRMVEXA.Domain.Entities;
 using CRMVEXA.Infrastructure.Data;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 
 namespace CRMVEXA.Application.Features.Fornecedor.UpdateFornecedor;
 
 public class UpdateFornecedorHandler : IRequestHandler<UpdateFornecedorRequest, UpdateFornecedorResponse>
 {
     private readonly AppDbContext _context;
+
     public UpdateFornecedorHandler(AppDbContext context)
     {
         _context = context;
@@ -17,24 +19,18 @@ public class UpdateFornecedorHandler : IRequestHandler<UpdateFornecedorRequest, 
     {
         try
         {
-            var fornecedor = await _context.Fornecedores.FindAsync(new object?[] { request.Id }, cancellationToken);
+            var fornecedor = await _context.Fornecedores
+                .Include(f => f.Enderecos)
+                .FirstOrDefaultAsync(f => f.Id == request.Id, cancellationToken);
 
             if (fornecedor == null)
             {
-                throw new Exception("Fornecedor não encontrado.");
+                return new UpdateFornecedorResponse
+                {
+                    Sucesso = false,
+                    Mensagem = "Fornecedor não encontrado."
+                };
             }
-
-
-            Endereco enderecoAtualizado = null;
-
-            enderecoAtualizado.AtualizarEndereco(
-                rua: request.Rua ?? string.Empty,
-                numero: request.Numero ?? string.Empty,
-                bairro: request.Bairro ?? string.Empty,
-                cidade: request.Cidade ?? string.Empty,
-                cep: request.Cep ?? string.Empty,
-                complemento: request.Complemento
-            );
 
             fornecedor.AtualizarDados(
                 nome: request.Nome,
@@ -44,18 +40,44 @@ public class UpdateFornecedorHandler : IRequestHandler<UpdateFornecedorRequest, 
                 telefone: request.Telefone,
                 whatsApp: request.WhatsApp,
                 email: request.Email,
-                endereco:  enderecoAtualizado,
                 categoriaProdutos: request.CategoriaProdutos,
                 condicaoPagamento: request.CondicaoPagamento,
-                observacoes: request.Observacoes,
-                dataCadastro: request.DataCadastro
+                observacoes: request.Observacoes
             );
 
+            var enderecoPrincipal = fornecedor.Enderecos.FirstOrDefault();
+
+            if (enderecoPrincipal != null)
+            {
+                enderecoPrincipal.AtualizarEndereco(
+                    rua: request.Rua ?? string.Empty,
+                    numero: request.Numero ?? string.Empty,
+                    bairro: request.Bairro ?? string.Empty,
+                    cidade: request.Cidade ?? string.Empty,
+                    cep: request.Cep ?? string.Empty,
+                    complemento: request.Complemento
+                );
+            }
+            else
+            {
+                var novoEndereco = new Endereco(
+                    rua: request.Rua ?? string.Empty,
+                    numero: request.Numero ?? string.Empty,
+                    bairro: request.Bairro ?? string.Empty,
+                    cidade: request.Cidade ?? string.Empty,
+                    cep: request.Cep ?? string.Empty,
+                    complemento: request.Complemento
+                );
+
+                fornecedor.AdicionarEndereco(novoEndereco);
+            }
+
             await _context.SaveChangesAsync(cancellationToken);
+
             return new UpdateFornecedorResponse
             {
                 Sucesso = true,
-                Mensagem = "Cliente atualizado com sucesso!",
+                Mensagem = "Fornecedor atualizado com sucesso!",
                 Fornecedorid = fornecedor.Id
             };
         }
@@ -64,8 +86,11 @@ public class UpdateFornecedorHandler : IRequestHandler<UpdateFornecedorRequest, 
             // TODO: Adicionar notificação Discord aqui depois
             // await _discordService.EnviarErro(ex);
 
-            throw new Exception($"Erro ao editar Fornecedor: {ex.Message}", ex);
+            return new UpdateFornecedorResponse
+            {
+                Sucesso = false,
+                Mensagem = $"Erro ao atualizar fornecedor: {ex.Message}"
+            };
         }
-
     }
 }

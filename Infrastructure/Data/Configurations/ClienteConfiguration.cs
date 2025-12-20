@@ -38,11 +38,11 @@ namespace CRMVEXA.Infrastructure.Data.Configurations
             builder.Property(x => x.DataCadastro)
                 .IsRequired();
 
-            builder.HasOne(c => c.Endereco)
-                .WithMany(e => e.Clientes)
-                .HasForeignKey(c => c.Id)
-                .OnDelete(DeleteBehavior.Restrict);
-
+            builder.HasMany(c => c.Enderecos)
+                .WithOne(e => e.Cliente)
+                .HasForeignKey(e => e.ClienteId)
+                .OnDelete(DeleteBehavior.Cascade);
+            
             builder.ToTable("Clientes");
         }
     }

@@ -24,7 +24,6 @@ public class CriarClienteHandler : IRequestHandler<CriarClienteRequest, int>
                 WhatsApp = request.whatsApp,
                 Email = request.email,
                 DataNascimento = request.dataNascimento?.ToUniversalTime(),
-                Endereco = request.endereco,
                 Preferencias = request.preferencias,
                 Observacoes = request.observacoes,
                 DataCadastro = request.dataCadastro.ToUniversalTime(),
