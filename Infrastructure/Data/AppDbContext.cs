@@ -18,8 +18,6 @@ namespace CRMVEXA.Infrastructure.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);
-
             modelBuilder.Entity<Fornecedor>()
                 .HasMany(f => f.Enderecos)
                 .WithOne(e => e.Fornecedor)
@@ -31,6 +29,8 @@ namespace CRMVEXA.Infrastructure.Data
                 .WithOne(e => e.Cliente)
                 .HasForeignKey(e => e.ClienteId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);
 
             base.OnModelCreating(modelBuilder);
         }
