@@ -16,7 +16,9 @@ namespace CRMVEXA.Application.Features.Clientes.GetListaClientes.Validators
 
         public async Task<GetListaClientesResponse> Handle(GetListaClientesRequest request, CancellationToken cancellationToken)
         {
-            var query = _context.Clientes.AsQueryable();
+            var query = _context.Clientes
+                .Include(c => c.Enderecos)
+                .AsQueryable();
 
             if (!string.IsNullOrWhiteSpace(request.Valor))
             {
@@ -24,13 +26,13 @@ namespace CRMVEXA.Application.Features.Clientes.GetListaClientes.Validators
                 {
                     query = query.Where(c => c.CPF != null && c.CPF.Contains(request.Valor));
                 }
-                else 
+                else
                 {
                     query = query.Where(c => c.NomeCompleto.ToLower().Contains(request.Valor.ToLower()));
                 }
             }
-            var totalRegistros = await query.CountAsync(cancellationToken);
 
+            var totalRegistros = await query.CountAsync(cancellationToken);
             var totalPaginas = (int)Math.Ceiling(totalRegistros / (double)request.Tamanho);
 
             var clientes = await query
