@@ -1,3 +1,4 @@
+using System;
 using CRMVEXA.Application.Features.Vendas.CreateVenda;
 using CRMVEXA.Domain.Entities;
 using CRMVEXA.Infrastructure.Data;

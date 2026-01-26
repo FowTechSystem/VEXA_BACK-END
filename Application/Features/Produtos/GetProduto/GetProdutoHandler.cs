@@ -1,3 +1,4 @@
+using System;
 using AutoMapper;
 using CRMVEXA.Application.DTOs;
 using CRMVEXA.Application.Features.Produtos.GetProduto;

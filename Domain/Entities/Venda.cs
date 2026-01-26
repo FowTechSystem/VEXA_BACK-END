@@ -1,3 +1,5 @@
+using System.Linq;
+
 namespace CRMVEXA.Domain.Entities
 {
     public class Venda

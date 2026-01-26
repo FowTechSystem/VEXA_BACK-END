@@ -1,3 +1,4 @@
+using System;
 using CRMVEXA.Application.Features.Produtos.DeleteProduto;
 using CRMVEXA.Infrastructure.Data;
 using MediatR;
