@@ -1,14 +1,14 @@
-﻿namespace CRMVEXA.Domain.Entities
+namespace CRMVEXA.Domain.Entities
 {
     public class MovimentacaoEstoque
     {
-        public int Id { get; private set; }
-        public int ProdutoId { get; private set; }
-        public string TipoMovimentacao { get; private set; } // Entrada, Saída, Ajuste
-        public int Quantidade { get; private set; }
-        public string Motivo { get; private set; }
-        public int UsuarioId { get; private set; }
-        public DateTime DataHora { get; private set; }
+        public int Id { get; set; }
+        public int ProdutoId { get; set; }
+        public string TipoMovimentacao { get; set; } // Entrada, Saída, Ajuste
+        public int Quantidade { get; set; }
+        public string Motivo { get; set; }
+        public int UsuarioId { get; set; }
+        public DateTime DataHora { get; set; }
 
         private MovimentacaoEstoque() { }
 

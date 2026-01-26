@@ -1,4 +1,4 @@
-﻿using CRMVEXA.Domain.Entities;
+using CRMVEXA.Domain.Entities;
 using CRMVEXA.Domain.Interfaces;
 using CRMVEXA.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
@@ -14,8 +14,15 @@ namespace CRMVEXA.Infrastructure.Repositories
             _context = context;
         }
 
-        public async Task<Venda?> ObterPorIdAsync(int id) => await _context.Vendas.FindAsync(id);
-        public async Task<IEnumerable<Venda>> ObterTodosAsync() => await _context.Vendas.ToListAsync();
+        public async Task<Venda?> ObterPorIdAsync(int id) 
+            => await _context.Vendas
+                .Include(v => v.Itens)
+                .FirstOrDefaultAsync(v => v.Id == id);
+
+        public async Task<IEnumerable<Venda>> ObterTodosAsync() 
+            => await _context.Vendas
+                .Include(v => v.Itens)
+                .ToListAsync();
         public async Task<Venda> AdicionarAsync(Venda venda)
         {
             await _context.Vendas.AddAsync(venda);

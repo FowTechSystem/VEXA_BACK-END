@@ -1,4 +1,4 @@
-﻿namespace CRMVEXA.Application.DTOs
+namespace CRMVEXA.Application.DTOs
 {
     public class VendaDto
     {
@@ -16,6 +16,7 @@
 
     public class ItemVendaDto
     {
+        public int Id { get; set; }
         public int ProdutoId { get; set; }
         public int Quantidade { get; set; }
         public decimal PrecoUnitario { get; set; }

@@ -1,6 +1,10 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using MediatR;
-using CRMVEXA.Domain.Entities;
+using CRMVEXA.Application.Features.Produtos.CreateProduto;
+using CRMVEXA.Application.Features.Produtos.UpdateProduto;
+using CRMVEXA.Application.Features.Produtos.GetProduto;
+using CRMVEXA.Application.Features.Produtos.GetListaProdutos;
+using CRMVEXA.Application.Features.Produtos.DeleteProduto;
 
 namespace CRMVEXA.API.Controllers
 {
@@ -15,25 +19,77 @@ namespace CRMVEXA.API.Controllers
             _mediator = mediator;
         }
 
-        //[HttpPost]
-        //public async Task<ActionResult<int>> Criar([FromBody]  command)
-        //{
-        //    var id = await _mediator.Send(command);
-        //    return CreatedAtAction(nameof(ObterPorId), new { id }, id);
-        //}
-
-        [HttpGet("{id}")]
-        public async Task<ActionResult<Produto>> ObterPorId(int id)
+        [HttpGet]
+        public async Task<ActionResult<GetListaProdutosResponse>> Listar()
         {
-            // Implemente a query: ObterProdutoPorIdQuery
-            return Ok(); // placeholder
+            try
+            {
+                var resultado = await _mediator.Send(new GetListaProdutosRequest());
+                return Ok(resultado);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { sucesso = false, mensagem = ex.Message });
+            }
         }
 
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<Produto>>> Listar()
+        [HttpGet("{id}")]
+        public async Task<ActionResult<GetProdutoResponse>> ObterPorId(int id)
         {
-            // Implemente a query: ListarProdutosQuery
-            return Ok(); // placeholder
+            try
+            {
+                var resultado = await _mediator.Send(new GetProdutoRequest { Id = id });
+                return Ok(resultado);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { sucesso = false, mensagem = ex.Message });
+            }
+        }
+
+        [HttpPost]
+        public async Task<ActionResult<int>> Criar([FromBody] CreateProdutoRequest request)
+        {
+            try
+            {
+                var id = await _mediator.Send(request);
+                return Ok(new { sucesso = true, id, mensagem = "Produto criado com sucesso!" });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { sucesso = false, mensagem = ex.Message });
+            }
+        }
+
+        [HttpPut("{id}")]
+        public async Task<ActionResult<UpdateProdutoResponse>> Atualizar(
+            [FromRoute] int id,
+            [FromBody] UpdateProdutoRequest request)
+        {
+            try
+            {
+                request.Id = id;
+                var resultado = await _mediator.Send(request);
+                return Ok(resultado);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { sucesso = false, mensagem = ex.Message });
+            }
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<ActionResult> Deletar([FromRoute] int id)
+        {
+            try
+            {
+                await _mediator.Send(new DeleteProdutoRequest { Id = id });
+                return Ok(new { sucesso = true, mensagem = "Produto deletado com sucesso!" });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { sucesso = false, mensagem = ex.Message });
+            }
         }
     }
 }

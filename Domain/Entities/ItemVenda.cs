@@ -1,12 +1,12 @@
-﻿namespace CRMVEXA.Domain.Entities
+namespace CRMVEXA.Domain.Entities
 {
     public class ItemVenda
     {
-        public int Id { get; private set; }
-        public int VendaId { get; private set; }
-        public int ProdutoId { get; private set; }
-        public int Quantidade { get; private set; }
-        public decimal PrecoUnitario { get; private set; }
+        public int Id { get; set; }
+        public int VendaId { get; set; }
+        public int ProdutoId { get; set; }
+        public int Quantidade { get; set; }
+        public decimal PrecoUnitario { get; set; }
         public decimal Subtotal => Quantidade * PrecoUnitario;
 
         private ItemVenda() { }

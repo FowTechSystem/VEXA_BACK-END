@@ -1,4 +1,4 @@
-﻿using CRMVEXA.Infrastructure.Data;
+using CRMVEXA.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
 
@@ -15,7 +15,10 @@ builder.Services.AddDbContext<AppDbContext>(options =>
         builder.Configuration.GetConnectionString("DefaultConnection")
     ));
 
-// 2. MediatR - REGISTRA AUTOMATICAMENTE TODOS OS HANDLERS
+// 2. AutoMapper
+builder.Services.AddAutoMapper(typeof(Program));
+
+// 3. MediatR - REGISTRA AUTOMATICAMENTE TODOS OS HANDLERS
 builder.Services.AddMediatR(cfg =>
 {
     var assemblies = AppDomain.CurrentDomain.GetAssemblies()
@@ -25,7 +28,7 @@ builder.Services.AddMediatR(cfg =>
     cfg.RegisterServicesFromAssemblies(assemblies);
 });
 
-// 3. Controllers COM CONFIGURAÇÃO JSON
+// 4. Controllers COM CONFIGURAÇÃO JSON
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
     {
@@ -35,7 +38,7 @@ builder.Services.AddControllers()
         options.JsonSerializerOptions.DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull;
     });
 
-// 4. CORS
+// 5. CORS
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend", policy =>
@@ -53,7 +56,7 @@ builder.Services.AddCors(options =>
     });
 });
 
-// 5. Swagger - ✅ VERSÃO SIMPLES (SEM ERRO)
+// 6. Swagger - ✅ VERSÃO SIMPLES (SEM ERRO)
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 

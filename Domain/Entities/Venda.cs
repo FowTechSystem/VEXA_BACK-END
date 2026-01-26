@@ -1,16 +1,16 @@
-﻿namespace CRMVEXA.Domain.Entities
+namespace CRMVEXA.Domain.Entities
 {
     public class Venda
     {
-        public int Id { get; private set; }
-        public string CodigoVenda { get; private set; }
-        public int? ClienteId { get; private set; }
-        public decimal Desconto { get; private set; }
-        public string FormaPagamento { get; private set; }
-        public int UsuarioId { get; private set; }
-        public DateTime DataHora { get; private set; }
-        public decimal ValorTotal { get; private set; }
-        public string Status { get; private set; } = "Concluída";
+        public int Id { get; set; }
+        public string CodigoVenda { get; set; }
+        public int? ClienteId { get; set; }
+        public decimal Desconto { get; set; }
+        public string FormaPagamento { get; set; }
+        public int UsuarioId { get; set; }
+        public DateTime DataHora { get; set; }
+        public decimal ValorTotal { get; set; }
+        public string Status { get; set; } = "Concluída";
 
         private List<ItemVenda> _itens = new();
         public IReadOnlyCollection<ItemVenda> Itens => _itens.AsReadOnly();
@@ -43,5 +43,16 @@
         }
 
         public void Cancelar() => Status = "Cancelada";
+
+        public void AtualizarCliente(int? clienteId)
+        {
+            ClienteId = clienteId;
+        }
+
+        public void RemoverItem(ItemVenda item)
+        {
+            _itens.Remove(item);
+            CalcularTotal();
+        }
     }
 }

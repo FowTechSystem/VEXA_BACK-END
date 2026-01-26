@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using CRMVEXA.Domain.Entities;
 
 namespace CRMVEXA.Infrastructure.Data
@@ -14,7 +14,11 @@ namespace CRMVEXA.Infrastructure.Data
         public DbSet<Usuario> Usuarios { get; set; }
         public DbSet<Venda> Vendas { get; set; }
         public DbSet<ItemVenda> ItensVenda { get; set; }
+        public DbSet<Compra> Compras { get; set; }
+        public DbSet<ItemCompra> ItensCompra { get; set; }
         public DbSet<Endereco> Enderecos { get; set; }
+        public DbSet<MovimentacaoEstoque> MovimentacoesEstoque { get; set; }
+        public DbSet<MovimentacaoCaixa> MovimentacoesCaixa { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

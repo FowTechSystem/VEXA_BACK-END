@@ -1,15 +1,15 @@
-﻿namespace CRMVEXA.Domain.Entities
+namespace CRMVEXA.Domain.Entities
 {
     public class Caixa
     {
-        public int Id { get; private set; }
-        public DateTime DataAbertura { get; private set; }
-        public DateTime? DataFechamento { get; private set; }
-        public decimal SaldoInicial { get; private set; }
-        public decimal SaldoFinal { get; private set; }
-        public int UsuarioId { get; private set; }
-        public string? Observacoes { get; private set; }
-        public bool Aberto { get; private set; }
+        public int Id { get; set; }
+        public DateTime DataAbertura { get; set; }
+        public DateTime? DataFechamento { get; set; }
+        public decimal SaldoInicial { get; set; }
+        public decimal SaldoFinal { get; set; }
+        public int UsuarioId { get; set; }
+        public string? Observacoes { get; set; }
+        public bool Aberto { get; set; }
 
         // Construtor protegido para uso do Entity Framework
         protected Caixa() { }

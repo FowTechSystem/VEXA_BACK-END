@@ -1,19 +1,19 @@
-﻿namespace CRMVEXA.Domain.Entities
+namespace CRMVEXA.Domain.Entities
 {
     public class Usuario
     {
-        public int Id { get; private set; }
-        public string Nome { get; private set; }
-        public string Email { get; private set; }
-        public string Login { get; private set; }
-        public string SenhaHash { get; private set; }
-        public string Cargo { get; private set; }
-        public bool PodeVender { get; private set; }
-        public bool PodeEditarEstoque { get; private set; }
-        public bool PodeEditarProduto { get; private set; }
-        public bool PodeAbrirFecharCaixa { get; private set; }
-        public bool PodeEmitirRelatorios { get; private set; }
-        public bool PodeCadastrarFornecedores { get; private set; }
+        public int Id { get; set; }
+        public string Nome { get; set; }
+        public string Email { get; set; }
+        public string Login { get; set; }
+        public string SenhaHash { get; set; }
+        public string Cargo { get; set; }
+        public bool PodeVender { get; set; }
+        public bool PodeEditarEstoque { get; set; }
+        public bool PodeEditarProduto { get; set; }
+        public bool PodeAbrirFecharCaixa { get; set; }
+        public bool PodeEmitirRelatorios { get; set; }
+        public bool PodeCadastrarFornecedores { get; set; }
 
         private Usuario() { }
 
