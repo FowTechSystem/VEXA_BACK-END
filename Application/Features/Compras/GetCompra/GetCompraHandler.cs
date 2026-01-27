@@ -1,6 +1,4 @@
 using System;
-using AutoMapper;
-using CRMVEXA.Application.DTOs;
 using CRMVEXA.Application.Features.Compras.GetCompra;
 using CRMVEXA.Infrastructure.Data;
 using MediatR;
@@ -11,12 +9,10 @@ namespace CRMVEXA.Application.Features.Compras.GetCompra
     public class GetCompraHandler : IRequestHandler<GetCompraRequest, GetCompraResponse>
     {
         private readonly AppDbContext _context;
-        private readonly IMapper _mapper;
 
-        public GetCompraHandler(AppDbContext context, IMapper mapper)
+        public GetCompraHandler(AppDbContext context)
         {
             _context = context;
-            _mapper = mapper;
         }
 
         public async Task<GetCompraResponse> Handle(GetCompraRequest request, CancellationToken cancellationToken)
@@ -30,32 +26,42 @@ namespace CRMVEXA.Application.Features.Compras.GetCompra
                 throw new Exception($"Compra com ID {request.Id} não encontrada");
             }
 
-            var compraDto = _mapper.Map<CompraDto>(compra);
-
             // Preencher dados relacionados
             var fornecedor = await _context.Fornecedores.FindAsync(new object[] { compra.FornecedorId }, cancellationToken);
-            if (fornecedor != null)
-            {
-                compraDto.FornecedorNome = fornecedor.Nome;
-            }
-
             var usuario = await _context.Usuarios.FindAsync(new object[] { compra.UsuarioId }, cancellationToken);
-            if (usuario != null)
-            {
-                compraDto.UsuarioNome = usuario.Nome;
-            }
 
-            // Preencher nomes dos produtos nos itens
-            foreach (var itemDto in compraDto.Itens)
+            var response = new GetCompraResponse
             {
-                var produto = await _context.Produtos.FindAsync(new object[] { itemDto.ProdutoId }, cancellationToken);
-                if (produto != null)
+                Id = compra.Id,
+                CodigoCompra = compra.CodigoCompra,
+                FornecedorId = compra.FornecedorId,
+                FornecedorNome = fornecedor?.Nome,
+                UsuarioId = compra.UsuarioId,
+                UsuarioNome = usuario?.Nome,
+                DataHora = compra.DataHora,
+                ValorTotal = compra.ValorTotal,
+                Observacoes = compra.Observacoes,
+                Status = compra.Status,
+                Itens = new List<ItemCompraResponse>()
+            };
+
+            // Preencher itens com nomes dos produtos
+            foreach (var item in compra.Itens)
+            {
+                var produto = await _context.Produtos.FindAsync(new object[] { item.ProdutoId }, cancellationToken);
+                response.Itens.Add(new ItemCompraResponse
                 {
-                    itemDto.ProdutoNome = produto.Nome;
-                }
+                    Id = item.Id,
+                    CompraId = item.CompraId,
+                    ProdutoId = item.ProdutoId,
+                    ProdutoNome = produto?.Nome,
+                    Quantidade = item.Quantidade,
+                    PrecoUnitario = item.PrecoUnitario,
+                    Subtotal = item.Subtotal
+                });
             }
 
-            return new GetCompraResponse { Compra = compraDto };
+            return response;
         }
     }
 }

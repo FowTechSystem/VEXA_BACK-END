@@ -1,6 +1,4 @@
 using System;
-using AutoMapper;
-using CRMVEXA.Application.DTOs;
 using CRMVEXA.Application.Features.Vendas.GetVenda;
 using CRMVEXA.Infrastructure.Data;
 using MediatR;
@@ -11,12 +9,10 @@ namespace CRMVEXA.Application.Features.Vendas.GetVenda
     public class GetVendaHandler : IRequestHandler<GetVendaRequest, GetVendaResponse>
     {
         private readonly AppDbContext _context;
-        private readonly IMapper _mapper;
 
-        public GetVendaHandler(AppDbContext context, IMapper mapper)
+        public GetVendaHandler(AppDbContext context)
         {
             _context = context;
-            _mapper = mapper;
         }
 
         public async Task<GetVendaResponse> Handle(GetVendaRequest request, CancellationToken cancellationToken)
@@ -30,9 +26,26 @@ namespace CRMVEXA.Application.Features.Vendas.GetVenda
                 throw new Exception($"Venda com ID {request.Id} não encontrada");
             }
 
-            var vendaDto = _mapper.Map<VendaDto>(venda);
-
-            return new GetVendaResponse { Venda = vendaDto };
+            return new GetVendaResponse
+            {
+                Id = venda.Id,
+                CodigoVenda = venda.CodigoVenda,
+                ClienteId = venda.ClienteId,
+                Desconto = venda.Desconto,
+                FormaPagamento = venda.FormaPagamento,
+                UsuarioId = venda.UsuarioId,
+                DataHora = venda.DataHora,
+                ValorTotal = venda.ValorTotal,
+                Status = venda.Status,
+                Itens = venda.Itens.Select(i => new ItemVendaResponse
+                {
+                    Id = i.Id,
+                    ProdutoId = i.ProdutoId,
+                    Quantidade = i.Quantidade,
+                    PrecoUnitario = i.PrecoUnitario,
+                    Subtotal = i.Subtotal
+                }).ToList()
+            };
         }
     }
 }

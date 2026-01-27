@@ -1,22 +1,17 @@
 using System;
-using AutoMapper;
-using CRMVEXA.Application.DTOs;
 using CRMVEXA.Application.Features.Produtos.GetProduto;
 using CRMVEXA.Infrastructure.Data;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 
 namespace CRMVEXA.Application.Features.Produtos.GetProduto
 {
     public class GetProdutoHandler : IRequestHandler<GetProdutoRequest, GetProdutoResponse>
     {
         private readonly AppDbContext _context;
-        private readonly IMapper _mapper;
 
-        public GetProdutoHandler(AppDbContext context, IMapper mapper)
+        public GetProdutoHandler(AppDbContext context)
         {
             _context = context;
-            _mapper = mapper;
         }
 
         public async Task<GetProdutoResponse> Handle(GetProdutoRequest request, CancellationToken cancellationToken)
@@ -28,9 +23,32 @@ namespace CRMVEXA.Application.Features.Produtos.GetProduto
                 throw new Exception($"Produto com ID {request.Id} não encontrado");
             }
 
-            var produtoDto = _mapper.Map<ProdutoDto>(produto);
-
-            return new GetProdutoResponse { Produto = produtoDto };
+            return new GetProdutoResponse
+            {
+                Id = produto.Id,
+                SKU = produto.SKU,
+                Nome = produto.Nome,
+                Categoria = produto.Categoria,
+                Subcategoria = produto.Subcategoria,
+                Tamanho = produto.Tamanho,
+                Cor = produto.Cor,
+                Genero = produto.Genero,
+                Marca = produto.Marca,
+                FornecedorId = produto.FornecedorId,
+                PrecoCusto = produto.PrecoCusto,
+                PrecoVenda = produto.PrecoVenda,
+                CodigoBarras = produto.CodigoBarras,
+                QuantidadeEstoque = produto.QuantidadeEstoque,
+                EstoqueMinimo = produto.EstoqueMinimo,
+                LocalizacaoEstoque = produto.LocalizacaoEstoque,
+                Foto1 = produto.Foto1,
+                Foto2 = produto.Foto2,
+                Foto3 = produto.Foto3,
+                Foto4 = produto.Foto4,
+                Foto5 = produto.Foto5,
+                DescricaoCurta = produto.DescricaoCurta,
+                Peso = produto.Peso
+            };
         }
     }
 }
