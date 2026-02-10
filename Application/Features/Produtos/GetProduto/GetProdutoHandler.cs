@@ -2,6 +2,7 @@ using System;
 using CRMVEXA.Application.Features.Produtos.GetProduto;
 using CRMVEXA.Infrastructure.Data;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 
 namespace CRMVEXA.Application.Features.Produtos.GetProduto
 {
@@ -16,7 +17,15 @@ namespace CRMVEXA.Application.Features.Produtos.GetProduto
 
         public async Task<GetProdutoResponse> Handle(GetProdutoRequest request, CancellationToken cancellationToken)
         {
-            var produto = await _context.Produtos.FindAsync(new object[] { request.Id }, cancellationToken);
+            var produto = await _context.Produtos
+                .Include(p => p.Categoria)
+                .Include(p => p.Subcategoria)
+                .Include(p => p.Genero)
+                .Include(p => p.Tamanho)
+                .Include(p => p.Cor)
+                .Include(p => p.Marca)
+                .Include(p => p.Estoque)
+                .FirstOrDefaultAsync(p => p.Id == request.Id, cancellationToken);
 
             if (produto == null)
             {
@@ -28,19 +37,19 @@ namespace CRMVEXA.Application.Features.Produtos.GetProduto
                 Id = produto.Id,
                 SKU = produto.SKU,
                 Nome = produto.Nome,
-                Categoria = produto.Categoria,
-                Subcategoria = produto.Subcategoria,
-                Tamanho = produto.Tamanho,
-                Cor = produto.Cor,
-                Genero = produto.Genero,
-                Marca = produto.Marca,
+                Categoria = produto.Categoria?.Nome ?? string.Empty,
+                Subcategoria = produto.Subcategoria?.Nome,
+                Tamanho = produto.Tamanho?.Nome,
+                Cor = produto.Cor?.Nome,
+                Genero = produto.Genero?.Nome ?? string.Empty,
+                Marca = produto.Marca?.Nome,
                 FornecedorId = produto.FornecedorId,
                 PrecoCusto = produto.PrecoCusto,
                 PrecoVenda = produto.PrecoVenda,
                 CodigoBarras = produto.CodigoBarras,
-                QuantidadeEstoque = produto.QuantidadeEstoque,
-                EstoqueMinimo = produto.EstoqueMinimo,
-                LocalizacaoEstoque = produto.LocalizacaoEstoque,
+                QuantidadeEstoque = produto.Estoque?.Quantidade ?? 0,
+                EstoqueMinimo = produto.Estoque?.EstoqueMinimo ?? 1,
+                LocalizacaoEstoque = produto.Estoque?.LocalizacaoEstoque,
                 Foto1 = produto.Foto1,
                 Foto2 = produto.Foto2,
                 Foto3 = produto.Foto3,

@@ -30,14 +30,14 @@ namespace CRMVEXA.Application.Features.Compras.DeleteCompra
             // Reverter estoque se necessário
             foreach (var item in compra.Itens)
             {
-                var produto = await _context.Produtos.FindAsync(new object[] { item.ProdutoId }, cancellationToken);
-                if (produto != null && compra.Status == "Concluída")
+                var produto = await _context.Produtos
+                    .Include(p => p.Estoque)
+                    .FirstOrDefaultAsync(p => p.Id == item.ProdutoId, cancellationToken);
+                if (produto?.Estoque != null && compra.Status == "Concluída")
                 {
-                    produto.QuantidadeEstoque -= item.Quantidade;
-                    if (produto.QuantidadeEstoque < 0)
-                    {
-                        produto.QuantidadeEstoque = 0;
-                    }
+                    produto.Estoque.AtualizarQuantidade(-item.Quantidade);
+                    if (produto.Estoque.Quantidade < 0)
+                        produto.Estoque.Quantidade = 0;
                 }
             }
 

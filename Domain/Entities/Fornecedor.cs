@@ -1,4 +1,4 @@
-﻿namespace CRMVEXA.Domain.Entities;
+namespace CRMVEXA.Domain.Entities;
 
 public class Fornecedor
 {
@@ -16,6 +16,7 @@ public class Fornecedor
     public DateTime DataCadastro { get; set; }
 
     public ICollection<Endereco> Enderecos { get; set; } = new List<Endereco>();
+    public ICollection<Produto> Produtos { get; set; } = new List<Produto>();
 
     public Fornecedor() { }
 

@@ -22,20 +22,17 @@ namespace CRMVEXA.Application.Features.Produtos.CreateProduto
                 var produto = new Produto(
                     request.SKU,
                     request.Nome,
-                    request.Categoria,
-                    request.Genero,
+                    request.CategoriaId,
+                    request.GeneroId,
                     request.PrecoCusto,
                     request.PrecoVenda)
                 {
-                    Subcategoria = request.Subcategoria,
-                    Tamanho = request.Tamanho,
-                    Cor = request.Cor,
-                    Marca = request.Marca,
+                    SubcategoriaId = request.SubcategoriaId,
+                    TamanhoId = request.TamanhoId,
+                    CorId = request.CorId,
+                    MarcaId = request.MarcaId,
                     FornecedorId = request.FornecedorId,
                     CodigoBarras = request.CodigoBarras,
-                    QuantidadeEstoque = request.QuantidadeEstoque,
-                    EstoqueMinimo = request.EstoqueMinimo,
-                    LocalizacaoEstoque = request.LocalizacaoEstoque,
                     Foto1 = request.Foto1,
                     Foto2 = request.Foto2,
                     Foto3 = request.Foto3,
@@ -44,6 +41,9 @@ namespace CRMVEXA.Application.Features.Produtos.CreateProduto
                     DescricaoCurta = request.DescricaoCurta,
                     Peso = request.Peso
                 };
+
+                var estoque = new Estoque(0, request.QuantidadeEstoque, request.EstoqueMinimo, request.LocalizacaoEstoque);
+                produto.Estoque = estoque;
 
                 _context.Produtos.Add(produto);
                 await _context.SaveChangesAsync(cancellationToken);

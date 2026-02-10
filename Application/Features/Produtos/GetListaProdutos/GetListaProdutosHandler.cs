@@ -16,26 +16,34 @@ namespace CRMVEXA.Application.Features.Produtos.GetListaProdutos
 
         public async Task<GetListaProdutosResponse> Handle(GetListaProdutosRequest request, CancellationToken cancellationToken)
         {
-            var produtos = await _context.Produtos.ToListAsync(cancellationToken);
-            
+            var produtos = await _context.Produtos
+                .Include(p => p.Categoria)
+                .Include(p => p.Subcategoria)
+                .Include(p => p.Genero)
+                .Include(p => p.Tamanho)
+                .Include(p => p.Cor)
+                .Include(p => p.Marca)
+                .Include(p => p.Estoque)
+                .ToListAsync(cancellationToken);
+
             var produtosResponse = produtos.Select(p => new ProdutoResponse
             {
                 Id = p.Id,
                 SKU = p.SKU,
                 Nome = p.Nome,
-                Categoria = p.Categoria,
-                Subcategoria = p.Subcategoria,
-                Tamanho = p.Tamanho,
-                Cor = p.Cor,
-                Genero = p.Genero,
-                Marca = p.Marca,
+                Categoria = p.Categoria?.Nome ?? string.Empty,
+                Subcategoria = p.Subcategoria?.Nome,
+                Tamanho = p.Tamanho?.Nome,
+                Cor = p.Cor?.Nome,
+                Genero = p.Genero?.Nome ?? string.Empty,
+                Marca = p.Marca?.Nome,
                 FornecedorId = p.FornecedorId,
                 PrecoCusto = p.PrecoCusto,
                 PrecoVenda = p.PrecoVenda,
                 CodigoBarras = p.CodigoBarras,
-                QuantidadeEstoque = p.QuantidadeEstoque,
-                EstoqueMinimo = p.EstoqueMinimo,
-                LocalizacaoEstoque = p.LocalizacaoEstoque,
+                QuantidadeEstoque = p.Estoque?.Quantidade ?? 0,
+                EstoqueMinimo = p.Estoque?.EstoqueMinimo ?? 1,
+                LocalizacaoEstoque = p.Estoque?.LocalizacaoEstoque,
                 Foto1 = p.Foto1,
                 Foto2 = p.Foto2,
                 Foto3 = p.Foto3,
