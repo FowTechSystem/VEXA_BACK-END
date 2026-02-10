@@ -17,7 +17,9 @@ namespace CRMVEXA.Application.Features.Produtos.UpdateProduto
 
         public async Task<UpdateProdutoResponse> Handle(UpdateProdutoRequest request, CancellationToken cancellationToken)
         {
-            var produto = await _context.Produtos.FindAsync(new object[] { request.Id }, cancellationToken);
+            var produto = await _context.Produtos
+                .Include(p => p.Estoque)
+                .FirstOrDefaultAsync(p => p.Id == request.Id, cancellationToken);
 
             if (produto == null)
             {
@@ -27,18 +29,16 @@ namespace CRMVEXA.Application.Features.Produtos.UpdateProduto
             produto.AtualizarDados(
                 request.SKU,
                 request.Nome,
-                request.Categoria,
-                request.Genero,
+                request.CategoriaId,
+                request.GeneroId,
                 request.PrecoCusto,
                 request.PrecoVenda,
-                request.Subcategoria,
-                request.Tamanho,
-                request.Cor,
-                request.Marca,
+                request.SubcategoriaId,
+                request.TamanhoId,
+                request.CorId,
+                request.MarcaId,
                 request.FornecedorId,
                 request.CodigoBarras,
-                request.EstoqueMinimo,
-                request.LocalizacaoEstoque,
                 request.Foto1,
                 request.Foto2,
                 request.Foto3,
@@ -47,6 +47,12 @@ namespace CRMVEXA.Application.Features.Produtos.UpdateProduto
                 request.DescricaoCurta,
                 request.Peso
             );
+
+            if (produto.Estoque != null)
+            {
+                produto.Estoque.DefinirEstoqueMinimo(request.EstoqueMinimo);
+                produto.Estoque.LocalizacaoEstoque = request.LocalizacaoEstoque;
+            }
 
             await _context.SaveChangesAsync(cancellationToken);
 

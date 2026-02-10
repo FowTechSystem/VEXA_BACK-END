@@ -6,12 +6,12 @@ namespace CRMVEXA.Application.Features.Produtos.CreateProduto
     {
         public string SKU { get; set; } = string.Empty;
         public string Nome { get; set; } = string.Empty;
-        public string Categoria { get; set; } = string.Empty;
-        public string? Subcategoria { get; set; }
-        public string? Tamanho { get; set; }
-        public string? Cor { get; set; }
-        public string Genero { get; set; } = string.Empty;
-        public string? Marca { get; set; }
+        public int CategoriaId { get; set; }
+        public int? SubcategoriaId { get; set; }
+        public int? TamanhoId { get; set; }
+        public int? CorId { get; set; }
+        public int GeneroId { get; set; }
+        public int? MarcaId { get; set; }
         public int? FornecedorId { get; set; }
         public decimal PrecoCusto { get; set; }
         public decimal PrecoVenda { get; set; }

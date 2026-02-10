@@ -18,14 +18,6 @@ namespace CRMVEXA.Infrastructure.Data.Configurations
                 .IsRequired()
                 .HasMaxLength(200);
             
-            builder.Property(x => x.Categoria)
-                .IsRequired()
-                .HasMaxLength(100);
-            
-            builder.Property(x => x.Genero)
-                .IsRequired()
-                .HasMaxLength(20);
-            
             builder.Property(x => x.PrecoCusto)
                 .HasColumnType("decimal(18,2)")
                 .IsRequired();
@@ -37,10 +29,45 @@ namespace CRMVEXA.Infrastructure.Data.Configurations
             builder.Property(x => x.Peso)
                 .HasColumnType("decimal(18,2)");
 
-            builder.HasOne<Fornecedor>()
-                .WithMany()
+            builder.HasOne(x => x.Categoria)
+                .WithMany(c => c.Produtos)
+                .HasForeignKey(x => x.CategoriaId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            builder.HasOne(x => x.Subcategoria)
+                .WithMany(s => s.Produtos)
+                .HasForeignKey(x => x.SubcategoriaId)
+                .OnDelete(DeleteBehavior.SetNull);
+
+            builder.HasOne(x => x.Tamanho)
+                .WithMany(t => t.Produtos)
+                .HasForeignKey(x => x.TamanhoId)
+                .OnDelete(DeleteBehavior.SetNull);
+
+            builder.HasOne(x => x.Cor)
+                .WithMany(c => c.Produtos)
+                .HasForeignKey(x => x.CorId)
+                .OnDelete(DeleteBehavior.SetNull);
+
+            builder.HasOne(x => x.Genero)
+                .WithMany(g => g.Produtos)
+                .HasForeignKey(x => x.GeneroId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            builder.HasOne(x => x.Marca)
+                .WithMany(m => m.Produtos)
+                .HasForeignKey(x => x.MarcaId)
+                .OnDelete(DeleteBehavior.SetNull);
+
+            builder.HasOne(x => x.Fornecedor)
+                .WithMany(f => f.Produtos)
                 .HasForeignKey(x => x.FornecedorId)
                 .OnDelete(DeleteBehavior.SetNull);
+
+            builder.HasOne(x => x.Estoque)
+                .WithOne(e => e.Produto)
+                .HasForeignKey<Estoque>(e => e.ProdutoId)
+                .OnDelete(DeleteBehavior.Cascade);
 
             builder.ToTable("Produtos");
         }

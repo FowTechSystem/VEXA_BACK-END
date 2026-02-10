@@ -28,22 +28,26 @@ namespace CRMVEXA.Application.Features.Vendas.CreateVenda
 
                 foreach (var itemRequest in request.Itens)
                 {
-                    var produto = await _context.Produtos.FindAsync(new object[] { itemRequest.ProdutoId }, cancellationToken);
+                    var produto = await _context.Produtos
+                        .Include(p => p.Estoque)
+                        .FirstOrDefaultAsync(p => p.Id == itemRequest.ProdutoId, cancellationToken);
                     if (produto == null)
                     {
                         throw new Exception($"Produto com ID {itemRequest.ProdutoId} não encontrado");
                     }
 
-                    if (produto.QuantidadeEstoque < itemRequest.Quantidade)
+                    var quantidadeDisponivel = produto.Estoque?.Quantidade ?? 0;
+                    if (quantidadeDisponivel < itemRequest.Quantidade)
                     {
-                        throw new Exception($"Estoque insuficiente para o produto {produto.Nome}. Disponível: {produto.QuantidadeEstoque}, Solicitado: {itemRequest.Quantidade}");
+                        throw new Exception($"Estoque insuficiente para o produto {produto.Nome}. Disponível: {quantidadeDisponivel}, Solicitado: {itemRequest.Quantidade}");
                     }
 
                     var itemVenda = new ItemVenda(itemRequest.ProdutoId, itemRequest.Quantidade, itemRequest.PrecoUnitario);
                     venda.AdicionarItem(itemVenda);
 
                     // Atualizar estoque
-                    produto.QuantidadeEstoque -= itemRequest.Quantidade;
+                    if (produto.Estoque != null)
+                        produto.Estoque.AtualizarQuantidade(-itemRequest.Quantidade);
 
                     // Registrar movimentação de estoque
                     var movimentacao = new MovimentacaoEstoque(

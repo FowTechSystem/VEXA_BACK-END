@@ -24,7 +24,9 @@ namespace CRMVEXA.Application.Features.Compras.CreateCompra
 
                 foreach (var itemRequest in request.Itens)
                 {
-                    var produto = await _context.Produtos.FindAsync(new object[] { itemRequest.ProdutoId }, cancellationToken);
+                    var produto = await _context.Produtos
+                        .Include(p => p.Estoque)
+                        .FirstOrDefaultAsync(p => p.Id == itemRequest.ProdutoId, cancellationToken);
                     if (produto == null)
                     {
                         throw new Exception($"Produto com ID {itemRequest.ProdutoId} não encontrado");
@@ -34,7 +36,8 @@ namespace CRMVEXA.Application.Features.Compras.CreateCompra
                     compra.AdicionarItem(itemCompra);
 
                     // Atualizar estoque
-                    produto.QuantidadeEstoque += itemRequest.Quantidade;
+                    if (produto.Estoque != null)
+                        produto.Estoque.AtualizarQuantidade(itemRequest.Quantidade);
 
                     // Registrar movimentação de estoque
                     var movimentacao = new MovimentacaoEstoque(

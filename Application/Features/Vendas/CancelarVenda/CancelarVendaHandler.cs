@@ -35,10 +35,12 @@ namespace CRMVEXA.Application.Features.Vendas.CancelarVenda
             // Restaurar estoque
             foreach (var item in venda.Itens)
             {
-                var produto = await _context.Produtos.FindAsync(new object[] { item.ProdutoId }, cancellationToken);
-                if (produto != null)
+                var produto = await _context.Produtos
+                    .Include(p => p.Estoque)
+                    .FirstOrDefaultAsync(p => p.Id == item.ProdutoId, cancellationToken);
+                if (produto != null && produto.Estoque != null)
                 {
-                    produto.QuantidadeEstoque += item.Quantidade;
+                    produto.Estoque.AtualizarQuantidade(item.Quantidade);
 
                     // Registrar movimentação de estoque
                     var movimentacao = new MovimentacaoEstoque(
