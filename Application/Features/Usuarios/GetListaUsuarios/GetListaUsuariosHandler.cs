@@ -39,15 +39,20 @@ namespace CRMVEXA.Application.Features.Usuarios.GetListaUsuarios
                 }
             }
 
+            // Quando há busca, retornar apenas os primeiros 10 (uma única “página” da pesquisa)
+            var haBusca = !string.IsNullOrWhiteSpace(request.Valor);
+            var pagina = haBusca ? 1 : request.Pagina;
+            var tamanho = request.Tamanho;
+
             var totalRegistros = await query.CountAsync(cancellationToken);
-            var totalPaginas = totalRegistros > 0
-                ? (int)Math.Ceiling(totalRegistros / (double)request.Tamanho)
-                : 0;
+            var totalPaginas = haBusca
+                ? (totalRegistros > 0 ? 1 : 0)
+                : (totalRegistros > 0 ? (int)Math.Ceiling(totalRegistros / (double)tamanho) : 0);
 
             var usuarios = await query
                 .OrderBy(u => u.Nome)
-                .Skip((request.Pagina - 1) * request.Tamanho)
-                .Take(request.Tamanho)
+                .Skip((pagina - 1) * tamanho)
+                .Take(tamanho)
                 .ToListAsync(cancellationToken);
 
             var usuariosResponse = usuarios.Select(u => new UsuarioResponse
@@ -68,10 +73,10 @@ namespace CRMVEXA.Application.Features.Usuarios.GetListaUsuarios
             return new GetListaUsuariosResponse
             {
                 Usuarios = usuariosResponse,
-                PaginaAtual = request.Pagina,
+                PaginaAtual = pagina,
                 TotalPaginas = totalPaginas,
                 TotalRegistros = totalRegistros,
-                TamanhoPagina = request.Tamanho
+                TamanhoPagina = tamanho
             };
         }
     }
