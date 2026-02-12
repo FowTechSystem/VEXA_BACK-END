@@ -16,7 +16,7 @@ namespace CRMVEXA.Application.Features.Produtos.GetListaProdutos
 
         public async Task<GetListaProdutosResponse> Handle(GetListaProdutosRequest request, CancellationToken cancellationToken)
         {
-            var produtos = await _context.Produtos
+            var query = _context.Produtos
                 .Include(p => p.Categoria)
                 .Include(p => p.Subcategoria)
                 .Include(p => p.Genero)
@@ -24,6 +24,33 @@ namespace CRMVEXA.Application.Features.Produtos.GetListaProdutos
                 .Include(p => p.Cor)
                 .Include(p => p.Marca)
                 .Include(p => p.Estoque)
+                .AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(request.Valor))
+            {
+                var valor = request.Valor.ToLower();
+                if (request.Filtro?.ToLower() == "sku")
+                    query = query.Where(p => p.SKU.ToLower().Contains(valor));
+                else if (request.Filtro?.ToLower() == "categoria")
+                    query = query.Where(p => p.Categoria != null && p.Categoria.Nome.ToLower().Contains(valor));
+                else if (request.Filtro?.ToLower() == "marca")
+                    query = query.Where(p => p.Marca != null && p.Marca.Nome.ToLower().Contains(valor));
+                else
+                    query = query.Where(p => p.Nome.ToLower().Contains(valor));
+            }
+
+            var pagina = Math.Max(1, request.Pagina);
+            var tamanho = Math.Clamp(request.Tamanho, 1, 50);
+
+            var totalRegistros = await query.CountAsync(cancellationToken);
+            var totalPaginas = totalRegistros > 0
+                ? (int)Math.Ceiling(totalRegistros / (double)tamanho)
+                : 0;
+
+            var produtos = await query
+                .OrderBy(p => p.Nome)
+                .Skip((pagina - 1) * tamanho)
+                .Take(tamanho)
                 .ToListAsync(cancellationToken);
 
             var produtosResponse = produtos.Select(p => new ProdutoResponse
@@ -53,7 +80,14 @@ namespace CRMVEXA.Application.Features.Produtos.GetListaProdutos
                 Peso = p.Peso
             }).ToList();
 
-            return new GetListaProdutosResponse { Produtos = produtosResponse };
+            return new GetListaProdutosResponse
+            {
+                Produtos = produtosResponse,
+                PaginaAtual = pagina,
+                TotalPaginas = totalPaginas,
+                TotalRegistros = totalRegistros,
+                TamanhoPagina = tamanho
+            };
         }
     }
 }

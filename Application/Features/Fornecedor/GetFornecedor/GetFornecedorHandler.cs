@@ -1,4 +1,4 @@
-﻿using CRMVEXA.Application.Features.Clientes.GetListaClientes;
+using CRMVEXA.Application.Features.Clientes.GetListaClientes;
 using CRMVEXA.Infrastructure.Data;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -28,26 +28,32 @@ public class GetFornecedorHandler : IRequestHandler<GetFornecedorRequest, GetFor
             }
             else
             {
-                query = query.Where(c => c.RazaoSocial.ToLower().Contains(request.Valor.ToLower()));
+                query = query.Where(c => (c.Nome != null && c.Nome.ToLower().Contains(request.Valor.ToLower())) ||
+                                         (c.RazaoSocial != null && c.RazaoSocial.ToLower().Contains(request.Valor.ToLower())));
             }
         }
 
+        var pagina = Math.Max(1, request.Pagina);
+        var tamanho = Math.Clamp(request.Tamanho, 1, 50);
+
         var totalRegistros = await query.CountAsync(cancellationToken);
-        var totalPaginas = (int)Math.Ceiling(totalRegistros / (double)request.Tamanho);
+        var totalPaginas = totalRegistros > 0
+            ? (int)Math.Ceiling(totalRegistros / (double)tamanho)
+            : 0;
 
         var fornecedores = await query
-            .OrderBy(c => c.RazaoSocial)
-            .Skip((request.Pagina - 1) * request.Tamanho)
-            .Take(request.Tamanho)
+            .OrderBy(f => f.Nome)
+            .Skip((pagina - 1) * tamanho)
+            .Take(tamanho)
             .ToListAsync(cancellationToken);
 
         return new GetFornecedorResponse
         {
             Fornecedor = fornecedores,
-            PaginaAtual = request.Pagina,
+            PaginaAtual = pagina,
             TotalPaginas = totalPaginas,
             TotalRegistros = totalRegistros,
-            TamanhoPagina = request.Tamanho
+            TamanhoPagina = tamanho
         };
     }
 }

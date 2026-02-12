@@ -19,11 +19,20 @@ namespace CRMVEXA.API.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<GetListaComprasResponse>> Listar()
+        public async Task<ActionResult<GetListaComprasResponse>> Listar(
+            [FromQuery] string? valor,
+            [FromQuery] int pagina = 1,
+            [FromQuery] int tamanho = 10)
         {
             try
             {
-                var resultado = await _mediator.Send(new GetListaComprasRequest());
+                var request = new GetListaComprasRequest
+                {
+                    Valor = valor,
+                    Pagina = pagina,
+                    Tamanho = tamanho
+                };
+                var resultado = await _mediator.Send(request);
                 return Ok(resultado);
             }
             catch (Exception ex)

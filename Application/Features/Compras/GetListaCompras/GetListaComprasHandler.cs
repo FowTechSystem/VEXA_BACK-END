@@ -17,8 +17,27 @@ namespace CRMVEXA.Application.Features.Compras.GetListaCompras
 
         public async Task<GetListaComprasResponse> Handle(GetListaComprasRequest request, CancellationToken cancellationToken)
         {
-            var compras = await _context.Compras
-                .Include(c => c.Itens)
+            var query = _context.Compras.Include(c => c.Itens).AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(request.Valor))
+            {
+                var valor = request.Valor.ToLower();
+                query = query.Where(c => c.CodigoCompra.ToLower().Contains(valor) ||
+                                        (c.Observacoes != null && c.Observacoes.ToLower().Contains(valor)));
+            }
+
+            var pagina = Math.Max(1, request.Pagina);
+            var tamanho = Math.Clamp(request.Tamanho, 1, 50);
+
+            var totalRegistros = await query.CountAsync(cancellationToken);
+            var totalPaginas = totalRegistros > 0
+                ? (int)Math.Ceiling(totalRegistros / (double)tamanho)
+                : 0;
+
+            var compras = await query
+                .OrderByDescending(c => c.DataHora)
+                .Skip((pagina - 1) * tamanho)
+                .Take(tamanho)
                 .ToListAsync(cancellationToken);
 
             var comprasResponse = new List<CompraResponse>();
@@ -61,7 +80,14 @@ namespace CRMVEXA.Application.Features.Compras.GetListaCompras
                 comprasResponse.Add(compraResponse);
             }
 
-            return new GetListaComprasResponse { Compras = comprasResponse };
+            return new GetListaComprasResponse
+            {
+                Compras = comprasResponse,
+                PaginaAtual = pagina,
+                TotalPaginas = totalPaginas,
+                TotalRegistros = totalRegistros,
+                TamanhoPagina = tamanho
+            };
         }
     }
 }

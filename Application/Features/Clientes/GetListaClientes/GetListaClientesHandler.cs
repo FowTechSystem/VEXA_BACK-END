@@ -1,9 +1,8 @@
-﻿using CRMVEXA.Domain.Interfaces;
 using CRMVEXA.Infrastructure.Data;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
-namespace CRMVEXA.Application.Features.Clientes.GetListaClientes.Validators
+namespace CRMVEXA.Application.Features.Clientes.GetListaClientes
 {
     public class GetListaClientesHandler : IRequestHandler<GetListaClientesRequest, GetListaClientesResponse>
     {
@@ -32,22 +31,27 @@ namespace CRMVEXA.Application.Features.Clientes.GetListaClientes.Validators
                 }
             }
 
+            var pagina = Math.Max(1, request.Pagina);
+            var tamanho = Math.Clamp(request.Tamanho, 1, 50);
+
             var totalRegistros = await query.CountAsync(cancellationToken);
-            var totalPaginas = (int)Math.Ceiling(totalRegistros / (double)request.Tamanho);
+            var totalPaginas = totalRegistros > 0
+                ? (int)Math.Ceiling(totalRegistros / (double)tamanho)
+                : 0;
 
             var clientes = await query
                 .OrderBy(c => c.NomeCompleto)
-                .Skip((request.Pagina - 1) * request.Tamanho)
-                .Take(request.Tamanho)
+                .Skip((pagina - 1) * tamanho)
+                .Take(tamanho)
                 .ToListAsync(cancellationToken);
 
             return new GetListaClientesResponse
             {
                 Clientes = clientes,
-                PaginaAtual = request.Pagina,
+                PaginaAtual = pagina,
                 TotalPaginas = totalPaginas,
                 TotalRegistros = totalRegistros,
-                TamanhoPagina = request.Tamanho
+                TamanhoPagina = tamanho
             };
         }
     }

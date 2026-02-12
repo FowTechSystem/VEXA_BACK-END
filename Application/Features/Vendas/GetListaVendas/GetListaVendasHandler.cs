@@ -17,8 +17,26 @@ namespace CRMVEXA.Application.Features.Vendas.GetListaVendas
 
         public async Task<GetListaVendasResponse> Handle(GetListaVendasRequest request, CancellationToken cancellationToken)
         {
-            var vendas = await _context.Vendas
-                .Include(v => v.Itens)
+            var query = _context.Vendas.Include(v => v.Itens).AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(request.Valor))
+            {
+                var valor = request.Valor.ToLower();
+                query = query.Where(v => v.CodigoVenda.ToLower().Contains(valor));
+            }
+
+            var pagina = Math.Max(1, request.Pagina);
+            var tamanho = Math.Clamp(request.Tamanho, 1, 50);
+
+            var totalRegistros = await query.CountAsync(cancellationToken);
+            var totalPaginas = totalRegistros > 0
+                ? (int)Math.Ceiling(totalRegistros / (double)tamanho)
+                : 0;
+
+            var vendas = await query
+                .OrderByDescending(v => v.DataHora)
+                .Skip((pagina - 1) * tamanho)
+                .Take(tamanho)
                 .ToListAsync(cancellationToken);
 
             var vendasResponse = vendas.Select(v => new VendaResponse
@@ -42,7 +60,14 @@ namespace CRMVEXA.Application.Features.Vendas.GetListaVendas
                 }).ToList()
             }).ToList();
 
-            return new GetListaVendasResponse { Vendas = vendasResponse };
+            return new GetListaVendasResponse
+            {
+                Vendas = vendasResponse,
+                PaginaAtual = pagina,
+                TotalPaginas = totalPaginas,
+                TotalRegistros = totalRegistros,
+                TamanhoPagina = tamanho
+            };
         }
     }
 }
