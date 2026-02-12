@@ -39,15 +39,14 @@ namespace CRMVEXA.Application.Features.Usuarios.GetListaUsuarios
                 }
             }
 
-            // Quando há busca, retornar apenas os primeiros 10 (uma única “página” da pesquisa)
-            var haBusca = !string.IsNullOrWhiteSpace(request.Valor);
-            var pagina = haBusca ? 1 : request.Pagina;
-            var tamanho = request.Tamanho;
+            var pagina = Math.Max(1, request.Pagina);
+            var tamanho = Math.Clamp(request.Tamanho, 1, 50);
 
+            // Total de registros (para o front saber que há mais páginas)
             var totalRegistros = await query.CountAsync(cancellationToken);
-            var totalPaginas = haBusca
-                ? (totalRegistros > 0 ? 1 : 0)
-                : (totalRegistros > 0 ? (int)Math.Ceiling(totalRegistros / (double)tamanho) : 0);
+            var totalPaginas = totalRegistros > 0
+                ? (int)Math.Ceiling(totalRegistros / (double)tamanho)
+                : 0;
 
             var usuarios = await query
                 .OrderBy(u => u.Nome)
