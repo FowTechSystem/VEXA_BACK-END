@@ -19,11 +19,14 @@ namespace CRMVEXA.Application.Features.Usuarios.CriarUsuario
         {
             try
             {
+                // Armazena senha com hash BCrypt para permitir login via POST /api/auth/login
+                var senhaHash = BCrypt.Net.BCrypt.HashPassword(request.SenhaHash);
+
                 var usuario = new Usuario(
                     request.Nome,
                     request.Email,
                     request.Login,
-                    request.SenhaHash,
+                    senhaHash,
                     request.Cargo
                 );
                 usuario.DefinirPermissoes(
