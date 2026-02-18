@@ -25,6 +25,7 @@ namespace CRMVEXA.Application.Features.Auth.Login
         {
             var usuario = await _context.Usuarios
                 .AsNoTracking()
+                .Include(u => u.Empresa)
                 .FirstOrDefaultAsync(u => u.Email.ToLower() == request.Email.Trim().ToLower(), cancellationToken);
 
             if (usuario == null)
@@ -48,6 +49,7 @@ namespace CRMVEXA.Application.Features.Auth.Login
                 {
                     Id = usuario.Id,
                     EmpresaId = usuario.EmpresaId,
+                    EmpresaNome = usuario.Empresa?.Nome ?? string.Empty,
                     Nome = usuario.Nome,
                     Email = usuario.Email,
                     Perfil = usuario.Cargo ?? "Usuário"
