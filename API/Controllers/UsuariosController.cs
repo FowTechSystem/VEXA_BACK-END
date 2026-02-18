@@ -20,7 +20,7 @@ namespace CRMVEXA.API.Controllers
         }
 
         [HttpGet("{id:int}")]
-        public async Task<ActionResult<GetListaUsuarios.UsuarioResponse>> ObterPorId([FromRoute] int id)
+        public async Task<ActionResult<Application.Features.Usuarios.GetListaUsuarios.UsuarioResponse>> ObterPorId([FromRoute] int id)
         {
             try
             {
