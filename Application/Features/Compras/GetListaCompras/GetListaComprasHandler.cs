@@ -1,5 +1,6 @@
 using CRMVEXA.Application.Features.Compras.GetListaCompras;
 using CRMVEXA.Application.Features.Compras.GetCompra;
+using CRMVEXA.Application.Services;
 using CRMVEXA.Infrastructure.Data;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -9,15 +10,18 @@ namespace CRMVEXA.Application.Features.Compras.GetListaCompras
     public class GetListaComprasHandler : IRequestHandler<GetListaComprasRequest, GetListaComprasResponse>
     {
         private readonly AppDbContext _context;
+        private readonly IEmpresaContext _empresaContext;
 
-        public GetListaComprasHandler(AppDbContext context)
+        public GetListaComprasHandler(AppDbContext context, IEmpresaContext empresaContext)
         {
             _context = context;
+            _empresaContext = empresaContext;
         }
 
         public async Task<GetListaComprasResponse> Handle(GetListaComprasRequest request, CancellationToken cancellationToken)
         {
-            var query = _context.Compras.Include(c => c.Itens).AsQueryable();
+            var empresaId = _empresaContext.EmpresaId;
+            var query = _context.Compras.Where(c => c.EmpresaId == empresaId).Include(c => c.Itens).AsQueryable();
 
             if (!string.IsNullOrWhiteSpace(request.Valor))
             {

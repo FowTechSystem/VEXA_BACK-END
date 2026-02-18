@@ -7,6 +7,7 @@ namespace CRMVEXA.Infrastructure.Data
     {
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
 
+        public DbSet<Empresa> Empresas { get; set; }
         public DbSet<Caixa> Caixas { get; set; }
         public DbSet<Categoria> Categorias { get; set; }
         public DbSet<Cliente> Clientes { get; set; }
@@ -50,6 +51,19 @@ namespace CRMVEXA.Infrastructure.Data
                 .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);
+
+            // Relacionamentos Empresa (multi-tenancy)
+            foreach (var entityType in modelBuilder.Model.GetEntityTypes())
+            {
+                if (entityType.ClrType == typeof(Empresa)) continue;
+                var empProp = entityType.FindProperty("EmpresaId");
+                if (empProp == null) continue;
+                modelBuilder.Entity(entityType.ClrType)
+                    .HasOne(typeof(Empresa), "Empresa")
+                    .WithMany()
+                    .HasForeignKey("EmpresaId")
+                    .OnDelete(DeleteBehavior.Restrict);
+            }
 
             base.OnModelCreating(modelBuilder);
         }

@@ -1,5 +1,6 @@
 using System;
 using CRMVEXA.Application.Features.Usuarios.CriarUsuario;
+using CRMVEXA.Application.Services;
 using CRMVEXA.Domain.Entities;
 using CRMVEXA.Infrastructure.Data;
 using MediatR;
@@ -9,19 +10,23 @@ namespace CRMVEXA.Application.Features.Usuarios.CriarUsuario
     public class CriarUsuarioHandler : IRequestHandler<CriarUsuarioRequest, int>
     {
         private readonly AppDbContext _context;
+        private readonly IEmpresaContext _empresaContext;
 
-        public CriarUsuarioHandler(AppDbContext context)
+        public CriarUsuarioHandler(AppDbContext context, IEmpresaContext empresaContext)
         {
             _context = context;
+            _empresaContext = empresaContext;
         }
 
         public async Task<int> Handle(CriarUsuarioRequest request, CancellationToken cancellationToken)
         {
             try
             {
+                var empresaId = _empresaContext.EmpresaId;
                 var senhaHash = BCrypt.Net.BCrypt.HashPassword(request.SenhaHash);
 
                 var usuario = new Usuario(
+                    empresaId,
                     request.Nome,
                     request.Email,
                     request.Login,

@@ -1,5 +1,6 @@
 using System;
 using CRMVEXA.Application.Features.Produtos.UpdateProduto;
+using CRMVEXA.Application.Services;
 using CRMVEXA.Infrastructure.Data;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -9,15 +10,19 @@ namespace CRMVEXA.Application.Features.Produtos.UpdateProduto
     public class UpdateProdutoHandler : IRequestHandler<UpdateProdutoRequest, UpdateProdutoResponse>
     {
         private readonly AppDbContext _context;
+        private readonly IEmpresaContext _empresaContext;
 
-        public UpdateProdutoHandler(AppDbContext context)
+        public UpdateProdutoHandler(AppDbContext context, IEmpresaContext empresaContext)
         {
             _context = context;
+            _empresaContext = empresaContext;
         }
 
         public async Task<UpdateProdutoResponse> Handle(UpdateProdutoRequest request, CancellationToken cancellationToken)
         {
+            var empresaId = _empresaContext.EmpresaId;
             var produto = await _context.Produtos
+                .Where(p => p.EmpresaId == empresaId)
                 .Include(p => p.Estoque)
                 .FirstOrDefaultAsync(p => p.Id == request.Id, cancellationToken);
 

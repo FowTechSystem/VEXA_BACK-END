@@ -5,6 +5,7 @@ namespace CRMVEXA.Domain.Entities
     public class Compra
     {
         public int Id { get; set; }
+        public int EmpresaId { get; set; }
         public string CodigoCompra { get; set; }
         public int FornecedorId { get; set; }
         public int UsuarioId { get; set; }
@@ -12,14 +13,16 @@ namespace CRMVEXA.Domain.Entities
         public decimal ValorTotal { get; set; }
         public string? Observacoes { get; set; }
         public string Status { get; set; } = "Concluída";
+        public Empresa Empresa { get; set; } = null!;
 
         private List<ItemCompra> _itens = new();
         public IReadOnlyCollection<ItemCompra> Itens => _itens.AsReadOnly();
 
         private Compra() { }
 
-        public Compra(string codigoCompra, int fornecedorId, int usuarioId, string? observacoes = null)
+        public Compra(int empresaId, string codigoCompra, int fornecedorId, int usuarioId, string? observacoes = null)
         {
+            EmpresaId = empresaId;
             CodigoCompra = codigoCompra;
             FornecedorId = fornecedorId;
             UsuarioId = usuarioId;

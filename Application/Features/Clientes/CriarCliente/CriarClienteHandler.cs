@@ -1,4 +1,5 @@
-﻿using CRMVEXA.Application.Features.Clientes.CriarCliente;
+using CRMVEXA.Application.Features.Clientes.CriarCliente;
+using CRMVEXA.Application.Services;
 using CRMVEXA.Domain.Entities;
 using CRMVEXA.Infrastructure.Data;
 using MediatR;
@@ -6,10 +7,12 @@ using MediatR;
 public class CriarClienteHandler : IRequestHandler<CriarClienteRequest, int>
 {
     private readonly AppDbContext _context;
+    private readonly IEmpresaContext _empresaContext;
 
-    public CriarClienteHandler(AppDbContext context)
+    public CriarClienteHandler(AppDbContext context, IEmpresaContext empresaContext)
     {
         _context = context;
+        _empresaContext = empresaContext;
     }
 
     public async Task<int> Handle(CriarClienteRequest request, CancellationToken cancellationToken) 
@@ -18,6 +21,7 @@ public class CriarClienteHandler : IRequestHandler<CriarClienteRequest, int>
         {
             var cliente = new Cliente
             {
+                EmpresaId = _empresaContext.EmpresaId,
                 NomeCompleto = request.nomeCompleto,
                 CPF = request.cPF,
                 Telefone = request.telefone,

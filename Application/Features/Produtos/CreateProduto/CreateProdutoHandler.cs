@@ -1,5 +1,6 @@
 using System;
 using CRMVEXA.Application.Features.Produtos.CreateProduto;
+using CRMVEXA.Application.Services;
 using CRMVEXA.Domain.Entities;
 using CRMVEXA.Infrastructure.Data;
 using MediatR;
@@ -9,16 +10,19 @@ namespace CRMVEXA.Application.Features.Produtos.CreateProduto
     public class CreateProdutoHandler : IRequestHandler<CreateProdutoRequest, int>
     {
         private readonly AppDbContext _context;
+        private readonly IEmpresaContext _empresaContext;
 
-        public CreateProdutoHandler(AppDbContext context)
+        public CreateProdutoHandler(AppDbContext context, IEmpresaContext empresaContext)
         {
             _context = context;
+            _empresaContext = empresaContext;
         }
 
         public async Task<int> Handle(CreateProdutoRequest request, CancellationToken cancellationToken)
         {
             try
             {
+                var empresaId = _empresaContext.EmpresaId;
                 var produto = new Produto(
                     request.SKU,
                     request.Nome,
@@ -27,6 +31,7 @@ namespace CRMVEXA.Application.Features.Produtos.CreateProduto
                     request.PrecoCusto,
                     request.PrecoVenda)
                 {
+                    EmpresaId = empresaId,
                     SubcategoriaId = request.SubcategoriaId,
                     TamanhoId = request.TamanhoId,
                     CorId = request.CorId,
@@ -42,7 +47,7 @@ namespace CRMVEXA.Application.Features.Produtos.CreateProduto
                     Peso = request.Peso
                 };
 
-                var estoque = new Estoque(0, request.QuantidadeEstoque, request.EstoqueMinimo, request.LocalizacaoEstoque);
+                var estoque = new Estoque(empresaId, 0, request.QuantidadeEstoque, request.EstoqueMinimo, request.LocalizacaoEstoque);
                 produto.Estoque = estoque;
 
                 _context.Produtos.Add(produto);

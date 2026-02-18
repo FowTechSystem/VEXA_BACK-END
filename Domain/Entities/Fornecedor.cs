@@ -3,6 +3,7 @@ namespace CRMVEXA.Domain.Entities;
 public class Fornecedor
 {
     public int Id { get; set; }
+    public int EmpresaId { get; set; }
     public string Nome { get; set; }
     public string? RazaoSocial { get; set; }
     public string? CNPJ { get; set; }
@@ -17,6 +18,7 @@ public class Fornecedor
 
     public ICollection<Endereco> Enderecos { get; set; } = new List<Endereco>();
     public ICollection<Produto> Produtos { get; set; } = new List<Produto>();
+    public Empresa Empresa { get; set; } = null!;
 
     public Fornecedor() { }
 

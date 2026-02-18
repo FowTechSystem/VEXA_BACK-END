@@ -1,4 +1,5 @@
-﻿using CRMVEXA.Application.Features.Fornecedor.UpdateClienteFornecedor;
+using CRMVEXA.Application.Features.Fornecedor.UpdateClienteFornecedor;
+using CRMVEXA.Application.Services;
 using CRMVEXA.Domain.Entities;
 using CRMVEXA.Infrastructure.Data;
 using MediatR;
@@ -9,17 +10,21 @@ namespace CRMVEXA.Application.Features.Fornecedor.UpdateFornecedor;
 public class UpdateFornecedorHandler : IRequestHandler<UpdateFornecedorRequest, UpdateFornecedorResponse>
 {
     private readonly AppDbContext _context;
+    private readonly IEmpresaContext _empresaContext;
 
-    public UpdateFornecedorHandler(AppDbContext context)
+    public UpdateFornecedorHandler(AppDbContext context, IEmpresaContext empresaContext)
     {
         _context = context;
+        _empresaContext = empresaContext;
     }
 
     public async Task<UpdateFornecedorResponse> Handle(UpdateFornecedorRequest request, CancellationToken cancellationToken)
     {
         try
         {
+            var empresaId = _empresaContext.EmpresaId;
             var fornecedor = await _context.Fornecedores
+                .Where(f => f.EmpresaId == empresaId)
                 .Include(f => f.Enderecos)
                 .FirstOrDefaultAsync(f => f.Id == request.Id, cancellationToken);
 

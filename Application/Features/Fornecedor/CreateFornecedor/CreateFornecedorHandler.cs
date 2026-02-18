@@ -1,4 +1,5 @@
-﻿using CRMVEXA.Infrastructure.Data;
+using CRMVEXA.Application.Services;
+using CRMVEXA.Infrastructure.Data;
 using CRMVEXA.Domain.Entities;
 using MediatR;
 
@@ -7,18 +8,19 @@ namespace CRMVEXA.Application.Features.Fornecedor.CreateFornecedor;
 public class CreateFornecedorHandler : IRequestHandler<CreateFornecedorRequest, int>
 {
     private readonly AppDbContext _context;
+    private readonly IEmpresaContext _empresaContext;
 
-    public CreateFornecedorHandler(AppDbContext context)
+    public CreateFornecedorHandler(AppDbContext context, IEmpresaContext empresaContext)
     {
         _context = context;
+        _empresaContext = empresaContext;
     }
 
     public async Task<int> Handle(CreateFornecedorRequest request, CancellationToken cancellationToken)
     {
         try
         {
-            CRMVEXA.Domain.Entities.Fornecedor fornecedor =
-                new CRMVEXA.Domain.Entities.Fornecedor
+            var fornecedor = new CRMVEXA.Domain.Entities.Fornecedor
                 (
                     request.Nome,
                     request.RazaoSocial,
@@ -32,6 +34,7 @@ public class CreateFornecedorHandler : IRequestHandler<CreateFornecedorRequest, 
                     request.Observacoes,
                     request.DataCadastro
                 );
+            fornecedor.EmpresaId = _empresaContext.EmpresaId;
 
             if (!string.IsNullOrWhiteSpace(request.Rua) || !string.IsNullOrWhiteSpace(request.Cep))
             {

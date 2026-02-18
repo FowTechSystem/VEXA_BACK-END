@@ -1,8 +1,9 @@
-﻿namespace CRMVEXA.Domain.Entities;
+namespace CRMVEXA.Domain.Entities;
 
 public class Cliente
 {
     public int Id { get; set; }
+    public int EmpresaId { get; set; }
     public string NomeCompleto { get; set; }
     public string? CPF { get; set; }
     public string? RG { get; set; }
@@ -17,6 +18,7 @@ public class Cliente
     public DateTime DataCadastro { get; set; }
 
     public ICollection<Endereco> Enderecos { get; set; } = new List<Endereco>();
+    public Empresa Empresa { get; set; } = null!;
 
     public Cliente() { }
 

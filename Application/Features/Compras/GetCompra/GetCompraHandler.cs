@@ -1,5 +1,6 @@
 using System;
 using CRMVEXA.Application.Features.Compras.GetCompra;
+using CRMVEXA.Application.Services;
 using CRMVEXA.Infrastructure.Data;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -9,15 +10,19 @@ namespace CRMVEXA.Application.Features.Compras.GetCompra
     public class GetCompraHandler : IRequestHandler<GetCompraRequest, GetCompraResponse>
     {
         private readonly AppDbContext _context;
+        private readonly IEmpresaContext _empresaContext;
 
-        public GetCompraHandler(AppDbContext context)
+        public GetCompraHandler(AppDbContext context, IEmpresaContext empresaContext)
         {
             _context = context;
+            _empresaContext = empresaContext;
         }
 
         public async Task<GetCompraResponse> Handle(GetCompraRequest request, CancellationToken cancellationToken)
         {
+            var empresaId = _empresaContext.EmpresaId;
             var compra = await _context.Compras
+                .Where(c => c.EmpresaId == empresaId)
                 .Include(c => c.Itens)
                 .FirstOrDefaultAsync(c => c.Id == request.Id, cancellationToken);
 
