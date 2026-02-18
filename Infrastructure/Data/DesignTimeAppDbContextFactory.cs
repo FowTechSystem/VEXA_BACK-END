@@ -8,7 +8,7 @@ namespace CRMVEXA.Infrastructure.Data
     /// Usado pelo "dotnet ef" em tempo de design. Suprime o aviso de pending model changes
     /// para permitir rodar "dotnet ef database update" mesmo com pequenas diferenças no snapshot.
     /// </summary>
-    public class DesignTimeAppDbContextFactory : IDesignTimeDbContextFactory<AppDbContext>
+    public class DesignTimeAppDbContextFactory
     {
         public AppDbContext CreateDbContext(string[] args)
         {
