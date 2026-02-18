@@ -1,5 +1,6 @@
 using System;
 using CRMVEXA.Application.Features.Vendas.CreateVenda;
+using CRMVEXA.Application.Services;
 using CRMVEXA.Domain.Entities;
 using CRMVEXA.Infrastructure.Data;
 using MediatR;
@@ -10,17 +11,20 @@ namespace CRMVEXA.Application.Features.Vendas.CreateVenda
     public class CreateVendaHandler : IRequestHandler<CreateVendaRequest, int>
     {
         private readonly AppDbContext _context;
+        private readonly IEmpresaContext _empresaContext;
 
-        public CreateVendaHandler(AppDbContext context)
+        public CreateVendaHandler(AppDbContext context, IEmpresaContext empresaContext)
         {
             _context = context;
+            _empresaContext = empresaContext;
         }
 
         public async Task<int> Handle(CreateVendaRequest request, CancellationToken cancellationToken)
         {
             try
             {
-                var venda = new Venda(request.CodigoVenda, request.UsuarioId, request.FormaPagamento)
+                var empresaId = _empresaContext.EmpresaId;
+                var venda = new Venda(empresaId, request.CodigoVenda, request.UsuarioId, request.FormaPagamento)
                 {
                     ClienteId = request.ClienteId,
                     Desconto = request.Desconto
@@ -29,6 +33,7 @@ namespace CRMVEXA.Application.Features.Vendas.CreateVenda
                 foreach (var itemRequest in request.Itens)
                 {
                     var produto = await _context.Produtos
+                        .Where(p => p.EmpresaId == empresaId)
                         .Include(p => p.Estoque)
                         .FirstOrDefaultAsync(p => p.Id == itemRequest.ProdutoId, cancellationToken);
                     if (produto == null)
@@ -51,6 +56,7 @@ namespace CRMVEXA.Application.Features.Vendas.CreateVenda
 
                     // Registrar movimentação de estoque
                     var movimentacao = new MovimentacaoEstoque(
+                        empresaId,
                         itemRequest.ProdutoId,
                         "Saída",
                         itemRequest.Quantidade,

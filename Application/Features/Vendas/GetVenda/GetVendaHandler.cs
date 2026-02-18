@@ -1,5 +1,6 @@
 using System;
 using CRMVEXA.Application.Features.Vendas.GetVenda;
+using CRMVEXA.Application.Services;
 using CRMVEXA.Infrastructure.Data;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -9,15 +10,19 @@ namespace CRMVEXA.Application.Features.Vendas.GetVenda
     public class GetVendaHandler : IRequestHandler<GetVendaRequest, GetVendaResponse>
     {
         private readonly AppDbContext _context;
+        private readonly IEmpresaContext _empresaContext;
 
-        public GetVendaHandler(AppDbContext context)
+        public GetVendaHandler(AppDbContext context, IEmpresaContext empresaContext)
         {
             _context = context;
+            _empresaContext = empresaContext;
         }
 
         public async Task<GetVendaResponse> Handle(GetVendaRequest request, CancellationToken cancellationToken)
         {
+            var empresaId = _empresaContext.EmpresaId;
             var venda = await _context.Vendas
+                .Where(v => v.EmpresaId == empresaId)
                 .Include(v => v.Itens)
                 .FirstOrDefaultAsync(v => v.Id == request.Id, cancellationToken);
 

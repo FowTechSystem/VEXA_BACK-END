@@ -1,5 +1,6 @@
 using System;
 using CRMVEXA.Application.Features.Vendas.CancelarVenda;
+using CRMVEXA.Application.Services;
 using CRMVEXA.Domain.Entities;
 using CRMVEXA.Infrastructure.Data;
 using MediatR;
@@ -10,15 +11,19 @@ namespace CRMVEXA.Application.Features.Vendas.CancelarVenda
     public class CancelarVendaHandler : IRequestHandler<CancelarVendaRequest, Unit>
     {
         private readonly AppDbContext _context;
+        private readonly IEmpresaContext _empresaContext;
 
-        public CancelarVendaHandler(AppDbContext context)
+        public CancelarVendaHandler(AppDbContext context, IEmpresaContext empresaContext)
         {
             _context = context;
+            _empresaContext = empresaContext;
         }
 
         public async Task<Unit> Handle(CancelarVendaRequest request, CancellationToken cancellationToken)
         {
+            var empresaId = _empresaContext.EmpresaId;
             var venda = await _context.Vendas
+                .Where(v => v.EmpresaId == empresaId)
                 .Include(v => v.Itens)
                 .FirstOrDefaultAsync(v => v.Id == request.Id, cancellationToken);
 
@@ -44,6 +49,7 @@ namespace CRMVEXA.Application.Features.Vendas.CancelarVenda
 
                     // Registrar movimentação de estoque
                     var movimentacao = new MovimentacaoEstoque(
+                        empresaId,
                         item.ProdutoId,
                         "Entrada",
                         item.Quantidade,

@@ -1,3 +1,4 @@
+using CRMVEXA.Application.Services;
 using CRMVEXA.Infrastructure.Data;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -7,15 +8,19 @@ namespace CRMVEXA.Application.Features.Clientes.GetListaClientes
     public class GetListaClientesHandler : IRequestHandler<GetListaClientesRequest, GetListaClientesResponse>
     {
         private readonly AppDbContext _context;
+        private readonly IEmpresaContext _empresaContext;
 
-        public GetListaClientesHandler(AppDbContext context)
+        public GetListaClientesHandler(AppDbContext context, IEmpresaContext empresaContext)
         {
             _context = context;
+            _empresaContext = empresaContext;
         }
 
         public async Task<GetListaClientesResponse> Handle(GetListaClientesRequest request, CancellationToken cancellationToken)
         {
+            var empresaId = _empresaContext.EmpresaId;
             var query = _context.Clientes
+                .Where(c => c.EmpresaId == empresaId)
                 .Include(c => c.Enderecos)
                 .AsQueryable();
 

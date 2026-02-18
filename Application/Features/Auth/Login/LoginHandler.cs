@@ -47,6 +47,7 @@ namespace CRMVEXA.Application.Features.Auth.Login
                 User = new LoginUserResponse
                 {
                     Id = usuario.Id,
+                    EmpresaId = usuario.EmpresaId,
                     Nome = usuario.Nome,
                     Email = usuario.Email,
                     Perfil = usuario.Cargo ?? "Usuário"
@@ -69,7 +70,8 @@ namespace CRMVEXA.Application.Features.Auth.Login
                 new(ClaimTypes.NameIdentifier, usuario.Id.ToString()),
                 new(ClaimTypes.Email, usuario.Email ?? ""),
                 new(ClaimTypes.Name, usuario.Nome ?? ""),
-                new("cargo", usuario.Cargo ?? "")
+                new("cargo", usuario.Cargo ?? ""),
+                new("empresa_id", usuario.EmpresaId.ToString())
             };
 
             var token = new JwtSecurityToken(

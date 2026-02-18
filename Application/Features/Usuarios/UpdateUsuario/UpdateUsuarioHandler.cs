@@ -1,4 +1,5 @@
 using CRMVEXA.Application.Features.Usuarios.UpdateUsuario;
+using CRMVEXA.Application.Services;
 using CRMVEXA.Domain.Entities;
 using CRMVEXA.Infrastructure.Data;
 using MediatR;
@@ -9,15 +10,19 @@ namespace CRMVEXA.Application.Features.Usuarios.UpdateUsuario
     public class UpdateUsuarioHandler : IRequestHandler<UpdateUsuarioRequest, UpdateUsuarioResponse>
     {
         private readonly AppDbContext _context;
+        private readonly IEmpresaContext _empresaContext;
 
-        public UpdateUsuarioHandler(AppDbContext context)
+        public UpdateUsuarioHandler(AppDbContext context, IEmpresaContext empresaContext)
         {
             _context = context;
+            _empresaContext = empresaContext;
         }
 
         public async Task<UpdateUsuarioResponse> Handle(UpdateUsuarioRequest request, CancellationToken cancellationToken)
         {
+            var empresaId = _empresaContext.EmpresaId;
             var usuario = await _context.Usuarios
+                .Where(u => u.EmpresaId == empresaId)
                 .Include(u => u.Enderecos)
                 .Include(u => u.UsuarioPermissoes)
                 .FirstOrDefaultAsync(u => u.Id == request.Id, cancellationToken);

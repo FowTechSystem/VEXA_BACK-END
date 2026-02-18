@@ -5,6 +5,7 @@ namespace CRMVEXA.Domain.Entities
     public class Venda
     {
         public int Id { get; set; }
+        public int EmpresaId { get; set; }
         public string CodigoVenda { get; set; }
         public int? ClienteId { get; set; }
         public decimal Desconto { get; set; }
@@ -13,14 +14,16 @@ namespace CRMVEXA.Domain.Entities
         public DateTime DataHora { get; set; }
         public decimal ValorTotal { get; set; }
         public string Status { get; set; } = "Concluída";
+        public Empresa Empresa { get; set; } = null!;
 
         private List<ItemVenda> _itens = new();
         public IReadOnlyCollection<ItemVenda> Itens => _itens.AsReadOnly();
 
         private Venda() { }
 
-        public Venda(string codigoVenda, int usuarioId, string formaPagamento)
+        public Venda(int empresaId, string codigoVenda, int usuarioId, string formaPagamento)
         {
+            EmpresaId = empresaId;
             CodigoVenda = codigoVenda;
             FormaPagamento = formaPagamento;
             UsuarioId = usuarioId;

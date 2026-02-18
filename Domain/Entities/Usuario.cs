@@ -3,6 +3,7 @@ namespace CRMVEXA.Domain.Entities
     public class Usuario
     {
         public int Id { get; set; }
+        public int EmpresaId { get; set; }
         public string Nome { get; set; }
         public string Email { get; set; }
         public string Login { get; set; }
@@ -34,10 +35,13 @@ namespace CRMVEXA.Domain.Entities
         // Endereços do usuário
         public ICollection<Endereco> Enderecos { get; set; } = new List<Endereco>();
 
+        public Empresa Empresa { get; set; } = null!;
+
         private Usuario() { }
 
-        public Usuario(string nome, string email, string login, string senhaHash, string cargo)
+        public Usuario(int empresaId, string nome, string email, string login, string senhaHash, string cargo)
         {
+            EmpresaId = empresaId;
             Nome = nome;
             Email = email;
             Login = login;

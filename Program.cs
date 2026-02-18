@@ -1,4 +1,5 @@
 using System.Text;
+using CRMVEXA.Application.Services;
 using CRMVEXA.Infrastructure.Data;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
@@ -11,6 +12,9 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Corrige problema de DateTime com PostgreSQL
 AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
+
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<IEmpresaContext, EmpresaContext>();
 
 // 1. Configurar DbContext
 builder.Services.AddDbContext<AppDbContext>(options =>

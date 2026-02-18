@@ -1,5 +1,6 @@
 using System;
 using CRMVEXA.Application.Features.Produtos.GetProduto;
+using CRMVEXA.Application.Services;
 using CRMVEXA.Infrastructure.Data;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -9,15 +10,19 @@ namespace CRMVEXA.Application.Features.Produtos.GetProduto
     public class GetProdutoHandler : IRequestHandler<GetProdutoRequest, GetProdutoResponse>
     {
         private readonly AppDbContext _context;
+        private readonly IEmpresaContext _empresaContext;
 
-        public GetProdutoHandler(AppDbContext context)
+        public GetProdutoHandler(AppDbContext context, IEmpresaContext empresaContext)
         {
             _context = context;
+            _empresaContext = empresaContext;
         }
 
         public async Task<GetProdutoResponse> Handle(GetProdutoRequest request, CancellationToken cancellationToken)
         {
+            var empresaId = _empresaContext.EmpresaId;
             var produto = await _context.Produtos
+                .Where(p => p.EmpresaId == empresaId)
                 .Include(p => p.Categoria)
                 .Include(p => p.Subcategoria)
                 .Include(p => p.Genero)

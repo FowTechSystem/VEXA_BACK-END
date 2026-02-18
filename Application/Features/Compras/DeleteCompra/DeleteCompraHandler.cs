@@ -1,5 +1,6 @@
 using System;
 using CRMVEXA.Application.Features.Compras.DeleteCompra;
+using CRMVEXA.Application.Services;
 using CRMVEXA.Domain.Entities;
 using CRMVEXA.Infrastructure.Data;
 using MediatR;
@@ -10,15 +11,19 @@ namespace CRMVEXA.Application.Features.Compras.DeleteCompra
     public class DeleteCompraHandler : IRequestHandler<DeleteCompraRequest, Unit>
     {
         private readonly AppDbContext _context;
+        private readonly IEmpresaContext _empresaContext;
 
-        public DeleteCompraHandler(AppDbContext context)
+        public DeleteCompraHandler(AppDbContext context, IEmpresaContext empresaContext)
         {
             _context = context;
+            _empresaContext = empresaContext;
         }
 
         public async Task<Unit> Handle(DeleteCompraRequest request, CancellationToken cancellationToken)
         {
+            var empresaId = _empresaContext.EmpresaId;
             var compra = await _context.Compras
+                .Where(c => c.EmpresaId == empresaId)
                 .Include(c => c.Itens)
                 .FirstOrDefaultAsync(c => c.Id == request.Id, cancellationToken);
 

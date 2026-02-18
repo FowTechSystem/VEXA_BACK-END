@@ -1,4 +1,5 @@
 using CRMVEXA.Application.Features.Usuarios.GetListaUsuarios;
+using CRMVEXA.Application.Services;
 using CRMVEXA.Infrastructure.Data;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -8,15 +9,18 @@ namespace CRMVEXA.Application.Features.Usuarios.GetListaUsuarios
     public class GetListaUsuariosHandler : IRequestHandler<GetListaUsuariosRequest, GetListaUsuariosResponse>
     {
         private readonly AppDbContext _context;
+        private readonly IEmpresaContext _empresaContext;
 
-        public GetListaUsuariosHandler(AppDbContext context)
+        public GetListaUsuariosHandler(AppDbContext context, IEmpresaContext empresaContext)
         {
             _context = context;
+            _empresaContext = empresaContext;
         }
 
         public async Task<GetListaUsuariosResponse> Handle(GetListaUsuariosRequest request, CancellationToken cancellationToken)
         {
-            var query = _context.Usuarios.AsQueryable();
+            var empresaId = _empresaContext.EmpresaId;
+            var query = _context.Usuarios.Where(u => u.EmpresaId == empresaId).AsQueryable();
 
             if (!string.IsNullOrWhiteSpace(request.Valor))
             {

@@ -1,4 +1,5 @@
 using CRMVEXA.Application.Features.Clientes.GetListaClientes;
+using CRMVEXA.Application.Services;
 using CRMVEXA.Infrastructure.Data;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -8,16 +9,20 @@ namespace CRMVEXA.Application.Features.Fornecedor.GetFornecedor;
 public class GetFornecedorHandler : IRequestHandler<GetFornecedorRequest, GetFornecedorResponse>
 {
     private readonly AppDbContext _context;
+    private readonly IEmpresaContext _empresaContext;
 
-    public GetFornecedorHandler(AppDbContext context)
+    public GetFornecedorHandler(AppDbContext context, IEmpresaContext empresaContext)
     {
         _context = context;
+        _empresaContext = empresaContext;
     }
 
     public async Task<GetFornecedorResponse> Handle(GetFornecedorRequest request, CancellationToken cancellationToken)
     {
+        var empresaId = _empresaContext.EmpresaId;
         var query = _context.Fornecedores
-            .Include(f => f.Enderecos)  
+            .Where(f => f.EmpresaId == empresaId)
+            .Include(f => f.Enderecos)
             .AsQueryable();
 
         if (!string.IsNullOrWhiteSpace(request.Valor))

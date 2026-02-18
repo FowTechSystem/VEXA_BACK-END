@@ -1,5 +1,6 @@
 using System;
 using CRMVEXA.Application.Features.Compras.CreateCompra;
+using CRMVEXA.Application.Services;
 using CRMVEXA.Domain.Entities;
 using CRMVEXA.Infrastructure.Data;
 using MediatR;
@@ -10,21 +11,25 @@ namespace CRMVEXA.Application.Features.Compras.CreateCompra
     public class CreateCompraHandler : IRequestHandler<CreateCompraRequest, int>
     {
         private readonly AppDbContext _context;
+        private readonly IEmpresaContext _empresaContext;
 
-        public CreateCompraHandler(AppDbContext context)
+        public CreateCompraHandler(AppDbContext context, IEmpresaContext empresaContext)
         {
             _context = context;
+            _empresaContext = empresaContext;
         }
 
         public async Task<int> Handle(CreateCompraRequest request, CancellationToken cancellationToken)
         {
             try
             {
-                var compra = new Compra(request.CodigoCompra, request.FornecedorId, request.UsuarioId, request.Observacoes);
+                var empresaId = _empresaContext.EmpresaId;
+                var compra = new Compra(empresaId, request.CodigoCompra, request.FornecedorId, request.UsuarioId, request.Observacoes);
 
                 foreach (var itemRequest in request.Itens)
                 {
                     var produto = await _context.Produtos
+                        .Where(p => p.EmpresaId == empresaId)
                         .Include(p => p.Estoque)
                         .FirstOrDefaultAsync(p => p.Id == itemRequest.ProdutoId, cancellationToken);
                     if (produto == null)
@@ -41,6 +46,7 @@ namespace CRMVEXA.Application.Features.Compras.CreateCompra
 
                     // Registrar movimentação de estoque
                     var movimentacao = new MovimentacaoEstoque(
+                        empresaId,
                         itemRequest.ProdutoId,
                         "Entrada",
                         itemRequest.Quantidade,

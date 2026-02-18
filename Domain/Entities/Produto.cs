@@ -3,6 +3,7 @@ namespace CRMVEXA.Domain.Entities
     public class Produto
     {
         public int Id { get; set; }
+        public int EmpresaId { get; set; }
         public string SKU { get; set; }
         public string Nome { get; set; }
         public int CategoriaId { get; set; }
@@ -32,6 +33,7 @@ namespace CRMVEXA.Domain.Entities
         public Marca? Marca { get; set; }
         public Fornecedor? Fornecedor { get; set; }
         public Estoque Estoque { get; set; } = null!;
+        public Empresa Empresa { get; set; } = null!;
 
         private Produto() { }
 
