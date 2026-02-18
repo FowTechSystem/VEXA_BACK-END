@@ -899,7 +899,7 @@ namespace CRMVEXA.Infrastructure.Migrations
                     b.HasOne("CRMVEXA.Domain.Entities.Permissao", "Permissao")
                         .WithMany("UsuarioPermissoes")
                         .HasForeignKey("PermissaoId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("CRMVEXA.Domain.Entities.Usuario", "Usuario")
