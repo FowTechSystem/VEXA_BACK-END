@@ -1,4 +1,4 @@
-﻿using CRMVEXA.Domain.Entities;
+using CRMVEXA.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -25,6 +25,9 @@ namespace CRMVEXA.Infrastructure.Data.Configurations
 
             builder.Property(x => x.Complemento)
                 .HasMaxLength(200);
+
+            builder.Property(x => x.Estado)
+                .HasMaxLength(2);
 
             builder.ToTable("Enderecos");
         }

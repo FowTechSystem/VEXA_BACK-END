@@ -1,4 +1,4 @@
-﻿namespace CRMVEXA.Domain.Entities;
+namespace CRMVEXA.Domain.Entities;
 
 public class Endereco
 {
@@ -9,14 +9,15 @@ public class Endereco
     public string Cidade { get; set; }
     public string Cep { get; set; }
     public string? Complemento { get; set; }
+    public string? Estado { get; set; }
 
-
-    public int? FornecedorId { get; set; }
     public int? ClienteId { get; set; }
+    public int? FornecedorId { get; set; }
+    public int? UsuarioId { get; set; }
 
-
-    public Fornecedor? Fornecedor { get; set; }
     public Cliente? Cliente { get; set; }
+    public Fornecedor? Fornecedor { get; set; }
+    public Usuario? Usuario { get; set; }
 
     public Endereco() { }
 

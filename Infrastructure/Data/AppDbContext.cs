@@ -19,6 +19,8 @@ namespace CRMVEXA.Infrastructure.Data
         public DbSet<Subcategoria> Subcategorias { get; set; }
         public DbSet<Tamanho> Tamanhos { get; set; }
         public DbSet<Usuario> Usuarios { get; set; }
+        public DbSet<Permissao> Permissoes { get; set; }
+        public DbSet<UsuarioPermissao> UsuarioPermissoes { get; set; }
         public DbSet<Venda> Vendas { get; set; }
         public DbSet<ItemVenda> ItensVenda { get; set; }
         public DbSet<Compra> Compras { get; set; }
@@ -39,6 +41,12 @@ namespace CRMVEXA.Infrastructure.Data
                 .HasMany(c => c.Enderecos)
                 .WithOne(e => e.Cliente)
                 .HasForeignKey(e => e.ClienteId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<Usuario>()
+                .HasMany(u => u.Enderecos)
+                .WithOne(e => e.Usuario)
+                .HasForeignKey(e => e.UsuarioId)
                 .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);

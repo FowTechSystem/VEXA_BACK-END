@@ -49,6 +49,8 @@ namespace CRMVEXA.Application.Features.Usuarios.GetListaUsuarios
                 : 0;
 
             var usuarios = await query
+                .Include(u => u.Enderecos)
+                .Include(u => u.UsuarioPermissoes)
                 .OrderBy(u => u.Nome)
                 .Skip((pagina - 1) * tamanho)
                 .Take(tamanho)
@@ -61,12 +63,33 @@ namespace CRMVEXA.Application.Features.Usuarios.GetListaUsuarios
                 Email = u.Email,
                 Login = u.Login,
                 Cargo = u.Cargo,
+                CPF = u.CPF,
+                RG = u.RG,
+                Telefone = u.Telefone,
+                WhatsApp = u.WhatsApp,
+                DataNascimento = u.DataNascimento,
+                Perfil = u.Perfil,
+                Departamento = u.Departamento,
+                Observacoes = u.Observacoes,
+                Ativo = u.Ativo,
                 PodeVender = u.PodeVender,
                 PodeEditarEstoque = u.PodeEditarEstoque,
                 PodeEditarProduto = u.PodeEditarProduto,
                 PodeAbrirFecharCaixa = u.PodeAbrirFecharCaixa,
                 PodeEmitirRelatorios = u.PodeEmitirRelatorios,
-                PodeCadastrarFornecedores = u.PodeCadastrarFornecedores
+                PodeCadastrarFornecedores = u.PodeCadastrarFornecedores,
+                Enderecos = u.Enderecos.Select(e => new EnderecoResponse
+                {
+                    Id = e.Id,
+                    Cep = e.Cep,
+                    Rua = e.Rua,
+                    Numero = e.Numero,
+                    Complemento = e.Complemento,
+                    Bairro = e.Bairro,
+                    Cidade = e.Cidade,
+                    Estado = e.Estado
+                }).ToList(),
+                PermissaoIds = u.UsuarioPermissoes.Select(up => up.PermissaoId).ToList()
             }).ToList();
 
             return new GetListaUsuariosResponse
