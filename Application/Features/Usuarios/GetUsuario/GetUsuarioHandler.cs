@@ -1,0 +1,64 @@
+using CRMVEXA.Application.Features.Usuarios.GetListaUsuarios;
+using CRMVEXA.Infrastructure.Data;
+using MediatR;
+using Microsoft.EntityFrameworkCore;
+
+namespace CRMVEXA.Application.Features.Usuarios.GetUsuario
+{
+    public class GetUsuarioHandler : IRequestHandler<GetUsuarioRequest, UsuarioResponse?>
+    {
+        private readonly AppDbContext _context;
+
+        public GetUsuarioHandler(AppDbContext context)
+        {
+            _context = context;
+        }
+
+        public async Task<UsuarioResponse?> Handle(GetUsuarioRequest request, CancellationToken cancellationToken)
+        {
+            var usuario = await _context.Usuarios
+                .Include(u => u.Enderecos)
+                .Include(u => u.UsuarioPermissoes)
+                .FirstOrDefaultAsync(u => u.Id == request.Id, cancellationToken);
+
+            if (usuario == null)
+                return null;
+
+            return new UsuarioResponse
+            {
+                Id = usuario.Id,
+                Nome = usuario.Nome,
+                Email = usuario.Email,
+                Login = usuario.Login,
+                Cargo = usuario.Cargo,
+                CPF = usuario.CPF,
+                RG = usuario.RG,
+                Telefone = usuario.Telefone,
+                WhatsApp = usuario.WhatsApp,
+                DataNascimento = usuario.DataNascimento,
+                Perfil = usuario.Perfil,
+                Departamento = usuario.Departamento,
+                Observacoes = usuario.Observacoes,
+                Ativo = usuario.Ativo,
+                PodeVender = usuario.PodeVender,
+                PodeEditarEstoque = usuario.PodeEditarEstoque,
+                PodeEditarProduto = usuario.PodeEditarProduto,
+                PodeAbrirFecharCaixa = usuario.PodeAbrirFecharCaixa,
+                PodeEmitirRelatorios = usuario.PodeEmitirRelatorios,
+                PodeCadastrarFornecedores = usuario.PodeCadastrarFornecedores,
+                Enderecos = usuario.Enderecos.Select(e => new EnderecoResponse
+                {
+                    Id = e.Id,
+                    Cep = e.Cep,
+                    Rua = e.Rua,
+                    Numero = e.Numero,
+                    Complemento = e.Complemento,
+                    Bairro = e.Bairro,
+                    Cidade = e.Cidade,
+                    Estado = e.Estado
+                }).ToList(),
+                PermissaoIds = usuario.UsuarioPermissoes.Select(up => up.PermissaoId).ToList()
+            };
+        }
+    }
+}

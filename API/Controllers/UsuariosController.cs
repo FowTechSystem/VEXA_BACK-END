@@ -1,6 +1,7 @@
 using CRMVEXA.Application.Features.Usuarios.CriarUsuario;
 using CRMVEXA.Application.Features.Usuarios.DeleteUsuario;
 using CRMVEXA.Application.Features.Usuarios.GetListaUsuarios;
+using CRMVEXA.Application.Features.Usuarios.GetUsuario;
 using CRMVEXA.Application.Features.Usuarios.UpdateUsuario;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -16,6 +17,22 @@ namespace CRMVEXA.API.Controllers
         public UsuariosController(IMediator mediator)
         {
             _mediator = mediator;
+        }
+
+        [HttpGet("{id:int}")]
+        public async Task<ActionResult<GetListaUsuarios.UsuarioResponse>> ObterPorId([FromRoute] int id)
+        {
+            try
+            {
+                var usuario = await _mediator.Send(new GetUsuarioRequest { Id = id });
+                if (usuario == null)
+                    return NotFound();
+                return Ok(usuario);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { sucesso = false, mensagem = ex.Message });
+            }
         }
 
         [HttpGet]

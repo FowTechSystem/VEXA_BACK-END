@@ -75,9 +75,20 @@ namespace CRMVEXA.Application.Features.Usuarios.UpdateUsuario
             if (request.Enderecos != null)
             {
                 _context.Enderecos.RemoveRange(usuario.Enderecos);
-                foreach (var e in request.Enderecos)
+                var enderecosValidos = request.Enderecos
+                    .Where(e => !string.IsNullOrWhiteSpace(e.Cep) || !string.IsNullOrWhiteSpace(e.Rua) ||
+                                !string.IsNullOrWhiteSpace(e.Numero) || !string.IsNullOrWhiteSpace(e.Bairro) ||
+                                !string.IsNullOrWhiteSpace(e.Cidade))
+                    .ToList();
+                foreach (var e in enderecosValidos)
                 {
-                    var endereco = new Endereco(e.Rua, e.Numero, e.Bairro, e.Cidade, e.Cep, e.Complemento)
+                    var endereco = new Endereco(
+                        string.IsNullOrWhiteSpace(e.Rua) ? "" : e.Rua,
+                        string.IsNullOrWhiteSpace(e.Numero) ? "" : e.Numero,
+                        string.IsNullOrWhiteSpace(e.Bairro) ? "" : e.Bairro,
+                        string.IsNullOrWhiteSpace(e.Cidade) ? "" : e.Cidade,
+                        string.IsNullOrWhiteSpace(e.Cep) ? "" : e.Cep,
+                        e.Complemento)
                     {
                         UsuarioId = usuario.Id,
                         Estado = e.Estado

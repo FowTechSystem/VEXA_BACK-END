@@ -51,11 +51,22 @@ namespace CRMVEXA.Application.Features.Usuarios.CriarUsuario
                 _context.Usuarios.Add(usuario);
                 await _context.SaveChangesAsync(cancellationToken);
 
-                if (request.Enderecos?.Count > 0)
+                var enderecosValidos = request.Enderecos?
+                    .Where(e => !string.IsNullOrWhiteSpace(e.Cep) || !string.IsNullOrWhiteSpace(e.Rua) ||
+                                !string.IsNullOrWhiteSpace(e.Numero) || !string.IsNullOrWhiteSpace(e.Bairro) ||
+                                !string.IsNullOrWhiteSpace(e.Cidade))
+                    .ToList() ?? new List<EnderecoRequest>();
+                if (enderecosValidos.Count > 0)
                 {
-                    foreach (var e in request.Enderecos)
+                    foreach (var e in enderecosValidos)
                     {
-                        var endereco = new Endereco(e.Rua, e.Numero, e.Bairro, e.Cidade, e.Cep, e.Complemento)
+                        var endereco = new Endereco(
+                            string.IsNullOrWhiteSpace(e.Rua) ? "" : e.Rua,
+                            string.IsNullOrWhiteSpace(e.Numero) ? "" : e.Numero,
+                            string.IsNullOrWhiteSpace(e.Bairro) ? "" : e.Bairro,
+                            string.IsNullOrWhiteSpace(e.Cidade) ? "" : e.Cidade,
+                            string.IsNullOrWhiteSpace(e.Cep) ? "" : e.Cep,
+                            e.Complemento)
                         {
                             UsuarioId = usuario.Id,
                             Estado = e.Estado
