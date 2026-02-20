@@ -52,12 +52,14 @@ namespace CRMVEXA.Infrastructure.Data
 
             modelBuilder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);
 
-            // Relacionamentos Empresa (multi-tenancy) - sem navegação para entidades que não têm propriedade Empresa
+            // Relacionamentos Empresa (multi-tenancy) - apenas para entidades que têm EmpresaId mas NÃO têm relação configurada por convenção
             foreach (var entityType in modelBuilder.Model.GetEntityTypes())
             {
                 if (entityType.ClrType == typeof(Empresa)) continue;
-                var empProp = entityType.FindProperty("EmpresaId");
-                if (empProp == null) continue;
+                if (entityType.FindProperty("EmpresaId") == null) continue;
+                // Pular se já tem FK para Empresa (convenção ou configuração)
+                if (entityType.GetForeignKeys().Any(fk => fk.PrincipalEntityType.ClrType == typeof(Empresa))) continue;
+
                 var hasEmpresaNav = entityType.ClrType.GetProperty("Empresa", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance) != null;
                 modelBuilder.Entity(entityType.ClrType)
                     .HasOne(typeof(Empresa), hasEmpresaNav ? "Empresa" : null)
