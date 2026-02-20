@@ -31,12 +31,27 @@ namespace CRMVEXA.Application.Features.Auth.Login
             if (usuario == null)
                 return null;
 
+            var senhaHash = usuario.SenhaHash;
+            if (string.IsNullOrEmpty(senhaHash))
+                return null;
+
             // Suporta senha em texto (legado) ou hash BCrypt
             bool senhaValida = false;
-            if (usuario.SenhaHash.StartsWith("$2") && usuario.SenhaHash.Length > 50)
-                senhaValida = BCrypt.Net.BCrypt.Verify(request.Password, usuario.SenhaHash);
+            if (senhaHash.StartsWith("$2") && senhaHash.Length > 50)
+            {
+                try
+                {
+                    senhaValida = BCrypt.Net.BCrypt.Verify(request.Password, senhaHash);
+                }
+                catch
+                {
+                    senhaValida = false;
+                }
+            }
             else
-                senhaValida = usuario.SenhaHash == request.Password;
+            {
+                senhaValida = senhaHash == request.Password;
+            }
 
             if (!senhaValida)
                 return null;

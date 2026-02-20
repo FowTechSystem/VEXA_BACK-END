@@ -7,6 +7,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text.Json;
 
 var builder = WebApplication.CreateBuilder(args);
+builder.WebHost.UseUrls("https://localhost:5001");
 
 // ============ CONFIGURAÇÕES DE SERVIÇOS ============
 
