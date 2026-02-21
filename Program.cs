@@ -1,4 +1,5 @@
 using System.Text;
+using CRMVEXA.API.Middleware;
 using CRMVEXA.Application.Services;
 using CRMVEXA.Infrastructure.Data;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -115,6 +116,7 @@ app.UseStaticFiles();
 app.UseRouting();
 app.UseCors("AllowFrontend");
 app.UseAuthentication();
+app.UseMiddleware<EmpresaContextMiddleware>();
 app.UseAuthorization();
 app.MapControllers();
 

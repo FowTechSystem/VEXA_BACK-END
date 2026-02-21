@@ -1,4 +1,5 @@
 using System.Security.Claims;
+using CRMVEXA.Application.Constants;
 using CRMVEXA.Application.Features.Empresas.CriarEmpresa;
 using CRMVEXA.Application.Features.Empresas.CriarPrimeiroUsuario;
 using CRMVEXA.Application.Features.Empresas.GetListaEmpresas;
@@ -17,7 +18,6 @@ namespace CRMVEXA.API.Controllers
     public class EmpresasController : ControllerBase
     {
         private readonly IMediator _mediator;
-        private const string EmailAdminSistema = "dev@gmail.com";
 
         public EmpresasController(IMediator mediator)
         {
@@ -28,7 +28,7 @@ namespace CRMVEXA.API.Controllers
         {
             var email = User.FindFirstValue(ClaimTypes.Email);
             return !string.IsNullOrEmpty(email) &&
-                   string.Equals(email.Trim(), EmailAdminSistema, StringComparison.OrdinalIgnoreCase);
+                   string.Equals(email.Trim(), SistemaConstants.EmailAdminSistema, StringComparison.OrdinalIgnoreCase);
         }
 
         /// <summary>

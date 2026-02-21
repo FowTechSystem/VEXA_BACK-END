@@ -1,9 +1,11 @@
 using System.Security.Claims;
+using CRMVEXA.API.Middleware;
 
 namespace CRMVEXA.Application.Services;
 
 /// <summary>
-/// Lê o EmpresaId do claim "empresa_id" do usuário autenticado (JWT).
+/// Fornece o EmpresaId efetivo: para dev@gmail.com com X-Empresa-Id, usa o header (validado pelo middleware).
+/// Caso contrário, usa empresa_id do token.
 /// </summary>
 public class EmpresaContext : IEmpresaContext
 {
@@ -26,8 +28,21 @@ public class EmpresaContext : IEmpresaContext
 
     public bool TemEmpresa => _empresaId.HasValue;
 
-    private int? _empresaId => _httpContextAccessor.HttpContext?.User?.FindFirstValue("empresa_id") is string s
-        && int.TryParse(s, out var id)
-        ? id
-        : null;
+    private int? _empresaId
+    {
+        get
+        {
+            var ctx = _httpContextAccessor.HttpContext;
+            if (ctx == null) return null;
+
+            // 1. Valor resolvido pelo middleware (inclui X-Empresa-Id validado para dev)
+            if (ctx.Items[EmpresaContextMiddleware.HttpContextKeyEmpresaId] is int mid)
+                return mid;
+
+            // 2. Fallback: claim do token
+            return ctx.User?.FindFirstValue("empresa_id") is string s && int.TryParse(s, out var id)
+                ? id
+                : null;
+        }
+    }
 }

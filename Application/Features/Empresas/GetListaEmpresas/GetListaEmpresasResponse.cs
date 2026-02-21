@@ -3,6 +3,7 @@ namespace CRMVEXA.Application.Features.Empresas.GetListaEmpresas
     public class GetListaEmpresasResponse
     {
         public List<EmpresaResponse> Empresas { get; set; } = new();
+        public int Total => Empresas.Count;
     }
 
     public class EmpresaResponse
