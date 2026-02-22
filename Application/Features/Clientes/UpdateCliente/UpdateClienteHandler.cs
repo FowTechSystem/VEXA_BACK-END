@@ -49,46 +49,48 @@ namespace CRMVEXA.Application.Features.Clientes.UpdateCliente.Validators
                 fotoBase64: request.FotoUrl
             );
 
-            var enderecoExistente = await _context.Set<Endereco>()
-                .FirstOrDefaultAsync(e =>
-                    e.Rua == request.Rua &&
-                    e.Numero == request.Numero &&
-                    e.Bairro == request.Bairro &&
-                    e.Cidade == request.Cidade &&
-                    e.Cep == request.Cep &&
-                    e.Complemento == request.Complemento,
-                    cancellationToken);
+            // Usar endereço: Endereco (objeto) > Enderecos[0] > campos flat
+            var e = request.Endereco ?? request.Enderecos?.FirstOrDefault();
+            var rua = e != null
+                ? (!string.IsNullOrWhiteSpace(e.Rua) ? e.Rua : (e.Endereco ?? ""))
+                : (request.Rua ?? "");
+            var numero = e?.Numero ?? request.Numero ?? "";
+            var bairro = e?.Bairro ?? request.Bairro ?? "";
+            var cidade = e?.Cidade ?? request.Cidade ?? "";
+            var cep = e?.Cep ?? request.Cep ?? "";
+            var complemento = e?.Complemento ?? request.Complemento;
 
-            if (enderecoExistente != null)
+            var temEndereco = !string.IsNullOrWhiteSpace(rua) || !string.IsNullOrWhiteSpace(cep) ||
+                !string.IsNullOrWhiteSpace(numero) || !string.IsNullOrWhiteSpace(bairro) || !string.IsNullOrWhiteSpace(cidade);
+
+            if (temEndereco)
             {
-                if (!cliente.Enderecos.Any(e => e.Id == enderecoExistente.Id))
+                var enderecoExistente = await _context.Set<Endereco>()
+                    .FirstOrDefaultAsync(e =>
+                        e.Rua == rua &&
+                        e.Numero == numero &&
+                        e.Bairro == bairro &&
+                        e.Cidade == cidade &&
+                        e.Cep == cep &&
+                        (e.Complemento ?? "") == (complemento ?? ""),
+                        cancellationToken);
+
+                if (enderecoExistente != null)
                 {
-                    cliente.AdicionarEndereco(enderecoExistente);
+                    if (!cliente.Enderecos.Any(e => e.Id == enderecoExistente.Id))
+                    {
+                        cliente.AdicionarEndereco(enderecoExistente);
+                    }
+                    else
+                    {
+                        enderecoExistente.AtualizarEndereco(rua, numero, bairro, cidade, cep, complemento);
+                    }
                 }
                 else
                 {
-                    enderecoExistente.AtualizarEndereco(
-                        request.Rua,
-                        request.Numero,
-                        request.Bairro,
-                        request.Cidade,
-                        request.Cep,
-                        request.Complemento
-                    );
+                    var novoEndereco = new Endereco(rua, numero, bairro, cidade, cep, complemento);
+                    cliente.AdicionarEndereco(novoEndereco);
                 }
-            }
-            else
-            {
-                var novoEndereco = new Endereco(
-                    rua: request.Rua,
-                    numero: request.Numero,
-                    bairro: request.Bairro,
-                    cidade: request.Cidade,
-                    cep: request.Cep,
-                    complemento: request.Complemento
-                );
-
-                cliente.AdicionarEndereco(novoEndereco);
             }
 
             await _context.SaveChangesAsync(cancellationToken);

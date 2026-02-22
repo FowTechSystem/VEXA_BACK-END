@@ -39,6 +39,30 @@ public class CriarClienteHandler : IRequestHandler<CriarClienteRequest, int>
             _context.Clientes.Add(cliente);
             await _context.SaveChangesAsync(cancellationToken);
 
+            // Salvar endereço se informado
+            if (request.endereco != null)
+            {
+                var rua = !string.IsNullOrWhiteSpace(request.endereco.Rua) ? request.endereco.Rua : (request.endereco.Endereco ?? "");
+                var temEndereco = !string.IsNullOrWhiteSpace(rua) || !string.IsNullOrWhiteSpace(request.endereco.Cep) ||
+                    !string.IsNullOrWhiteSpace(request.endereco.Numero) || !string.IsNullOrWhiteSpace(request.endereco.Bairro) ||
+                    !string.IsNullOrWhiteSpace(request.endereco.Cidade);
+                if (temEndereco)
+                {
+                    var endereco = new Endereco(
+                        rua,
+                        request.endereco.Numero ?? "",
+                        request.endereco.Bairro ?? "",
+                        request.endereco.Cidade ?? "",
+                        request.endereco.Cep ?? "",
+                        request.endereco.Complemento)
+                    {
+                        ClienteId = cliente.Id
+                    };
+                    _context.Enderecos.Add(endereco);
+                    await _context.SaveChangesAsync(cancellationToken);
+                }
+            }
+
             return cliente.Id;
         }
         catch (Exception ex)
