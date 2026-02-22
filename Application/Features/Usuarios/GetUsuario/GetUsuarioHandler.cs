@@ -37,6 +37,7 @@ namespace CRMVEXA.Application.Features.Usuarios.GetUsuario
                 Login = usuario.Login,
                 Cargo = usuario.Cargo,
                 CPF = usuario.CPF,
+                CNPJ = usuario.CNPJ,
                 RG = usuario.RG,
                 Telefone = usuario.Telefone,
                 WhatsApp = usuario.WhatsApp,

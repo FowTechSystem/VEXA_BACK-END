@@ -23,7 +23,8 @@ namespace CRMVEXA.Application.Features.Usuarios.CriarUsuario
             try
             {
                 var empresaId = _empresaContext.EmpresaId;
-                var senhaHash = BCrypt.Net.BCrypt.HashPassword(request.SenhaHash);
+                var senhaTexto = !string.IsNullOrEmpty(request.SenhaHash) ? request.SenhaHash : request.Senha ?? "";
+                var senhaHash = BCrypt.Net.BCrypt.HashPassword(senhaTexto);
 
                 var usuario = new Usuario(
                     empresaId,
@@ -35,6 +36,7 @@ namespace CRMVEXA.Application.Features.Usuarios.CriarUsuario
                 );
 
                 usuario.CPF = request.CPF;
+                usuario.CNPJ = request.CNPJ;
                 usuario.RG = request.RG;
                 usuario.Telefone = request.Telefone;
                 usuario.WhatsApp = request.WhatsApp;
@@ -57,7 +59,7 @@ namespace CRMVEXA.Application.Features.Usuarios.CriarUsuario
                 await _context.SaveChangesAsync(cancellationToken);
 
                 var enderecosValidos = request.Enderecos?
-                    .Where(e => !string.IsNullOrWhiteSpace(e.Cep) || !string.IsNullOrWhiteSpace(e.Rua) ||
+                    .Where(e => !string.IsNullOrWhiteSpace(e.Cep) || !string.IsNullOrWhiteSpace(e.Rua) || !string.IsNullOrWhiteSpace(e.Endereco) ||
                                 !string.IsNullOrWhiteSpace(e.Numero) || !string.IsNullOrWhiteSpace(e.Bairro) ||
                                 !string.IsNullOrWhiteSpace(e.Cidade))
                     .ToList() ?? new List<EnderecoRequest>();
@@ -65,8 +67,9 @@ namespace CRMVEXA.Application.Features.Usuarios.CriarUsuario
                 {
                     foreach (var e in enderecosValidos)
                     {
+                        var rua = !string.IsNullOrWhiteSpace(e.Rua) ? e.Rua : (e.Endereco ?? "");
                         var endereco = new Endereco(
-                            string.IsNullOrWhiteSpace(e.Rua) ? "" : e.Rua,
+                            rua,
                             string.IsNullOrWhiteSpace(e.Numero) ? "" : e.Numero,
                             string.IsNullOrWhiteSpace(e.Bairro) ? "" : e.Bairro,
                             string.IsNullOrWhiteSpace(e.Cidade) ? "" : e.Cidade,

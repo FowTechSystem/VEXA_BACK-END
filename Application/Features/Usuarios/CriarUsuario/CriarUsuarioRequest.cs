@@ -7,10 +7,14 @@ namespace CRMVEXA.Application.Features.Usuarios.CriarUsuario
         public string Nome { get; set; } = string.Empty;
         public string Email { get; set; } = string.Empty;
         public string Login { get; set; } = string.Empty;
+        /// <summary>Senha em texto (o backend faz o hash). Aceita "senhaHash" ou "senha" no JSON.</summary>
         public string SenhaHash { get; set; } = string.Empty;
+        /// <summary>Alternativa a SenhaHash - se frontend enviar "senha", usa aqui.</summary>
+        public string? Senha { get; set; }
         public string Cargo { get; set; } = string.Empty;
 
         public string? CPF { get; set; }
+        public string? CNPJ { get; set; }
         public string? RG { get; set; }
         public string? Telefone { get; set; }
         public string? WhatsApp { get; set; }
@@ -37,7 +41,9 @@ namespace CRMVEXA.Application.Features.Usuarios.CriarUsuario
     public class EnderecoRequest
     {
         public string Cep { get; set; } = string.Empty;
+        /// <summary>Nome da rua/endereço. Aceita "rua" ou "endereco" no JSON.</summary>
         public string Rua { get; set; } = string.Empty;
+        public string? Endereco { get; set; }
         public string Numero { get; set; } = string.Empty;
         public string? Complemento { get; set; }
         public string Bairro { get; set; } = string.Empty;

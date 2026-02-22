@@ -41,6 +41,7 @@ namespace CRMVEXA.Application.Features.Usuarios.UpdateUsuario
             usuario.Login = request.Login;
             usuario.Cargo = request.Cargo;
             usuario.CPF = request.CPF;
+            usuario.CNPJ = request.CNPJ;
             usuario.RG = request.RG;
             usuario.Telefone = request.Telefone;
             usuario.WhatsApp = request.WhatsApp;
@@ -81,14 +82,15 @@ namespace CRMVEXA.Application.Features.Usuarios.UpdateUsuario
             {
                 _context.Enderecos.RemoveRange(usuario.Enderecos);
                 var enderecosValidos = request.Enderecos
-                    .Where(e => !string.IsNullOrWhiteSpace(e.Cep) || !string.IsNullOrWhiteSpace(e.Rua) ||
+                    .Where(e => !string.IsNullOrWhiteSpace(e.Cep) || !string.IsNullOrWhiteSpace(e.Rua) || !string.IsNullOrWhiteSpace(e.Endereco) ||
                                 !string.IsNullOrWhiteSpace(e.Numero) || !string.IsNullOrWhiteSpace(e.Bairro) ||
                                 !string.IsNullOrWhiteSpace(e.Cidade))
                     .ToList();
                 foreach (var e in enderecosValidos)
                 {
+                    var rua = !string.IsNullOrWhiteSpace(e.Rua) ? e.Rua : (e.Endereco ?? "");
                     var endereco = new Endereco(
-                        string.IsNullOrWhiteSpace(e.Rua) ? "" : e.Rua,
+                        rua,
                         string.IsNullOrWhiteSpace(e.Numero) ? "" : e.Numero,
                         string.IsNullOrWhiteSpace(e.Bairro) ? "" : e.Bairro,
                         string.IsNullOrWhiteSpace(e.Cidade) ? "" : e.Cidade,

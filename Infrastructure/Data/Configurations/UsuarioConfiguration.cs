@@ -13,6 +13,7 @@ namespace CRMVEXA.Infrastructure.Data.Configurations
             builder.Property(x => x.Login).IsRequired().HasMaxLength(80);
             builder.Property(x => x.Email).IsRequired().HasMaxLength(200);
             builder.Property(x => x.CPF).HasMaxLength(14);
+            builder.Property(x => x.CNPJ).HasMaxLength(18);
             builder.Property(x => x.RG).HasMaxLength(20);
             builder.Property(x => x.Telefone).HasMaxLength(20);
             builder.Property(x => x.WhatsApp).HasMaxLength(20);
