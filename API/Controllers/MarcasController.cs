@@ -91,7 +91,11 @@ public class MarcasController : ControllerBase
         {
             var resultado = await _mediator.Send(new DeleteMarcaRequest { Id = id }, cancellationToken);
             if (!resultado.Sucesso)
+            {
+                if (resultado.Mensagem.Contains("não encontrada"))
+                    return NotFound(new { sucesso = false, mensagem = resultado.Mensagem, message = resultado.Mensagem });
                 return BadRequest(new { sucesso = false, mensagem = resultado.Mensagem, message = resultado.Mensagem });
+            }
             return Ok(new { sucesso = true, mensagem = resultado.Mensagem });
         }
         catch (Exception ex)

@@ -29,25 +29,26 @@ namespace CRMVEXA.Application.Features.Produtos.CreateProduto
 
         public async Task<int> Handle(CreateProdutoRequest request, CancellationToken cancellationToken)
         {
+            var empresaId = _empresaContext.EmpresaId;
+
+            // Validar FKs antes de inserir
+            var catExiste = await _context.Categorias.AnyAsync(c => c.EmpresaId == empresaId && c.Id == request.CategoriaId, cancellationToken);
+            if (!catExiste)
+                throw new Exception($"Categoria com Id {request.CategoriaId} não encontrada. Cadastre categorias em /api/categorias primeiro.");
+
+            var genExiste = await _context.GenerosProduto.AnyAsync(g => g.EmpresaId == empresaId && g.Id == request.GeneroId, cancellationToken);
+            if (!genExiste)
+                throw new Exception($"Gênero com Id {request.GeneroId} não encontrado. Verifique os gêneros cadastrados.");
+
+            if (request.MarcaId.HasValue)
+            {
+                var marcaExiste = await _context.Marcas.AnyAsync(m => m.EmpresaId == empresaId && m.Id == request.MarcaId, cancellationToken);
+                if (!marcaExiste)
+                    throw new Exception($"Marca com Id {request.MarcaId} não encontrada.");
+            }
+
             try
             {
-                var empresaId = _empresaContext.EmpresaId;
-
-                // Validar FKs antes de inserir
-                var catExiste = await _context.Categorias.AnyAsync(c => c.EmpresaId == empresaId && c.Id == request.CategoriaId, cancellationToken);
-                if (!catExiste)
-                    throw new Exception($"Categoria com Id {request.CategoriaId} não encontrada. Cadastre categorias em /api/categorias primeiro.");
-
-                var genExiste = await _context.GenerosProduto.AnyAsync(g => g.Id == request.GeneroId, cancellationToken);
-                if (!genExiste)
-                    throw new Exception($"Gênero com Id {request.GeneroId} não encontrado. Verifique os gêneros cadastrados.");
-
-                if (request.MarcaId.HasValue)
-                {
-                    var marcaExiste = await _context.Marcas.AnyAsync(m => m.EmpresaId == empresaId && m.Id == request.MarcaId, cancellationToken);
-                    if (!marcaExiste)
-                        throw new Exception($"Marca com Id {request.MarcaId} não encontrada.");
-                }
                 var produto = new Produto(
                     request.SKU,
                     request.Nome,

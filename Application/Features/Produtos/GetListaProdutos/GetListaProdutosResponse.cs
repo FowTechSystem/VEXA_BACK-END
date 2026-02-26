@@ -1,3 +1,5 @@
+using CRMVEXA.Application.Features.Produtos.Common;
+
 namespace CRMVEXA.Application.Features.Produtos.GetListaProdutos
 {
     public class GetListaProdutosResponse
@@ -36,17 +38,5 @@ namespace CRMVEXA.Application.Features.Produtos.GetListaProdutos
         public string? Foto5 { get; set; }
         public string? DescricaoCurta { get; set; }
         public decimal? Peso { get; set; }
-    }
-
-    public class CategoriaRefResponse
-    {
-        public int Id { get; set; }
-        public string Nome { get; set; } = string.Empty;
-    }
-
-    public class MarcaRefResponse
-    {
-        public int Id { get; set; }
-        public string Nome { get; set; } = string.Empty;
     }
 }
