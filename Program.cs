@@ -52,6 +52,30 @@ builder.Services.AddControllers(o =>
         options.JsonSerializerOptions.DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull;
     });
 
+// Resposta de validação no formato do frontend (sucesso, mensagem, message, errors)
+builder.Services.Configure<Microsoft.AspNetCore.Mvc.ApiBehaviorOptions>(options =>
+{
+    options.InvalidModelStateResponseFactory = context =>
+    {
+        var errors = context.ModelState
+            .Where(e => e.Value?.Errors.Count > 0)
+            .ToDictionary(
+                kvp => kvp.Key,
+                kvp => kvp.Value!.Errors.Select(e => e.ErrorMessage).ToArray());
+        var firstError = context.ModelState
+            .SelectMany(m => m.Value?.Errors ?? Enumerable.Empty<Microsoft.AspNetCore.Mvc.ModelBinding.ModelError>())
+            .FirstOrDefault();
+        var message = firstError?.ErrorMessage ?? "Um ou mais erros de validação.";
+        return new Microsoft.AspNetCore.Mvc.BadRequestObjectResult(new
+        {
+            sucesso = false,
+            mensagem = message,
+            message,
+            errors
+        });
+    };
+});
+
 // 5. CORS
 builder.Services.AddCors(options =>
 {
