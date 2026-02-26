@@ -5,12 +5,14 @@ namespace CRMVEXA.Application.Features.Produtos.GetProduto
         public int Id { get; set; }
         public string SKU { get; set; } = string.Empty;
         public string Nome { get; set; } = string.Empty;
-        public string Categoria { get; set; } = string.Empty;
+        public int CategoriaId { get; set; }
+        public CategoriaRefResponse? Categoria { get; set; }
         public string? Subcategoria { get; set; }
         public string? Tamanho { get; set; }
         public string? Cor { get; set; }
         public string Genero { get; set; } = string.Empty;
-        public string? Marca { get; set; }
+        public int? MarcaId { get; set; }
+        public MarcaRefResponse? Marca { get; set; }
         public int? FornecedorId { get; set; }
         public decimal PrecoCusto { get; set; }
         public decimal PrecoVenda { get; set; }
@@ -25,5 +27,17 @@ namespace CRMVEXA.Application.Features.Produtos.GetProduto
         public string? Foto5 { get; set; }
         public string? DescricaoCurta { get; set; }
         public decimal? Peso { get; set; }
+    }
+
+    public class CategoriaRefResponse
+    {
+        public int Id { get; set; }
+        public string Nome { get; set; } = string.Empty;
+    }
+
+    public class MarcaRefResponse
+    {
+        public int Id { get; set; }
+        public string Nome { get; set; } = string.Empty;
     }
 }

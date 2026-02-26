@@ -4,6 +4,7 @@ using CRMVEXA.Application.Services;
 using CRMVEXA.Domain.Entities;
 using CRMVEXA.Infrastructure.Data;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 
 namespace CRMVEXA.Application.Features.Produtos.CreateProduto
 {
@@ -18,11 +19,35 @@ namespace CRMVEXA.Application.Features.Produtos.CreateProduto
             _empresaContext = empresaContext;
         }
 
+        private static string ObterMensagemErro(Exception ex)
+        {
+            var e = ex;
+            while (e?.InnerException != null)
+                e = e.InnerException;
+            return e?.Message ?? ex.Message;
+        }
+
         public async Task<int> Handle(CreateProdutoRequest request, CancellationToken cancellationToken)
         {
             try
             {
                 var empresaId = _empresaContext.EmpresaId;
+
+                // Validar FKs antes de inserir
+                var catExiste = await _context.Categorias.AnyAsync(c => c.EmpresaId == empresaId && c.Id == request.CategoriaId, cancellationToken);
+                if (!catExiste)
+                    throw new Exception($"Categoria com Id {request.CategoriaId} não encontrada. Cadastre categorias em /api/categorias primeiro.");
+
+                var genExiste = await _context.GenerosProduto.AnyAsync(g => g.Id == request.GeneroId, cancellationToken);
+                if (!genExiste)
+                    throw new Exception($"Gênero com Id {request.GeneroId} não encontrado. Verifique os gêneros cadastrados.");
+
+                if (request.MarcaId.HasValue)
+                {
+                    var marcaExiste = await _context.Marcas.AnyAsync(m => m.EmpresaId == empresaId && m.Id == request.MarcaId, cancellationToken);
+                    if (!marcaExiste)
+                        throw new Exception($"Marca com Id {request.MarcaId} não encontrada.");
+                }
                 var produto = new Produto(
                     request.SKU,
                     request.Nome,
@@ -57,7 +82,8 @@ namespace CRMVEXA.Application.Features.Produtos.CreateProduto
             }
             catch (Exception ex)
             {
-                throw new Exception($"Erro ao criar produto: {ex.Message}", ex);
+                var msg = ObterMensagemErro(ex);
+                throw new Exception($"Erro ao criar produto: {msg}", ex);
             }
         }
     }

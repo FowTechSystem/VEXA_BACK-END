@@ -40,7 +40,7 @@ namespace CRMVEXA.API.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(new { sucesso = false, mensagem = ex.Message });
+                return BadRequest(Erro(ex.Message));
             }
         }
 
@@ -54,43 +54,49 @@ namespace CRMVEXA.API.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(new { sucesso = false, mensagem = ex.Message });
+                return BadRequest(Erro(ex.Message));
             }
         }
 
         [HttpPost]
-        public async Task<ActionResult<int>> Criar([FromBody] CreateProdutoRequest request)
+        public async Task<IActionResult> Criar([FromBody] CreateProdutoRequest request)
         {
             try
             {
+                if (request == null)
+                    return BadRequest(Erro("Corpo da requisição inválido."));
+
                 var id = await _mediator.Send(request);
                 return Ok(new { sucesso = true, id, mensagem = "Produto criado com sucesso!" });
             }
             catch (Exception ex)
             {
-                return BadRequest(new { sucesso = false, mensagem = ex.Message });
+                return BadRequest(Erro(ex.Message));
             }
         }
 
         [HttpPut("{id}")]
-        public async Task<ActionResult<UpdateProdutoResponse>> Atualizar(
+        public async Task<IActionResult> Atualizar(
             [FromRoute] int id,
             [FromBody] UpdateProdutoRequest request)
         {
             try
             {
+                if (request == null)
+                    return BadRequest(Erro("Corpo da requisição inválido."));
+
                 request.Id = id;
                 var resultado = await _mediator.Send(request);
-                return Ok(resultado);
+                return Ok(new { sucesso = true, id = resultado.Id, mensagem = resultado.Mensagem });
             }
             catch (Exception ex)
             {
-                return BadRequest(new { sucesso = false, mensagem = ex.Message });
+                return BadRequest(Erro(ex.Message));
             }
         }
 
         [HttpDelete("{id}")]
-        public async Task<ActionResult> Deletar([FromRoute] int id)
+        public async Task<IActionResult> Deletar([FromRoute] int id)
         {
             try
             {
@@ -99,8 +105,16 @@ namespace CRMVEXA.API.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(new { sucesso = false, mensagem = ex.Message });
+                return BadRequest(Erro(ex.Message));
             }
         }
+
+        /// <summary>Resposta de erro padronizada para o frontend (sucesso, mensagem e message).</summary>
+        private static object Erro(string mensagem) => new
+        {
+            sucesso = false,
+            mensagem,
+            message = mensagem
+        };
     }
 }
