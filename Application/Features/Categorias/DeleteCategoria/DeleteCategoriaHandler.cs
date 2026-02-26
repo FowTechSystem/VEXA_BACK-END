@@ -21,6 +21,7 @@ public class DeleteCategoriaHandler : IRequestHandler<DeleteCategoriaRequest, De
         var empresaId = _empresaContext.EmpresaId;
         var categoria = await _context.Categorias
             .Include(c => c.Produtos)
+            .Include(c => c.Subcategorias)
             .FirstOrDefaultAsync(c => c.EmpresaId == empresaId && c.Id == request.Id, cancellationToken);
 
         if (categoria == null)
@@ -28,6 +29,9 @@ public class DeleteCategoriaHandler : IRequestHandler<DeleteCategoriaRequest, De
 
         if (categoria.Produtos.Any())
             return new DeleteCategoriaResponse { Sucesso = false, Mensagem = "Não é possível excluir: existem produtos vinculados a esta categoria." };
+
+        if (categoria.Subcategorias.Any())
+            return new DeleteCategoriaResponse { Sucesso = false, Mensagem = "Não é possível excluir: existem subcategorias vinculadas a esta categoria." };
 
         _context.Categorias.Remove(categoria);
         await _context.SaveChangesAsync(cancellationToken);
