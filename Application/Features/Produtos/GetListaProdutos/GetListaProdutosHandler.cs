@@ -19,11 +19,12 @@ namespace CRMVEXA.Application.Features.Produtos.GetListaProdutos
 
         public async Task<GetListaProdutosResponse> Handle(GetListaProdutosRequest request, CancellationToken cancellationToken)
         {
+            if (!_empresaContext.TemEmpresa)
+                throw new InvalidOperationException("EmpresaId não disponível. Envie o token JWT e o header X-Empresa-Id (ex: X-Empresa-Id: 1) para dev, ou use um token com claim empresa_id.");
             var empresaId = _empresaContext.EmpresaId;
             var query = _context.Produtos
                 .Where(p => p.EmpresaId == empresaId)
                 .Include(p => p.Categoria)
-                .Include(p => p.Subcategoria)
                 .Include(p => p.Genero)
                 .Include(p => p.Tamanho)
                 .Include(p => p.Cor)
@@ -65,7 +66,7 @@ namespace CRMVEXA.Application.Features.Produtos.GetListaProdutos
                 Nome = p.Nome,
                 CategoriaId = p.CategoriaId,
                 Categoria = p.Categoria != null ? new CategoriaRefResponse { Id = p.Categoria.Id, Nome = p.Categoria.Nome } : null,
-                Subcategoria = p.Subcategoria?.Nome,
+                Subcategoria = null, // Tabela Subcategorias não utilizada pelo frontend
                 Tamanho = p.Tamanho?.Nome,
                 Cor = p.Cor?.Nome,
                 Genero = p.Genero?.Nome ?? string.Empty,
