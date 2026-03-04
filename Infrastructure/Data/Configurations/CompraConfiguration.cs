@@ -17,7 +17,9 @@ namespace CRMVEXA.Infrastructure.Data.Configurations
             builder.Property(x => x.Status)
                 .IsRequired()
                 .HasMaxLength(20)
-                .HasDefaultValue("Concluída");
+                .HasDefaultValue("pendente");
+
+            builder.Property(x => x.DataEntregaPrevista);
 
             builder.Property(x => x.ValorTotal)
                 .HasColumnType("decimal(18,2)");

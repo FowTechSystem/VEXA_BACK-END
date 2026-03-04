@@ -4,6 +4,7 @@ using CRMVEXA.Application.Features.Compras.CreateCompra;
 using CRMVEXA.Application.Features.Compras.GetCompra;
 using CRMVEXA.Application.Features.Compras.GetListaCompras;
 using CRMVEXA.Application.Features.Compras.DeleteCompra;
+using CRMVEXA.Application.Features.Compras.UpdateCompraStatus;
 
 namespace CRMVEXA.API.Controllers
 {
@@ -62,6 +63,25 @@ namespace CRMVEXA.API.Controllers
             {
                 var id = await _mediator.Send(request);
                 return Ok(new { sucesso = true, id, mensagem = "Compra criada com sucesso!" });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { sucesso = false, mensagem = ex.Message });
+            }
+        }
+
+        [HttpPatch("{id}/status")]
+        public async Task<ActionResult<UpdateCompraStatusResponse>> AtualizarStatus([FromRoute] int id, [FromBody] UpdateCompraStatusRequest request)
+        {
+            try
+            {
+                if (request == null || string.IsNullOrWhiteSpace(request.Status))
+                    return BadRequest(new { sucesso = false, mensagem = "Status é obrigatório" });
+                request.Id = id;
+                var resultado = await _mediator.Send(request);
+                if (!resultado.Sucesso)
+                    return BadRequest(resultado);
+                return Ok(resultado);
             }
             catch (Exception ex)
             {

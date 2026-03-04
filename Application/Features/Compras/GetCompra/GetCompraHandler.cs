@@ -1,5 +1,6 @@
 using System;
 using CRMVEXA.Application.Features.Compras.GetCompra;
+using CRMVEXA.Application.Features.Compras.GetListaCompras;
 using CRMVEXA.Application.Services;
 using CRMVEXA.Infrastructure.Data;
 using MediatR;
@@ -40,10 +41,11 @@ namespace CRMVEXA.Application.Features.Compras.GetCompra
                 Id = compra.Id,
                 CodigoCompra = compra.CodigoCompra,
                 FornecedorId = compra.FornecedorId,
-                FornecedorNome = fornecedor?.Nome,
+                Fornecedor = fornecedor != null ? new FornecedorRefResponse { Id = fornecedor.Id, Nome = fornecedor.Nome ?? "", RazaoSocial = fornecedor.RazaoSocial } : null,
                 UsuarioId = compra.UsuarioId,
                 UsuarioNome = usuario?.Nome,
                 DataHora = compra.DataHora,
+                DataEntregaPrevista = compra.DataEntregaPrevista,
                 ValorTotal = compra.ValorTotal,
                 Observacoes = compra.Observacoes,
                 Status = compra.Status,

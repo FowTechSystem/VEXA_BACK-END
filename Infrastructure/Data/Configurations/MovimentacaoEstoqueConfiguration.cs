@@ -28,6 +28,9 @@ namespace CRMVEXA.Infrastructure.Data.Configurations
                 .HasForeignKey(x => x.UsuarioId)
                 .OnDelete(DeleteBehavior.Restrict);
 
+            builder.Property(x => x.CompraId);
+            builder.Property(x => x.VendaId);
+
             builder.ToTable("MovimentacoesEstoque");
         }
     }

@@ -72,7 +72,7 @@ namespace CRMVEXA.Application.Features.Produtos.CreateProduto
                     Peso = request.Peso
                 };
 
-                var estoque = new Estoque(empresaId, 0, request.QuantidadeEstoque, request.EstoqueMinimo, request.LocalizacaoEstoque);
+                var estoque = new CRMVEXA.Domain.Entities.Estoque(empresaId, 0, request.QuantidadeEstoque, request.EstoqueMinimo, request.LocalizacaoEstoque);
                 produto.Estoque = estoque;
 
                 _context.Produtos.Add(produto);

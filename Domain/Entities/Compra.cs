@@ -10,9 +10,10 @@ namespace CRMVEXA.Domain.Entities
         public int FornecedorId { get; set; }
         public int UsuarioId { get; set; }
         public DateTime DataHora { get; set; }
+        public DateTime? DataEntregaPrevista { get; set; }
         public decimal ValorTotal { get; set; }
         public string? Observacoes { get; set; }
-        public string Status { get; set; } = "Concluída";
+        public string Status { get; set; } = "pendente";
         public Empresa Empresa { get; set; } = null!;
 
         private List<ItemCompra> _itens = new();
@@ -30,6 +31,14 @@ namespace CRMVEXA.Domain.Entities
             Observacoes = observacoes;
         }
 
+        public void DefinirStatusEDatas(string status, DateTime dataPedido, DateTime? dataEntregaPrevista, decimal? valorTotal = null)
+        {
+            Status = status;
+            DataHora = dataPedido;
+            DataEntregaPrevista = dataEntregaPrevista;
+            if (valorTotal.HasValue) ValorTotal = valorTotal.Value;
+        }
+
         public void AdicionarItem(ItemCompra item)
         {
             _itens.Add(item);
@@ -38,9 +47,11 @@ namespace CRMVEXA.Domain.Entities
 
         private void CalcularTotal()
         {
-            ValorTotal = _itens.Sum(i => i.Subtotal);
+            if (_itens.Count > 0)
+                ValorTotal = _itens.Sum(i => i.Subtotal);
         }
 
-        public void Cancelar() => Status = "Cancelada";
+        public void Cancelar() => Status = "cancelada";
+        public void MarcarRecebida() => Status = "recebida";
     }
 }
