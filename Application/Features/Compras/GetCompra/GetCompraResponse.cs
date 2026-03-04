@@ -1,3 +1,5 @@
+using CRMVEXA.Application.Features.Compras.GetListaCompras;
+
 namespace CRMVEXA.Application.Features.Compras.GetCompra
 {
     public class GetCompraResponse
@@ -5,10 +7,12 @@ namespace CRMVEXA.Application.Features.Compras.GetCompra
         public int Id { get; set; }
         public string CodigoCompra { get; set; } = string.Empty;
         public int FornecedorId { get; set; }
-        public string? FornecedorNome { get; set; }
+        public FornecedorRefResponse? Fornecedor { get; set; }
         public int UsuarioId { get; set; }
         public string? UsuarioNome { get; set; }
         public DateTime DataHora { get; set; }
+        public DateTime DataPedido { get => DataHora; set => DataHora = value; }
+        public DateTime? DataEntregaPrevista { get; set; }
         public decimal ValorTotal { get; set; }
         public string? Observacoes { get; set; }
         public string Status { get; set; } = string.Empty;

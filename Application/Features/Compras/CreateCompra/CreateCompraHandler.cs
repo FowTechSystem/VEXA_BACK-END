@@ -1,10 +1,12 @@
 using System;
+using System.Security.Claims;
 using CRMVEXA.Application.Features.Compras.CreateCompra;
 using CRMVEXA.Application.Services;
 using CRMVEXA.Domain.Entities;
 using CRMVEXA.Infrastructure.Data;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Http;
 
 namespace CRMVEXA.Application.Features.Compras.CreateCompra
 {
@@ -12,59 +14,65 @@ namespace CRMVEXA.Application.Features.Compras.CreateCompra
     {
         private readonly AppDbContext _context;
         private readonly IEmpresaContext _empresaContext;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public CreateCompraHandler(AppDbContext context, IEmpresaContext empresaContext)
+        public CreateCompraHandler(AppDbContext context, IEmpresaContext empresaContext, IHttpContextAccessor httpContextAccessor)
         {
             _context = context;
             _empresaContext = empresaContext;
+            _httpContextAccessor = httpContextAccessor;
         }
 
         public async Task<int> Handle(CreateCompraRequest request, CancellationToken cancellationToken)
         {
-            try
+            var empresaId = _empresaContext.EmpresaId;
+
+            // Validar fornecedor existe
+            var fornecedor = await _context.Fornecedores
+                .FirstOrDefaultAsync(f => f.EmpresaId == empresaId && f.Id == request.FornecedorId, cancellationToken);
+            if (fornecedor == null)
+                throw new InvalidOperationException($"Fornecedor com ID {request.FornecedorId} não encontrado. Selecione um fornecedor cadastrado.");
+
+            var usuarioId = request.UsuarioId ?? ObterUsuarioIdDoToken();
+            if (usuarioId <= 0)
+                throw new InvalidOperationException("Usuário não identificado. Faça login novamente.");
+
+            var codigoCompra = $"CMP-{DateTime.UtcNow:yyyyMMdd-HHmmss}";
+            var status = NormalizarStatus(request.Status);
+            var dataPedido = request.DataPedido ?? DateTime.UtcNow;
+            var valorTotal = request.ValorTotal;
+
+            var compra = new Compra(empresaId, codigoCompra, request.FornecedorId, usuarioId, request.Observacoes);
+            compra.DefinirStatusEDatas(status, dataPedido, request.DataEntregaPrevista, valorTotal);
+
+            foreach (var itemRequest in request.Itens)
             {
-                var empresaId = _empresaContext.EmpresaId;
-                var compra = new Compra(empresaId, request.CodigoCompra, request.FornecedorId, request.UsuarioId, request.Observacoes);
+                var produto = await _context.Produtos
+                    .FirstOrDefaultAsync(p => p.EmpresaId == empresaId && p.Id == itemRequest.ProdutoId, cancellationToken);
+                if (produto == null)
+                    throw new InvalidOperationException($"Produto com ID {itemRequest.ProdutoId} não encontrado");
 
-                foreach (var itemRequest in request.Itens)
-                {
-                    var produto = await _context.Produtos
-                        .Where(p => p.EmpresaId == empresaId)
-                        .Include(p => p.Estoque)
-                        .FirstOrDefaultAsync(p => p.Id == itemRequest.ProdutoId, cancellationToken);
-                    if (produto == null)
-                    {
-                        throw new Exception($"Produto com ID {itemRequest.ProdutoId} não encontrado");
-                    }
-
-                    var itemCompra = new ItemCompra(itemRequest.ProdutoId, itemRequest.Quantidade, itemRequest.PrecoUnitario);
-                    compra.AdicionarItem(itemCompra);
-
-                    // Atualizar estoque
-                    if (produto.Estoque != null)
-                        produto.Estoque.AtualizarQuantidade(itemRequest.Quantidade);
-
-                    // Registrar movimentação de estoque
-                    var movimentacao = new MovimentacaoEstoque(
-                        empresaId,
-                        itemRequest.ProdutoId,
-                        "Entrada",
-                        itemRequest.Quantidade,
-                        $"Compra {request.CodigoCompra}",
-                        request.UsuarioId
-                    );
-                    _context.MovimentacoesEstoque.Add(movimentacao);
-                }
-
-                _context.Compras.Add(compra);
-                await _context.SaveChangesAsync(cancellationToken);
-
-                return compra.Id;
+                var itemCompra = new ItemCompra(itemRequest.ProdutoId, itemRequest.Quantidade, itemRequest.PrecoUnitario);
+                compra.AdicionarItem(itemCompra);
             }
-            catch (Exception ex)
-            {
-                throw new Exception($"Erro ao criar compra: {ex.Message}", ex);
-            }
+
+            // Não atualiza estoque na criação - só quando status = "recebida" (via UpdateCompraStatus)
+            _context.Compras.Add(compra);
+            await _context.SaveChangesAsync(cancellationToken);
+            return compra.Id;
+        }
+
+        private static string NormalizarStatus(string? status)
+        {
+            var s = (status ?? "pendente").Trim().ToLowerInvariant();
+            if (s is "pendente" or "aprovada" or "recebida" or "cancelada") return s;
+            return "pendente";
+        }
+
+        private int ObterUsuarioIdDoToken()
+        {
+            var idStr = _httpContextAccessor.HttpContext?.User?.FindFirstValue(ClaimTypes.NameIdentifier);
+            return int.TryParse(idStr, out var id) ? id : 0;
         }
     }
 }
