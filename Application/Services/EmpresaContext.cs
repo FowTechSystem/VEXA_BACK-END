@@ -21,7 +21,7 @@ public class EmpresaContext : IEmpresaContext
         get
         {
             if (!TemEmpresa)
-                throw new InvalidOperationException("EmpresaId não disponível no contexto. Verifique se o usuário está autenticado e o token contém o claim 'empresa_id'.");
+                throw new InvalidOperationException("EmpresaId não disponível. Envie o token JWT (Authorization: Bearer) e: (1) o claim 'empresa_id' no token, ou (2) se for dev (dev@gmail.com), o header X-Empresa-Id com o ID da empresa.");
             return _empresaId!.Value;
         }
     }

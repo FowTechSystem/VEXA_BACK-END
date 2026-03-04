@@ -40,7 +40,7 @@ namespace CRMVEXA.API.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(Erro(ex.Message));
+                return BadRequest(Erro(ObterMensagemErro(ex)));
             }
         }
 
@@ -54,7 +54,7 @@ namespace CRMVEXA.API.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(Erro(ex.Message));
+                return BadRequest(Erro(ObterMensagemErro(ex)));
             }
         }
 
@@ -71,7 +71,7 @@ namespace CRMVEXA.API.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(Erro(ex.Message));
+                return BadRequest(Erro(ObterMensagemErro(ex)));
             }
         }
 
@@ -91,7 +91,7 @@ namespace CRMVEXA.API.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(Erro(ex.Message));
+                return BadRequest(Erro(ObterMensagemErro(ex)));
             }
         }
 
@@ -105,8 +105,17 @@ namespace CRMVEXA.API.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(Erro(ex.Message));
+                return BadRequest(Erro(ObterMensagemErro(ex)));
             }
+        }
+
+        /// <summary>Obtém a mensagem mais relevante (inner exception para erros de DB).</summary>
+        private static string ObterMensagemErro(Exception ex)
+        {
+            var atual = ex;
+            while (atual?.InnerException != null)
+                atual = atual.InnerException;
+            return atual?.Message ?? ex.Message;
         }
 
         /// <summary>Resposta de erro padronizada para o frontend (sucesso, mensagem e message).</summary>

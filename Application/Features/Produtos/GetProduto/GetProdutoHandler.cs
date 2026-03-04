@@ -24,7 +24,6 @@ namespace CRMVEXA.Application.Features.Produtos.GetProduto
             var produto = await _context.Produtos
                 .Where(p => p.EmpresaId == empresaId)
                 .Include(p => p.Categoria)
-                .Include(p => p.Subcategoria)
                 .Include(p => p.Genero)
                 .Include(p => p.Tamanho)
                 .Include(p => p.Cor)
@@ -44,7 +43,7 @@ namespace CRMVEXA.Application.Features.Produtos.GetProduto
                 Nome = produto.Nome,
                 CategoriaId = produto.CategoriaId,
                 Categoria = produto.Categoria != null ? new CategoriaRefResponse { Id = produto.Categoria.Id, Nome = produto.Categoria.Nome } : null,
-                Subcategoria = produto.Subcategoria?.Nome,
+                Subcategoria = null, // Tabela Subcategorias não utilizada pelo frontend
                 Tamanho = produto.Tamanho?.Nome,
                 Cor = produto.Cor?.Nome,
                 Genero = produto.Genero?.Nome ?? string.Empty,
