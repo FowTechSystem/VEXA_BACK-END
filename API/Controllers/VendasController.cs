@@ -22,7 +22,7 @@ namespace CRMVEXA.API.Controllers
         public async Task<ActionResult<GetListaVendasResponse>> Listar(
             [FromQuery] string? valor,
             [FromQuery] int pagina = 1,
-            [FromQuery] int tamanho = 10)
+            [FromQuery] int tamanho = 100)
         {
             try
             {

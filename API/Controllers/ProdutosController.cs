@@ -24,7 +24,7 @@ namespace CRMVEXA.API.Controllers
             [FromQuery] string? filtro,
             [FromQuery] string? valor,
             [FromQuery] int pagina = 1,
-            [FromQuery] int tamanho = 10)
+            [FromQuery] int tamanho = 100)
         {
             try
             {

@@ -46,7 +46,7 @@ namespace CRMVEXA.Application.Features.Produtos.GetListaProdutos
             }
 
             var pagina = Math.Max(1, request.Pagina);
-            var tamanho = Math.Clamp(request.Tamanho, 1, 50);
+            var tamanho = Math.Clamp(request.Tamanho, 1, 500);
 
             var totalRegistros = await query.CountAsync(cancellationToken);
             var totalPaginas = totalRegistros > 0
@@ -66,7 +66,8 @@ namespace CRMVEXA.Application.Features.Produtos.GetListaProdutos
                 Nome = p.Nome,
                 CategoriaId = p.CategoriaId,
                 Categoria = p.Categoria != null ? new CategoriaRefResponse { Id = p.Categoria.Id, Nome = p.Categoria.Nome } : null,
-                Subcategoria = null, // Tabela Subcategorias não utilizada pelo frontend
+                CategoriaNome = p.Categoria?.Nome,
+                Subcategoria = null,
                 Tamanho = p.Tamanho?.Nome,
                 Cor = p.Cor?.Nome,
                 Genero = p.Genero?.Nome ?? string.Empty,
@@ -78,6 +79,7 @@ namespace CRMVEXA.Application.Features.Produtos.GetListaProdutos
                 CodigoBarras = p.CodigoBarras,
                 QuantidadeEstoque = p.Estoque?.Quantidade ?? 0,
                 EstoqueMinimo = p.Estoque?.EstoqueMinimo ?? 1,
+                EstoqueMaximo = 0,
                 LocalizacaoEstoque = p.Estoque?.LocalizacaoEstoque,
                 Foto1 = p.Foto1,
                 Foto2 = p.Foto2,

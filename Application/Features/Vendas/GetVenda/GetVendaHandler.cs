@@ -31,6 +31,31 @@ namespace CRMVEXA.Application.Features.Vendas.GetVenda
                 throw new Exception($"Venda com ID {request.Id} não encontrada");
             }
 
+            var usuario = await _context.Usuarios.FindAsync(new object[] { venda.UsuarioId }, cancellationToken);
+            var vendedorRef = usuario != null ? new VendedorRefResponse { Id = usuario.Id, Nome = usuario.Nome ?? "" } : null;
+
+            var itensResp = new List<ItemVendaResponse>();
+            foreach (var i in venda.Itens)
+            {
+                var produto = await _context.Produtos.Include(p => p.Categoria).FirstOrDefaultAsync(p => p.Id == i.ProdutoId, cancellationToken);
+                itensResp.Add(new ItemVendaResponse
+                {
+                    Id = i.Id,
+                    ProdutoId = i.ProdutoId,
+                    Produto = produto != null ? new ProdutoRefResponse
+                    {
+                        Id = produto.Id,
+                        Nome = produto.Nome,
+                        Sku = produto.SKU ?? "",
+                        PrecoVenda = produto.PrecoVenda,
+                        PrecoCusto = produto.PrecoCusto,
+                        Categoria = produto.Categoria != null ? new CategoriaRefResponse { Id = produto.Categoria.Id, Nome = produto.Categoria.Nome } : null
+                    } : null,
+                    Quantidade = i.Quantidade,
+                    PrecoUnitario = i.PrecoUnitario,
+                    Subtotal = i.Subtotal
+                });
+            }
             return new GetVendaResponse
             {
                 Id = venda.Id,
@@ -39,17 +64,12 @@ namespace CRMVEXA.Application.Features.Vendas.GetVenda
                 Desconto = venda.Desconto,
                 FormaPagamento = venda.FormaPagamento,
                 UsuarioId = venda.UsuarioId,
+                Vendedor = vendedorRef,
+                Usuario = vendedorRef,
                 DataHora = venda.DataHora,
                 ValorTotal = venda.ValorTotal,
                 Status = venda.Status,
-                Itens = venda.Itens.Select(i => new ItemVendaResponse
-                {
-                    Id = i.Id,
-                    ProdutoId = i.ProdutoId,
-                    Quantidade = i.Quantidade,
-                    PrecoUnitario = i.PrecoUnitario,
-                    Subtotal = i.Subtotal
-                }).ToList()
+                Itens = itensResp
             };
         }
     }

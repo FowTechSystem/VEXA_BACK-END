@@ -37,7 +37,7 @@ namespace CRMVEXA.Application.Features.Clientes.GetListaClientes
             }
 
             var pagina = Math.Max(1, request.Pagina);
-            var tamanho = Math.Clamp(request.Tamanho, 1, 50);
+            var tamanho = Math.Clamp(request.Tamanho, 1, 500);
 
             var totalRegistros = await query.CountAsync(cancellationToken);
             var totalPaginas = totalRegistros > 0
@@ -50,9 +50,17 @@ namespace CRMVEXA.Application.Features.Clientes.GetListaClientes
                 .Take(tamanho)
                 .ToListAsync(cancellationToken);
 
+            var clientesResp = clientes.Select(c => new ClienteListaResponse
+            {
+                Id = c.Id,
+                Nome = c.NomeCompleto,
+                Email = c.Email,
+                DataCadastro = c.DataCadastro
+            }).ToList();
+
             return new GetListaClientesResponse
             {
-                Clientes = clientes,
+                Clientes = clientesResp,
                 PaginaAtual = pagina,
                 TotalPaginas = totalPaginas,
                 TotalRegistros = totalRegistros,
