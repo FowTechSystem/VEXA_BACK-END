@@ -29,6 +29,31 @@ namespace CRMVEXA.Application.Features.Vendas.GetListaVendas
                 query = query.Where(v => v.CodigoVenda.ToLower().Contains(valor));
             }
 
+            if (request.Mes.HasValue && request.Ano.HasValue)
+            {
+                var m = Math.Clamp(request.Mes.Value, 1, 12);
+                var inicio = new DateTime(request.Ano.Value, m, 1, 0, 0, 0, DateTimeKind.Utc);
+                var fim = inicio.AddMonths(1);
+                query = query.Where(v => v.DataHora >= inicio && v.DataHora < fim);
+            }
+            else
+            {
+                if (request.DataInicio.HasValue)
+                {
+                    var inicio = request.DataInicio.Value;
+                    if (inicio.Kind == DateTimeKind.Unspecified)
+                        inicio = DateTime.SpecifyKind(inicio, DateTimeKind.Utc);
+                    query = query.Where(v => v.DataHora >= inicio);
+                }
+                if (request.DataFim.HasValue)
+                {
+                    var fim = request.DataFim.Value.Date.AddDays(1);
+                    if (fim.Kind == DateTimeKind.Unspecified)
+                        fim = DateTime.SpecifyKind(fim, DateTimeKind.Utc);
+                    query = query.Where(v => v.DataHora < fim);
+                }
+            }
+
             var pagina = Math.Max(1, request.Pagina);
             var tamanho = Math.Clamp(request.Tamanho, 1, 500);
 
@@ -78,7 +103,7 @@ namespace CRMVEXA.Application.Features.Vendas.GetListaVendas
                     CodigoVenda = v.CodigoVenda,
                     ClienteId = v.ClienteId,
                     NomeCliente = cliente?.NomeCompleto,
-                    Desconto = v.Desconto,
+                    Desconto = v.Desconto ?? 0,
                     FormaPagamento = v.FormaPagamento,
                     UsuarioId = v.UsuarioId,
                     Vendedor = vendedorRef,

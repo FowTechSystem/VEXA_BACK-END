@@ -27,8 +27,7 @@ namespace CRMVEXA.Infrastructure.Data.Configurations
                 .HasColumnType("decimal(18,2)");
             
             builder.Property(x => x.Desconto)
-                .HasColumnType("decimal(18,2)")
-                .HasDefaultValue(0);
+                .HasColumnType("decimal(18,2)");
 
             builder.HasMany(x => x.Itens)
                 .WithOne()

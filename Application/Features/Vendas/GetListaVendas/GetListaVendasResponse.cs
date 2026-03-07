@@ -5,6 +5,7 @@ namespace CRMVEXA.Application.Features.Vendas.GetListaVendas
     public class GetListaVendasResponse
     {
         public List<VendaResponse> Vendas { get; set; } = new();
+        public int Total => TotalRegistros;
         public int PaginaAtual { get; set; }
         public int TotalPaginas { get; set; }
         public int TotalRegistros { get; set; }

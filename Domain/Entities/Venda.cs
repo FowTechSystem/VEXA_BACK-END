@@ -8,7 +8,7 @@ namespace CRMVEXA.Domain.Entities
         public int EmpresaId { get; set; }
         public string CodigoVenda { get; set; }
         public int? ClienteId { get; set; }
-        public decimal Desconto { get; set; }
+        public decimal? Desconto { get; set; }
         public string FormaPagamento { get; set; }
         public int UsuarioId { get; set; }
         public DateTime DataHora { get; set; }
@@ -44,7 +44,7 @@ namespace CRMVEXA.Domain.Entities
 
         private void CalcularTotal()
         {
-            ValorTotal = _itens.Sum(i => i.Subtotal) - Desconto;
+            ValorTotal = _itens.Sum(i => i.Subtotal) - (Desconto ?? 0);
         }
 
         public void Cancelar() => Status = "Cancelada";

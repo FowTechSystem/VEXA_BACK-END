@@ -61,7 +61,7 @@ namespace CRMVEXA.Application.Features.Vendas.GetVenda
                 Id = venda.Id,
                 CodigoVenda = venda.CodigoVenda,
                 ClienteId = venda.ClienteId,
-                Desconto = venda.Desconto,
+                Desconto = venda.Desconto ?? 0,
                 FormaPagamento = venda.FormaPagamento,
                 UsuarioId = venda.UsuarioId,
                 Vendedor = vendedorRef,
