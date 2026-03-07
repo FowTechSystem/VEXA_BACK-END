@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace CRMVEXA.Application.Features.Compras.DeleteCompra
 {
-    public class DeleteCompraHandler : IRequestHandler<DeleteCompraRequest, Unit>
+    public class DeleteCompraHandler : IRequestHandler<DeleteCompraRequest, DeleteCompraResponse>
     {
         private readonly AppDbContext _context;
         private readonly IEmpresaContext _empresaContext;
@@ -19,7 +19,7 @@ namespace CRMVEXA.Application.Features.Compras.DeleteCompra
             _empresaContext = empresaContext;
         }
 
-        public async Task<Unit> Handle(DeleteCompraRequest request, CancellationToken cancellationToken)
+        public async Task<DeleteCompraResponse> Handle(DeleteCompraRequest request, CancellationToken cancellationToken)
         {
             var empresaId = _empresaContext.EmpresaId;
             var compra = await _context.Compras
@@ -28,28 +28,16 @@ namespace CRMVEXA.Application.Features.Compras.DeleteCompra
                 .FirstOrDefaultAsync(c => c.Id == request.Id, cancellationToken);
 
             if (compra == null)
-            {
-                throw new Exception($"Compra com ID {request.Id} não encontrada");
-            }
+                return new DeleteCompraResponse { Sucesso = false, Mensagem = "Compra não encontrada", Codigo = 404 };
 
-            // Reverter estoque se necessário
-            foreach (var item in compra.Itens)
-            {
-                var produto = await _context.Produtos
-                    .Include(p => p.Estoque)
-                    .FirstOrDefaultAsync(p => p.Id == item.ProdutoId, cancellationToken);
-                if (produto?.Estoque != null && compra.Status == "Concluída")
-                {
-                    produto.Estoque.AtualizarQuantidade(-item.Quantidade);
-                    if (produto.Estoque.Quantidade < 0)
-                        produto.Estoque.Quantidade = 0;
-                }
-            }
+            var statusNormalizado = compra.Status?.Trim().ToLowerInvariant();
+            if (statusNormalizado == "recebida")
+                return new DeleteCompraResponse { Sucesso = false, Mensagem = "Compra já recebida não pode ser excluída (possui movimentação de estoque)", Codigo = 409 };
 
             _context.Compras.Remove(compra);
             await _context.SaveChangesAsync(cancellationToken);
 
-            return Unit.Value;
+            return new DeleteCompraResponse { Sucesso = true, Codigo = 200 };
         }
     }
 }

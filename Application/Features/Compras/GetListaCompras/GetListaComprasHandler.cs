@@ -69,13 +69,23 @@ namespace CRMVEXA.Application.Features.Compras.GetListaCompras
 
                 foreach (var item in compra.Itens)
                 {
-                    var produto = await _context.Produtos.FindAsync(new object[] { item.ProdutoId }, cancellationToken);
+                    var produto = await _context.Produtos.Include(p => p.Estoque).FirstOrDefaultAsync(p => p.Id == item.ProdutoId, cancellationToken);
                     compraResponse.Itens.Add(new ItemCompraResponse
                     {
                         Id = item.Id,
                         CompraId = item.CompraId,
                         ProdutoId = item.ProdutoId,
                         ProdutoNome = produto?.Nome,
+                        Produto = produto != null ? new ProdutoRefResponse
+                        {
+                            Id = produto.Id,
+                            Nome = produto.Nome,
+                            Sku = produto.SKU ?? "",
+                            EstoqueMinimo = produto.Estoque?.EstoqueMinimo ?? 0,
+                            EstoqueMaximo = 0,
+                            PrecoCusto = produto.PrecoCusto,
+                            PrecoVenda = produto.PrecoVenda
+                        } : null,
                         Quantidade = item.Quantidade,
                         PrecoUnitario = item.PrecoUnitario,
                         Subtotal = item.Subtotal

@@ -28,6 +28,8 @@ namespace CRMVEXA.Application.Features.Produtos.GetListaProdutos
         public string? CodigoBarras { get; set; }
         public int QuantidadeEstoque { get; set; }
         public int EstoqueMinimo { get; set; }
+        public int EstoqueMaximo { get; set; }
+        public string? CategoriaNome { get; set; }
         public string? LocalizacaoEstoque { get; set; }
         public string? Foto1 { get; set; }
         public string? Foto2 { get; set; }

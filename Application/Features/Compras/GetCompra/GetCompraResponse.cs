@@ -25,8 +25,20 @@ namespace CRMVEXA.Application.Features.Compras.GetCompra
         public int CompraId { get; set; }
         public int ProdutoId { get; set; }
         public string? ProdutoNome { get; set; }
+        public ProdutoRefResponse? Produto { get; set; }
         public int Quantidade { get; set; }
         public decimal PrecoUnitario { get; set; }
         public decimal Subtotal { get; set; }
+    }
+
+    public class ProdutoRefResponse
+    {
+        public int Id { get; set; }
+        public string Nome { get; set; } = string.Empty;
+        public string Sku { get; set; } = string.Empty;
+        public int EstoqueMinimo { get; set; }
+        public int EstoqueMaximo { get; set; }
+        public decimal PrecoCusto { get; set; }
+        public decimal PrecoVenda { get; set; }
     }
 }
