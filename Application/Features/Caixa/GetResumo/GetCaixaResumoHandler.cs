@@ -25,12 +25,21 @@ public class GetCaixaResumoHandler : IRequestHandler<GetCaixaResumoRequest, GetC
 
         var (inicio, fim) = ObterPeriodo(request.DataInicio, request.DataFim);
 
-        var totalEntradas = await _context.Vendas
+        var totalVendas = await _context.Vendas
             .Where(v => v.EmpresaId == empresaId
                 && v.DataHora >= inicio
                 && v.DataHora < fim
                 && v.Status != "Cancelada")
             .SumAsync(v => v.ValorTotal, cancellationToken);
+
+        var totalCondicionais = await _context.Condicionais
+            .Where(c => c.EmpresaId == empresaId
+                && c.Data >= inicio
+                && c.Data < fim
+                && c.Status == "pendente")
+            .SumAsync(c => c.ValorTotal, cancellationToken);
+
+        var totalEntradas = totalVendas + totalCondicionais;
 
         var totalSaidas = await _context.Compras
             .Where(c => c.EmpresaId == empresaId
@@ -96,8 +105,29 @@ public class GetCaixaResumoHandler : IRequestHandler<GetCaixaResumoRequest, GetC
             };
         }).ToList();
 
+        var condicionaisEntidades = await _context.Condicionais
+            .Where(c => c.EmpresaId == empresaId
+                && c.Data >= inicio
+                && c.Data < fim
+                && c.Status == "pendente")
+            .Include(c => c.Cliente)
+            .ToListAsync(cancellationToken);
+
+        var condicionais = condicionaisEntidades.Select(c => new MovimentacaoResumoItem
+        {
+            Id = c.Id,
+            Tipo = "condicional",
+            Data = c.Data,
+            Valor = c.ValorTotal,
+            Descricao = "Condicional #" + c.Id,
+            ClienteFornecedor = c.Cliente?.NomeCompleto,
+            FormaPagamento = null,
+            Status = c.Status
+        }).ToList();
+
         var movimentacoes = vendas
             .Concat(compras)
+            .Concat(condicionais)
             .OrderByDescending(m => m.Data)
             .ToList();
 
