@@ -3,7 +3,7 @@ using MediatR;
 
 namespace CRMVEXA.Application.Features.Clientes.CriarCliente;
 
-public class CriarClienteRequest : IRequest<int>
+public class CriarClienteRequest : IRequest<CriarClienteResponse>
 {
     public string nomeCompleto { get; set; } = string.Empty;
     public string cPF { get; set; } = string.Empty;
@@ -18,6 +18,14 @@ public class CriarClienteRequest : IRequest<int>
     public string? rg { get; set; }
     public string? cnpj { get; set; }
     public string? FotoBase64 { get; set; }
+
+    /// <summary>Endereço no root (formato flat esperado pelo front). Usado quando endereco não vier preenchido.</summary>
+    public string? rua { get; set; }
+    public string? numero { get; set; }
+    public string? complemento { get; set; }
+    public string? bairro { get; set; }
+    public string? cidade { get; set; }
+    public string? cep { get; set; }
 }
 
 /// <summary>Endereço do cliente. Aceita "rua" ou "endereco" para o nome da rua.</summary>

@@ -1,5 +1,6 @@
 using CRMVEXA.Application.Features.Clientes.CriarCliente;
 using CRMVEXA.Application.Features.Clientes.DeleteCliente;
+using CRMVEXA.Application.Features.Clientes.GetCliente;
 using CRMVEXA.Application.Features.Clientes.GetListaClientes;
 using CRMVEXA.Application.Features.Clientes.UpdateCliente;
 using MediatR;
@@ -18,6 +19,22 @@ namespace CRMVEXA.API.Controllers
         {
             _mediator = mediator;
             _environment = environment;
+        }
+
+        [HttpGet("{id:int}")]
+        public async Task<ActionResult> ObterPorId([FromRoute] int id)
+        {
+            try
+            {
+                var resultado = await _mediator.Send(new GetClienteRequest { Id = id });
+                if (resultado == null)
+                    return NotFound(new { sucesso = false, mensagem = "Cliente não encontrado." });
+                return Ok(resultado);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { sucesso = false, mensagem = ex.Message });
+            }
         }
 
         [HttpGet]
@@ -47,12 +64,12 @@ namespace CRMVEXA.API.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<int>> Criar([FromBody] CriarClienteRequest request)
+        public async Task<ActionResult<CriarClienteResponse>> Criar([FromBody] CriarClienteRequest request)
         {
             try
             {
-                var id = await _mediator.Send(request);
-                return Ok(new { sucesso = true, id, mensagem = "Cliente criado com sucesso!" });
+                var cliente = await _mediator.Send(request);
+                return StatusCode(201, cliente);
             }
             catch (Exception ex)
             {
@@ -132,7 +149,7 @@ namespace CRMVEXA.API.Controllers
 
                 var url = $"/uploads/clientes/{nomeArquivo}";
 
-                return Ok(new { sucesso = true, url });
+                return Ok(new { sucesso = true, url, fotoUrl = url });
             }
             catch (Exception ex)
             {
