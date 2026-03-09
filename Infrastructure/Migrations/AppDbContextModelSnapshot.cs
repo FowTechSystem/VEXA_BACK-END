@@ -39,6 +39,9 @@ namespace CRMVEXA.Infrastructure.Migrations
                     b.Property<DateTime?>("DataFechamento")
                         .HasColumnType("timestamp without time zone");
 
+                    b.Property<int>("EmpresaId")
+                        .HasColumnType("integer");
+
                     b.Property<string>("Observacoes")
                         .HasColumnType("text");
 
@@ -53,7 +56,59 @@ namespace CRMVEXA.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("EmpresaId");
+
                     b.ToTable("Caixas");
+                });
+
+            modelBuilder.Entity("CRMVEXA.Domain.Entities.Catalogo", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<bool>("Ativo")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(true);
+
+                    b.Property<DateTime>("CriadoEm")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<int>("CriadorId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("CriadorNome")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<string>("CriadorWhatsApp")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<int>("EmpresaId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("EmpresaNome")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<string>("Slug")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CriadorId");
+
+                    b.HasIndex("Slug");
+
+                    b.HasIndex("EmpresaId", "Slug");
+
+                    b.ToTable("Catalogos", (string)null);
                 });
 
             modelBuilder.Entity("CRMVEXA.Domain.Entities.Categoria", b =>
@@ -64,12 +119,29 @@ namespace CRMVEXA.Infrastructure.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
+                    b.Property<bool>("Ativo")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(true);
+
+                    b.Property<DateTime>("DataCadastro")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<string>("Descricao")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<int>("EmpresaId")
+                        .HasColumnType("integer");
+
                     b.Property<string>("Nome")
                         .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("EmpresaId");
 
                     b.ToTable("Categorias", (string)null);
                 });
@@ -100,6 +172,9 @@ namespace CRMVEXA.Infrastructure.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)");
 
+                    b.Property<int>("EmpresaId")
+                        .HasColumnType("integer");
+
                     b.Property<string>("FotoBase64")
                         .HasMaxLength(500)
                         .HasColumnType("character varying(500)");
@@ -129,6 +204,8 @@ namespace CRMVEXA.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("EmpresaId");
+
                     b.ToTable("Clientes", (string)null);
                 });
 
@@ -145,8 +222,14 @@ namespace CRMVEXA.Infrastructure.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("character varying(50)");
 
+                    b.Property<DateTime?>("DataEntregaPrevista")
+                        .HasColumnType("timestamp without time zone");
+
                     b.Property<DateTime>("DataHora")
                         .HasColumnType("timestamp without time zone");
+
+                    b.Property<int>("EmpresaId")
+                        .HasColumnType("integer");
 
                     b.Property<int>("FornecedorId")
                         .HasColumnType("integer");
@@ -159,7 +242,7 @@ namespace CRMVEXA.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasMaxLength(20)
                         .HasColumnType("character varying(20)")
-                        .HasDefaultValue("Concluída");
+                        .HasDefaultValue("pendente");
 
                     b.Property<int>("UsuarioId")
                         .HasColumnType("integer");
@@ -169,11 +252,54 @@ namespace CRMVEXA.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("EmpresaId");
+
                     b.HasIndex("FornecedorId");
 
                     b.HasIndex("UsuarioId");
 
                     b.ToTable("Compras", (string)null);
+                });
+
+            modelBuilder.Entity("CRMVEXA.Domain.Entities.Condicional", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("ClienteId")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("Data")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<int>("EmpresaId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasDefaultValue("pendente");
+
+                    b.Property<int>("UsuarioId")
+                        .HasColumnType("integer");
+
+                    b.Property<decimal>("ValorTotal")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ClienteId");
+
+                    b.HasIndex("EmpresaId");
+
+                    b.HasIndex("UsuarioId");
+
+                    b.ToTable("Condicionais", (string)null);
                 });
 
             modelBuilder.Entity("CRMVEXA.Domain.Entities.Cor", b =>
@@ -184,6 +310,9 @@ namespace CRMVEXA.Infrastructure.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
+                    b.Property<int>("EmpresaId")
+                        .HasColumnType("integer");
+
                     b.Property<string>("Nome")
                         .IsRequired()
                         .HasMaxLength(50)
@@ -191,7 +320,49 @@ namespace CRMVEXA.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("EmpresaId");
+
                     b.ToTable("Cores", (string)null);
+                });
+
+            modelBuilder.Entity("CRMVEXA.Domain.Entities.Empresa", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<bool>("Ativo")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("CNPJ")
+                        .HasMaxLength(18)
+                        .HasColumnType("character varying(18)");
+
+                    b.Property<DateTime>("DataCadastro")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<string>("Email")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<string>("Nome")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<string>("NomeFantasia")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<string>("Telefone")
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Empresas", (string)null);
                 });
 
             modelBuilder.Entity("CRMVEXA.Domain.Entities.Endereco", b =>
@@ -263,6 +434,9 @@ namespace CRMVEXA.Infrastructure.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
+                    b.Property<int>("EmpresaId")
+                        .HasColumnType("integer");
+
                     b.Property<int>("EstoqueMinimo")
                         .HasColumnType("integer");
 
@@ -277,6 +451,8 @@ namespace CRMVEXA.Infrastructure.Migrations
                         .HasColumnType("integer");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("EmpresaId");
 
                     b.HasIndex("ProdutoId")
                         .IsUnique();
@@ -307,6 +483,9 @@ namespace CRMVEXA.Infrastructure.Migrations
                     b.Property<string>("Email")
                         .HasColumnType("text");
 
+                    b.Property<int>("EmpresaId")
+                        .HasColumnType("integer");
+
                     b.Property<string>("Nome")
                         .IsRequired()
                         .HasMaxLength(200)
@@ -329,6 +508,8 @@ namespace CRMVEXA.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("EmpresaId");
+
                     b.ToTable("Fornecedores");
                 });
 
@@ -340,6 +521,9 @@ namespace CRMVEXA.Infrastructure.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
+                    b.Property<int>("EmpresaId")
+                        .HasColumnType("integer");
+
                     b.Property<string>("Nome")
                         .IsRequired()
                         .HasMaxLength(50)
@@ -347,7 +531,45 @@ namespace CRMVEXA.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("EmpresaId");
+
                     b.ToTable("GenerosProduto", (string)null);
+                });
+
+            modelBuilder.Entity("CRMVEXA.Domain.Entities.ItemCatalogo", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("CatalogoId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Nome")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<decimal>("Preco")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("ProdutoId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Quantidade")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(1);
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CatalogoId");
+
+                    b.HasIndex("ProdutoId");
+
+                    b.ToTable("ItensCatalogo", (string)null);
                 });
 
             modelBuilder.Entity("CRMVEXA.Domain.Entities.ItemCompra", b =>
@@ -377,6 +599,35 @@ namespace CRMVEXA.Infrastructure.Migrations
                     b.HasIndex("ProdutoId");
 
                     b.ToTable("ItensCompra", (string)null);
+                });
+
+            modelBuilder.Entity("CRMVEXA.Domain.Entities.ItemCondicional", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("CondicionalId")
+                        .HasColumnType("integer");
+
+                    b.Property<decimal>("PrecoUnitario")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("ProdutoId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Quantidade")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CondicionalId");
+
+                    b.HasIndex("ProdutoId");
+
+                    b.ToTable("ItensCondicional", (string)null);
                 });
 
             modelBuilder.Entity("CRMVEXA.Domain.Entities.ItemVenda", b =>
@@ -416,12 +667,29 @@ namespace CRMVEXA.Infrastructure.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
+                    b.Property<bool>("Ativo")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(true);
+
+                    b.Property<DateTime>("DataCadastro")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<string>("Descricao")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<int>("EmpresaId")
+                        .HasColumnType("integer");
+
                     b.Property<string>("Nome")
                         .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("EmpresaId");
 
                     b.ToTable("Marcas", (string)null);
                 });
@@ -443,6 +711,9 @@ namespace CRMVEXA.Infrastructure.Migrations
                     b.Property<string>("Descricao")
                         .HasColumnType("text");
 
+                    b.Property<int>("EmpresaId")
+                        .HasColumnType("integer");
+
                     b.Property<string>("FormaPagamento")
                         .IsRequired()
                         .HasMaxLength(30)
@@ -460,6 +731,8 @@ namespace CRMVEXA.Infrastructure.Migrations
 
                     b.HasIndex("CaixaId");
 
+                    b.HasIndex("EmpresaId");
+
                     b.ToTable("MovimentacoesCaixa", (string)null);
                 });
 
@@ -471,13 +744,22 @@ namespace CRMVEXA.Infrastructure.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
+                    b.Property<int?>("CompraId")
+                        .HasColumnType("integer");
+
                     b.Property<DateTime>("DataHora")
                         .HasColumnType("timestamp without time zone");
+
+                    b.Property<int>("EmpresaId")
+                        .HasColumnType("integer");
 
                     b.Property<string>("Motivo")
                         .IsRequired()
                         .HasMaxLength(200)
                         .HasColumnType("character varying(200)");
+
+                    b.Property<string>("Observacoes")
+                        .HasColumnType("text");
 
                     b.Property<int>("ProdutoId")
                         .HasColumnType("integer");
@@ -493,7 +775,12 @@ namespace CRMVEXA.Infrastructure.Migrations
                     b.Property<int>("UsuarioId")
                         .HasColumnType("integer");
 
+                    b.Property<int?>("VendaId")
+                        .HasColumnType("integer");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("EmpresaId");
 
                     b.HasIndex("ProdutoId");
 
@@ -547,6 +834,9 @@ namespace CRMVEXA.Infrastructure.Migrations
 
                     b.Property<string>("DescricaoCurta")
                         .HasColumnType("text");
+
+                    b.Property<int>("EmpresaId")
+                        .HasColumnType("integer");
 
                     b.Property<int?>("FornecedorId")
                         .HasColumnType("integer");
@@ -603,6 +893,8 @@ namespace CRMVEXA.Infrastructure.Migrations
 
                     b.HasIndex("CorId");
 
+                    b.HasIndex("EmpresaId");
+
                     b.HasIndex("FornecedorId");
 
                     b.HasIndex("GeneroId");
@@ -627,6 +919,9 @@ namespace CRMVEXA.Infrastructure.Migrations
                     b.Property<int>("CategoriaId")
                         .HasColumnType("integer");
 
+                    b.Property<int>("EmpresaId")
+                        .HasColumnType("integer");
+
                     b.Property<string>("Nome")
                         .IsRequired()
                         .HasMaxLength(100)
@@ -635,6 +930,8 @@ namespace CRMVEXA.Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("CategoriaId");
+
+                    b.HasIndex("EmpresaId");
 
                     b.ToTable("Subcategorias", (string)null);
                 });
@@ -647,12 +944,17 @@ namespace CRMVEXA.Infrastructure.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
+                    b.Property<int>("EmpresaId")
+                        .HasColumnType("integer");
+
                     b.Property<string>("Nome")
                         .IsRequired()
                         .HasMaxLength(20)
                         .HasColumnType("character varying(20)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("EmpresaId");
 
                     b.ToTable("Tamanhos", (string)null);
                 });
@@ -667,6 +969,10 @@ namespace CRMVEXA.Infrastructure.Migrations
 
                     b.Property<bool>("Ativo")
                         .HasColumnType("boolean");
+
+                    b.Property<string>("CNPJ")
+                        .HasMaxLength(18)
+                        .HasColumnType("character varying(18)");
 
                     b.Property<string>("CPF")
                         .HasMaxLength(14)
@@ -687,6 +993,9 @@ namespace CRMVEXA.Infrastructure.Migrations
                         .IsRequired()
                         .HasMaxLength(200)
                         .HasColumnType("character varying(200)");
+
+                    b.Property<int>("EmpresaId")
+                        .HasColumnType("integer");
 
                     b.Property<string>("Login")
                         .IsRequired()
@@ -742,6 +1051,8 @@ namespace CRMVEXA.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("EmpresaId");
+
                     b.ToTable("Usuarios", (string)null);
                 });
 
@@ -779,10 +1090,11 @@ namespace CRMVEXA.Infrastructure.Migrations
                     b.Property<DateTime>("DataHora")
                         .HasColumnType("timestamp without time zone");
 
-                    b.Property<decimal>("Desconto")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("decimal(18,2)")
-                        .HasDefaultValue(0m);
+                    b.Property<decimal?>("Desconto")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("EmpresaId")
+                        .HasColumnType("integer");
 
                     b.Property<string>("FormaPagamento")
                         .IsRequired()
@@ -806,13 +1118,73 @@ namespace CRMVEXA.Infrastructure.Migrations
 
                     b.HasIndex("ClienteId");
 
+                    b.HasIndex("EmpresaId");
+
                     b.HasIndex("UsuarioId");
 
                     b.ToTable("Vendas", (string)null);
                 });
 
+            modelBuilder.Entity("CRMVEXA.Domain.Entities.Caixa", b =>
+                {
+                    b.HasOne("CRMVEXA.Domain.Entities.Empresa", "Empresa")
+                        .WithMany("Caixas")
+                        .HasForeignKey("EmpresaId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Empresa");
+                });
+
+            modelBuilder.Entity("CRMVEXA.Domain.Entities.Catalogo", b =>
+                {
+                    b.HasOne("CRMVEXA.Domain.Entities.Usuario", "Criador")
+                        .WithMany()
+                        .HasForeignKey("CriadorId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("CRMVEXA.Domain.Entities.Empresa", "Empresa")
+                        .WithMany()
+                        .HasForeignKey("EmpresaId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Criador");
+
+                    b.Navigation("Empresa");
+                });
+
+            modelBuilder.Entity("CRMVEXA.Domain.Entities.Categoria", b =>
+                {
+                    b.HasOne("CRMVEXA.Domain.Entities.Empresa", "Empresa")
+                        .WithMany("Categorias")
+                        .HasForeignKey("EmpresaId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Empresa");
+                });
+
+            modelBuilder.Entity("CRMVEXA.Domain.Entities.Cliente", b =>
+                {
+                    b.HasOne("CRMVEXA.Domain.Entities.Empresa", "Empresa")
+                        .WithMany("Clientes")
+                        .HasForeignKey("EmpresaId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Empresa");
+                });
+
             modelBuilder.Entity("CRMVEXA.Domain.Entities.Compra", b =>
                 {
+                    b.HasOne("CRMVEXA.Domain.Entities.Empresa", "Empresa")
+                        .WithMany("Compras")
+                        .HasForeignKey("EmpresaId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("CRMVEXA.Domain.Entities.Fornecedor", null)
                         .WithMany()
                         .HasForeignKey("FornecedorId")
@@ -824,6 +1196,46 @@ namespace CRMVEXA.Infrastructure.Migrations
                         .HasForeignKey("UsuarioId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
+
+                    b.Navigation("Empresa");
+                });
+
+            modelBuilder.Entity("CRMVEXA.Domain.Entities.Condicional", b =>
+                {
+                    b.HasOne("CRMVEXA.Domain.Entities.Cliente", "Cliente")
+                        .WithMany()
+                        .HasForeignKey("ClienteId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("CRMVEXA.Domain.Entities.Empresa", "Empresa")
+                        .WithMany()
+                        .HasForeignKey("EmpresaId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("CRMVEXA.Domain.Entities.Usuario", "Usuario")
+                        .WithMany()
+                        .HasForeignKey("UsuarioId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Cliente");
+
+                    b.Navigation("Empresa");
+
+                    b.Navigation("Usuario");
+                });
+
+            modelBuilder.Entity("CRMVEXA.Domain.Entities.Cor", b =>
+                {
+                    b.HasOne("CRMVEXA.Domain.Entities.Empresa", "Empresa")
+                        .WithMany()
+                        .HasForeignKey("EmpresaId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Empresa");
                 });
 
             modelBuilder.Entity("CRMVEXA.Domain.Entities.Endereco", b =>
@@ -852,13 +1264,58 @@ namespace CRMVEXA.Infrastructure.Migrations
 
             modelBuilder.Entity("CRMVEXA.Domain.Entities.Estoque", b =>
                 {
+                    b.HasOne("CRMVEXA.Domain.Entities.Empresa", "Empresa")
+                        .WithMany()
+                        .HasForeignKey("EmpresaId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("CRMVEXA.Domain.Entities.Produto", "Produto")
                         .WithOne("Estoque")
                         .HasForeignKey("CRMVEXA.Domain.Entities.Estoque", "ProdutoId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.Navigation("Empresa");
+
                     b.Navigation("Produto");
+                });
+
+            modelBuilder.Entity("CRMVEXA.Domain.Entities.Fornecedor", b =>
+                {
+                    b.HasOne("CRMVEXA.Domain.Entities.Empresa", "Empresa")
+                        .WithMany("Fornecedores")
+                        .HasForeignKey("EmpresaId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Empresa");
+                });
+
+            modelBuilder.Entity("CRMVEXA.Domain.Entities.GeneroProduto", b =>
+                {
+                    b.HasOne("CRMVEXA.Domain.Entities.Empresa", "Empresa")
+                        .WithMany()
+                        .HasForeignKey("EmpresaId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Empresa");
+                });
+
+            modelBuilder.Entity("CRMVEXA.Domain.Entities.ItemCatalogo", b =>
+                {
+                    b.HasOne("CRMVEXA.Domain.Entities.Catalogo", null)
+                        .WithMany("Produtos")
+                        .HasForeignKey("CatalogoId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("CRMVEXA.Domain.Entities.Produto", null)
+                        .WithMany()
+                        .HasForeignKey("ProdutoId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("CRMVEXA.Domain.Entities.ItemCompra", b =>
@@ -866,6 +1323,21 @@ namespace CRMVEXA.Infrastructure.Migrations
                     b.HasOne("CRMVEXA.Domain.Entities.Compra", null)
                         .WithMany("Itens")
                         .HasForeignKey("CompraId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("CRMVEXA.Domain.Entities.Produto", null)
+                        .WithMany()
+                        .HasForeignKey("ProdutoId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("CRMVEXA.Domain.Entities.ItemCondicional", b =>
+                {
+                    b.HasOne("CRMVEXA.Domain.Entities.Condicional", null)
+                        .WithMany("Itens")
+                        .HasForeignKey("CondicionalId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -891,6 +1363,17 @@ namespace CRMVEXA.Infrastructure.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("CRMVEXA.Domain.Entities.Marca", b =>
+                {
+                    b.HasOne("CRMVEXA.Domain.Entities.Empresa", "Empresa")
+                        .WithMany()
+                        .HasForeignKey("EmpresaId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Empresa");
+                });
+
             modelBuilder.Entity("CRMVEXA.Domain.Entities.MovimentacaoCaixa", b =>
                 {
                     b.HasOne("CRMVEXA.Domain.Entities.Caixa", null)
@@ -898,10 +1381,22 @@ namespace CRMVEXA.Infrastructure.Migrations
                         .HasForeignKey("CaixaId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
+
+                    b.HasOne("CRMVEXA.Domain.Entities.Empresa", null)
+                        .WithMany()
+                        .HasForeignKey("EmpresaId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("CRMVEXA.Domain.Entities.MovimentacaoEstoque", b =>
                 {
+                    b.HasOne("CRMVEXA.Domain.Entities.Empresa", null)
+                        .WithMany()
+                        .HasForeignKey("EmpresaId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.HasOne("CRMVEXA.Domain.Entities.Produto", null)
                         .WithMany()
                         .HasForeignKey("ProdutoId")
@@ -927,6 +1422,12 @@ namespace CRMVEXA.Infrastructure.Migrations
                         .WithMany("Produtos")
                         .HasForeignKey("CorId")
                         .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("CRMVEXA.Domain.Entities.Empresa", "Empresa")
+                        .WithMany("Produtos")
+                        .HasForeignKey("EmpresaId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("CRMVEXA.Domain.Entities.Fornecedor", "Fornecedor")
                         .WithMany("Produtos")
@@ -958,6 +1459,8 @@ namespace CRMVEXA.Infrastructure.Migrations
 
                     b.Navigation("Cor");
 
+                    b.Navigation("Empresa");
+
                     b.Navigation("Fornecedor");
 
                     b.Navigation("Genero");
@@ -977,7 +1480,37 @@ namespace CRMVEXA.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("CRMVEXA.Domain.Entities.Empresa", "Empresa")
+                        .WithMany()
+                        .HasForeignKey("EmpresaId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.Navigation("Categoria");
+
+                    b.Navigation("Empresa");
+                });
+
+            modelBuilder.Entity("CRMVEXA.Domain.Entities.Tamanho", b =>
+                {
+                    b.HasOne("CRMVEXA.Domain.Entities.Empresa", "Empresa")
+                        .WithMany()
+                        .HasForeignKey("EmpresaId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Empresa");
+                });
+
+            modelBuilder.Entity("CRMVEXA.Domain.Entities.Usuario", b =>
+                {
+                    b.HasOne("CRMVEXA.Domain.Entities.Empresa", "Empresa")
+                        .WithMany("Usuarios")
+                        .HasForeignKey("EmpresaId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Empresa");
                 });
 
             modelBuilder.Entity("CRMVEXA.Domain.Entities.UsuarioPermissao", b =>
@@ -1006,11 +1539,24 @@ namespace CRMVEXA.Infrastructure.Migrations
                         .HasForeignKey("ClienteId")
                         .OnDelete(DeleteBehavior.SetNull);
 
+                    b.HasOne("CRMVEXA.Domain.Entities.Empresa", "Empresa")
+                        .WithMany("Vendas")
+                        .HasForeignKey("EmpresaId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("CRMVEXA.Domain.Entities.Usuario", null)
                         .WithMany()
                         .HasForeignKey("UsuarioId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
+
+                    b.Navigation("Empresa");
+                });
+
+            modelBuilder.Entity("CRMVEXA.Domain.Entities.Catalogo", b =>
+                {
+                    b.Navigation("Produtos");
                 });
 
             modelBuilder.Entity("CRMVEXA.Domain.Entities.Categoria", b =>
@@ -1030,9 +1576,33 @@ namespace CRMVEXA.Infrastructure.Migrations
                     b.Navigation("Itens");
                 });
 
+            modelBuilder.Entity("CRMVEXA.Domain.Entities.Condicional", b =>
+                {
+                    b.Navigation("Itens");
+                });
+
             modelBuilder.Entity("CRMVEXA.Domain.Entities.Cor", b =>
                 {
                     b.Navigation("Produtos");
+                });
+
+            modelBuilder.Entity("CRMVEXA.Domain.Entities.Empresa", b =>
+                {
+                    b.Navigation("Caixas");
+
+                    b.Navigation("Categorias");
+
+                    b.Navigation("Clientes");
+
+                    b.Navigation("Compras");
+
+                    b.Navigation("Fornecedores");
+
+                    b.Navigation("Produtos");
+
+                    b.Navigation("Usuarios");
+
+                    b.Navigation("Vendas");
                 });
 
             modelBuilder.Entity("CRMVEXA.Domain.Entities.Fornecedor", b =>

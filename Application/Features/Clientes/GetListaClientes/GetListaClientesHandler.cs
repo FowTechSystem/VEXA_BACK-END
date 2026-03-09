@@ -26,14 +26,15 @@ namespace CRMVEXA.Application.Features.Clientes.GetListaClientes
 
             if (!string.IsNullOrWhiteSpace(request.Valor))
             {
-                if (request.Filtro?.ToLower() == "cpf")
-                {
-                    query = query.Where(c => c.CPF != null && c.CPF.Contains(request.Valor));
-                }
+                var valor = request.Valor.Trim();
+                var valorLower = valor.ToLower();
+                var f = request.Filtro?.Trim().ToLowerInvariant();
+                if (f == "cpf")
+                    query = query.Where(c => c.CPF != null && c.CPF.Contains(valor));
+                else if (f == "email")
+                    query = query.Where(c => c.Email != null && c.Email.ToLower().Contains(valorLower));
                 else
-                {
-                    query = query.Where(c => c.NomeCompleto.ToLower().Contains(request.Valor.ToLower()));
-                }
+                    query = query.Where(c => c.NomeCompleto.ToLower().Contains(valorLower));
             }
 
             var pagina = Math.Max(1, request.Pagina);
@@ -53,9 +54,27 @@ namespace CRMVEXA.Application.Features.Clientes.GetListaClientes
             var clientesResp = clientes.Select(c => new ClienteListaResponse
             {
                 Id = c.Id,
-                Nome = c.NomeCompleto,
+                NomeCompleto = c.NomeCompleto,
                 Email = c.Email,
-                DataCadastro = c.DataCadastro
+                CPF = c.CPF,
+                RG = c.RG,
+                CNPJ = c.CNPJ,
+                DataNascimento = c.DataNascimento,
+                Telefone = c.Telefone,
+                WhatsApp = c.WhatsApp,
+                Preferencias = c.Preferencias,
+                Observacoes = c.Observacoes,
+                FotoUrl = c.FotoBase64 != null && c.FotoBase64.StartsWith("data:") ? c.FotoBase64 : (c.FotoBase64 != null ? "data:image/jpeg;base64," + c.FotoBase64 : null),
+                DataCadastro = c.DataCadastro,
+                Enderecos = c.Enderecos?.Select(e => new EnderecoClienteResponse
+                {
+                    Rua = e.Rua,
+                    Numero = e.Numero,
+                    Complemento = e.Complemento,
+                    Bairro = e.Bairro,
+                    Cidade = e.Cidade,
+                    Cep = e.Cep
+                }).ToList() ?? new List<EnderecoClienteResponse>()
             }).ToList();
 
             return new GetListaClientesResponse

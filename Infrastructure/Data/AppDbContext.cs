@@ -29,6 +29,10 @@ namespace CRMVEXA.Infrastructure.Data
         public DbSet<Endereco> Enderecos { get; set; }
         public DbSet<MovimentacaoEstoque> MovimentacoesEstoque { get; set; }
         public DbSet<MovimentacaoCaixa> MovimentacoesCaixa { get; set; }
+        public DbSet<Condicional> Condicionais { get; set; }
+        public DbSet<ItemCondicional> ItensCondicional { get; set; }
+        public DbSet<Catalogo> Catalogos { get; set; }
+        public DbSet<ItemCatalogo> ItensCatalogo { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
