@@ -17,6 +17,8 @@ namespace CRMVEXA.Application.Features.Vendas.GetListaVendas
         public int Id { get; set; }
         public string CodigoVenda { get; set; } = string.Empty;
         public int? ClienteId { get; set; }
+        /// <summary>Objeto cliente para relatórios (cliente.nome).</summary>
+        public ClienteRefResponse? Cliente { get; set; }
         public string? NomeCliente { get; set; }
         public decimal Desconto { get; set; }
         public string FormaPagamento { get; set; } = string.Empty;
@@ -33,6 +35,12 @@ namespace CRMVEXA.Application.Features.Vendas.GetListaVendas
     }
 
     public class VendedorRefResponse
+    {
+        public int Id { get; set; }
+        public string Nome { get; set; } = string.Empty;
+    }
+
+    public class ClienteRefResponse
     {
         public int Id { get; set; }
         public string Nome { get; set; } = string.Empty;
