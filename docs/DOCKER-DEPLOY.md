@@ -204,22 +204,7 @@ docker compose up -d --build
 
 ### Banco de dados (migrations)
 
-O container da API **não aplica migrations automaticamente**. Opções:
-
-1. **No seu PC** (com Postgres acessível): exponha o Postgres só para depuração **ou** use túnel SSH, depois:
-   ```bash
-   dotnet ef database update --project CRMVEXA.csproj --connection "Host=...;..."
-   ```
-2. **Na VPS**, com SDK (só para manutenção): instalar SDK temporariamente ou usar uma imagem com `dotnet-ef` — o mais simples costuma ser rodar `ef` da sua máquina contra o host/porta do Postgres.
-
-Se quiser acessar o Postgres a partir da sua máquina por um tempo, no `docker-compose.yml` você pode adicionar em `db` (apenas em homologação, com firewall restrito):
-
-```yaml
-ports:
-  - "127.0.0.1:5432:5432"
-```
-
-E usar túnel SSH: `ssh -L 5432:127.0.0.1:5432 root@SEU_IP`.
+O container da API **não aplica migrations automaticamente**. O `docker-compose.yml` já mapeia Postgres em **`127.0.0.1:5432`** no host. Passo a passo completo (incl. erro `Usuarios does not exist`): ver **§11** abaixo.
 
 ---
 
@@ -289,6 +274,60 @@ A API responde em **`/`** e **`/health`** com JSON (versão recente do código).
    Se aqui retornar JSON e no browser não, há proxy/firewall estranho; se aqui também for 404, o build não atualizou o container.
 
 **Nota:** 404 na raiz em versões **muito antigas** do deploy era “normal” (sem rota em `/`). Com o código atual, **`/`** e **`/health`** devem funcionar após rebuild.
+
+---
+
+## 11. Erro `relation "Usuarios" does not exist` / login **500**
+
+O Postgres está vazio: **falta aplicar as migrations** do Entity Framework (criar tabelas).
+
+O `docker-compose.yml` expõe o Postgres em **`127.0.0.1:5432`** no host (só localhost, não abre para a internet). Depois de atualizar o compose:
+
+```bash
+cd /opt/vexa_backend
+git pull
+docker compose up -d
+```
+
+### Opção A — Na VPS, com container SDK (recomendado; não instala .NET no Ubuntu)
+
+1. Descubra a **rede Docker** onde estão `api` e `db` (um nome por linha):
+
+   ```bash
+   docker inspect crmvexa-db --format '{{range $k, $v := .NetworkSettings.Networks}}{{$k}} {{end}}'
+   ```
+
+   Exemplo típico: `vexa_backend_default` (depende da pasta do projeto).
+
+2. Troque `REDE_AQUI`, `SENHA_POSTGRES` (igual ao `POSTGRES_PASSWORD` do `.env`) e rode:
+
+   ```bash
+   docker run --rm \
+     --network REDE_AQUI \
+     -v /opt/vexa_backend:/app -w /app \
+     mcr.microsoft.com/dotnet/sdk:9.0 \
+     bash -c 'dotnet tool install --global dotnet-ef --version 9.0.0 && export PATH="$PATH:/root/.dotnet/tools" && dotnet ef database update --project CRMVEXA.csproj --connection "Host=db;Port=5432;Database=crmvaxa;Username=postgres;Password=SENHA_POSTGRES"'
+   ```
+
+3. Se o nome da base no `.env` não for `crmvaxa`, use o mesmo em `Database=`.
+
+4. Reinicie a API se quiser limpar estado: `docker compose restart api`
+
+5. Confirme tabelas: `docker compose exec db psql -U postgres -d crmvaxa -c '\dt'`
+
+### Opção B — No seu PC (com .NET SDK + túnel SSH)
+
+1. Terminal: `ssh -L 5432:127.0.0.1:5432 root@SEU_IP` (deixe aberto).
+
+2. Na pasta do projeto no PC:
+
+   ```bash
+   dotnet ef database update --project CRMVEXA.csproj --connection "Host=127.0.0.1;Port=5432;Database=crmvaxa;Username=postgres;Password=SENHA_POSTGRES"
+   ```
+
+### Depois das migrations
+
+É preciso existir **utilizador** na tabela (fluxo de cadastro da app ou dados iniciais). Senha errada → **401**; sem tabelas → **500** como viste nos logs.
 
 ---
 
