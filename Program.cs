@@ -8,7 +8,12 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text.Json;
 
 var builder = WebApplication.CreateBuilder(args);
-builder.WebHost.UseUrls("https://localhost:5001");
+
+// Dev local: HTTPS fixo. Docker/produção: HTTP em todas as interfaces (proxy TLS na frente).
+if (builder.Environment.IsDevelopment())
+    builder.WebHost.UseUrls("https://localhost:5001");
+else
+    builder.WebHost.UseUrls("http://+:8080");
 
 // ============ CONFIGURAÇÕES DE SERVIÇOS ============
 
@@ -17,6 +22,7 @@ AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<IEmpresaContext, EmpresaContext>();
+builder.Services.AddScoped<IEntradaEstoquePorCompraService, EntradaEstoquePorCompraService>();
 
 // 1. Configurar DbContext
 builder.Services.AddDbContext<AppDbContext>(options =>
@@ -133,9 +139,8 @@ if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
+    app.UseHttpsRedirection();
 }
-
-app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
 app.UseCors("AllowFrontend");

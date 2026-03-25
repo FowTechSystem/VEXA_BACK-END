@@ -39,7 +39,7 @@ public class EstoqueController : ControllerBase
         }
     }
 
-    /// <summary>Histórico de movimentações (entradas por compra recebida, saídas por venda).</summary>
+    /// <summary>Histórico de movimentações (entradas por compra lançada/recebida, saídas por venda, etc.).</summary>
     [HttpGet("movimentacoes")]
     public async Task<ActionResult<GetListaMovimentacoesResponse>> Movimentacoes(
         [FromQuery] int? produtoId,
