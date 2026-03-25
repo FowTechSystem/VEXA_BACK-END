@@ -15,12 +15,18 @@ namespace CRMVEXA.Application.Features.Compras.CreateCompra
         private readonly AppDbContext _context;
         private readonly IEmpresaContext _empresaContext;
         private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly IEntradaEstoquePorCompraService _entradaEstoque;
 
-        public CreateCompraHandler(AppDbContext context, IEmpresaContext empresaContext, IHttpContextAccessor httpContextAccessor)
+        public CreateCompraHandler(
+            AppDbContext context,
+            IEmpresaContext empresaContext,
+            IHttpContextAccessor httpContextAccessor,
+            IEntradaEstoquePorCompraService entradaEstoque)
         {
             _context = context;
             _empresaContext = empresaContext;
             _httpContextAccessor = httpContextAccessor;
+            _entradaEstoque = entradaEstoque;
         }
 
         public async Task<int> Handle(CreateCompraRequest request, CancellationToken cancellationToken)
@@ -56,9 +62,16 @@ namespace CRMVEXA.Application.Features.Compras.CreateCompra
                 compra.AdicionarItem(itemCompra);
             }
 
-            // Não atualiza estoque na criação - só quando status = "recebida" (via UpdateCompraStatus)
             _context.Compras.Add(compra);
             await _context.SaveChangesAsync(cancellationToken);
+
+            if (!string.Equals(compra.Status, "cancelada", StringComparison.OrdinalIgnoreCase))
+            {
+                var motivo = $"Compra {compra.CodigoCompra} lançada";
+                await _entradaEstoque.RegistrarEntradaAsync(empresaId, compra, usuarioId, motivo, cancellationToken);
+                await _context.SaveChangesAsync(cancellationToken);
+            }
+
             return compra.Id;
         }
 

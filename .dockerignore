@@ -1,0 +1,14 @@
+**/.git
+**/.vs
+**/.vscode
+**/.cursor
+**/bin
+**/obj
+**/out
+**/Log
+**/Logs
+**/*.user
+**/*.suo
+**/node_modules
+**/.env
+!**/.env.example

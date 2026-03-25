@@ -78,7 +78,7 @@ namespace CRMVEXA.Application.Features.Produtos.GetListaProdutos
                 PrecoVenda = p.PrecoVenda,
                 CodigoBarras = p.CodigoBarras,
                 QuantidadeEstoque = p.Estoque?.Quantidade ?? 0,
-                EstoqueMinimo = p.Estoque?.EstoqueMinimo ?? 1,
+                EstoqueMinimo = p.Estoque?.EstoqueMinimo ?? 10,
                 EstoqueMaximo = 0,
                 LocalizacaoEstoque = p.Estoque?.LocalizacaoEstoque,
                 Foto1 = p.Foto1,

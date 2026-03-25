@@ -1,6 +1,5 @@
 using System.Security.Claims;
 using CRMVEXA.Application.Services;
-using CRMVEXA.Domain.Entities;
 using CRMVEXA.Infrastructure.Data;
 using MediatR;
 using Microsoft.AspNetCore.Http;
@@ -13,12 +12,18 @@ public class UpdateCompraStatusHandler : IRequestHandler<UpdateCompraStatusReque
     private readonly AppDbContext _context;
     private readonly IEmpresaContext _empresaContext;
     private readonly IHttpContextAccessor _httpContextAccessor;
+    private readonly IEntradaEstoquePorCompraService _entradaEstoque;
 
-    public UpdateCompraStatusHandler(AppDbContext context, IEmpresaContext empresaContext, IHttpContextAccessor httpContextAccessor)
+    public UpdateCompraStatusHandler(
+        AppDbContext context,
+        IEmpresaContext empresaContext,
+        IHttpContextAccessor httpContextAccessor,
+        IEntradaEstoquePorCompraService entradaEstoque)
     {
         _context = context;
         _empresaContext = empresaContext;
         _httpContextAccessor = httpContextAccessor;
+        _entradaEstoque = entradaEstoque;
     }
 
     public async Task<UpdateCompraStatusResponse> Handle(UpdateCompraStatusRequest request, CancellationToken cancellationToken)
@@ -43,34 +48,14 @@ public class UpdateCompraStatusHandler : IRequestHandler<UpdateCompraStatusReque
 
         if (status == "recebida")
         {
-            var usuarioId = ObterUsuarioIdDoToken();
-            foreach (var item in compra.Itens)
+            var jaEntrouEstoque = await _context.MovimentacoesEstoque
+                .AnyAsync(m => m.CompraId == compra.Id, cancellationToken);
+
+            if (!jaEntrouEstoque)
             {
-                var produto = await _context.Produtos
-                    .Where(p => p.EmpresaId == empresaId && p.Id == item.ProdutoId)
-                    .Include(p => p.Estoque)
-                    .FirstOrDefaultAsync(cancellationToken);
-
-                if (produto == null) continue;
-
-                if (produto.Estoque != null)
-                    produto.Estoque.AtualizarQuantidade(item.Quantidade);
-                else
-                {
-                    var estoque = new CRMVEXA.Domain.Entities.Estoque(empresaId, item.ProdutoId, item.Quantidade);
-                    _context.Estoques.Add(estoque);
-                }
-
-                var movimentacao = new MovimentacaoEstoque(
-                    empresaId,
-                    item.ProdutoId,
-                    "Entrada",
-                    item.Quantidade,
-                    $"Compra {compra.CodigoCompra} recebida",
-                    usuarioId,
-                    compraId: compra.Id
-                );
-                _context.MovimentacoesEstoque.Add(movimentacao);
+                var usuarioId = ObterUsuarioIdDoToken();
+                var motivo = $"Compra {compra.CodigoCompra} recebida";
+                await _entradaEstoque.RegistrarEntradaAsync(empresaId, compra, usuarioId, motivo, cancellationToken);
             }
         }
 

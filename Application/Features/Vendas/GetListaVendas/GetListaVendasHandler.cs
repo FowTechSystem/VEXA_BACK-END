@@ -102,6 +102,7 @@ namespace CRMVEXA.Application.Features.Vendas.GetListaVendas
                     Id = v.Id,
                     CodigoVenda = v.CodigoVenda,
                     ClienteId = v.ClienteId,
+                    Cliente = cliente != null ? new ClienteRefResponse { Id = cliente.Id, Nome = cliente.NomeCompleto } : null,
                     NomeCliente = cliente?.NomeCompleto,
                     Desconto = v.Desconto ?? 0,
                     FormaPagamento = v.FormaPagamento,
