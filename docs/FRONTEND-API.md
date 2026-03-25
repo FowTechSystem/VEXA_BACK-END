@@ -55,6 +55,7 @@ Para detalhes de contrato (campos exatos), use **Swagger** em ambiente de desenv
 
 - **Desenvolvimento local:** `https://localhost:5001` (ver `launchSettings.json`).
 - **Docker / VPS:** a API sobe em **HTTP na porta 8080** (ex.: `http://SEU_IP:8080`); detalhes em [`docs/DOCKER-DEPLOY.md`](DOCKER-DEPLOY.md).
+- **Publicar o front na VPS / CORS / variáveis de ambiente:** [`docs/FRONTEND-DEPLOY-VPS.md`](FRONTEND-DEPLOY-VPS.md).
 
 ---
 

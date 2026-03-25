@@ -267,6 +267,31 @@ docker compose up -d --build   # após git pull
 
 ---
 
+## 9. Front-end no mesmo projeto de entrega
+
+Guia para o time de UI publicar o app e alinhar CORS / URL da API: [`FRONTEND-DEPLOY-VPS.md`](FRONTEND-DEPLOY-VPS.md).
+
+---
+
+## 10. Sintomas: 404 em `/` ou `/health` no browser
+
+A API responde em **`/`** e **`/health`** com JSON (versão recente do código). Se no IP `:8080` ainda aparecer **404**:
+
+1. O container está com **imagem antiga** — na VPS:
+   ```bash
+   cd /opt/vexa_backend
+   git pull
+   docker compose up -d --build
+   ```
+2. Confirme que o **push** no GitHub inclui o `Program.cs` atual.
+3. Teste na própria VPS (ignora cache do browser):  
+   `curl -sS http://127.0.0.1:8080/health`  
+   Se aqui retornar JSON e no browser não, há proxy/firewall estranho; se aqui também for 404, o build não atualizou o container.
+
+**Nota:** 404 na raiz em versões **muito antigas** do deploy era “normal” (sem rota em `/`). Com o código atual, **`/`** e **`/health`** devem funcionar após rebuild.
+
+---
+
 ## Ajuste feito no código para Docker
 
 Fora de **Development**, a aplicação usa **HTTP em `+:8080`** e **não** força `UseHttpsRedirection` no container (o HTTPS termina no proxy). Em **Development** no seu PC continua **https://localhost:5001** com Swagger.
