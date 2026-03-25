@@ -82,22 +82,31 @@ builder.Services.Configure<Microsoft.AspNetCore.Mvc.ApiBehaviorOptions>(options 
     };
 });
 
-// 5. CORS
+// 5. CORS — dev local + entradas em Cors:AdditionalOrigins (ex.: front na VPS :8081)
+var corsBaseOrigins = new[]
+{
+    "http://localhost:3000",
+    "http://localhost:5173",
+    "http://localhost:5174",
+    "http://localhost:5175",
+    "http://localhost:8080",
+    "https://localhost:3000",
+    "https://localhost:5173",
+    "https://localhost:5174",
+    "https://localhost:5175",
+    "https://localhost:8080"
+};
+var corsExtra = builder.Configuration.GetSection("Cors:AdditionalOrigins").Get<string[]>() ?? Array.Empty<string>();
+var corsOrigins = corsBaseOrigins
+    .Concat(corsExtra.Where(static o => !string.IsNullOrWhiteSpace(o)))
+    .Distinct(StringComparer.OrdinalIgnoreCase)
+    .ToArray();
+
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend", policy =>
     {
-        policy.WithOrigins(
-              "http://localhost:3000",
-              "http://localhost:5173",
-              "http://localhost:5174",
-              "http://localhost:5175",
-              "http://localhost:8080",
-              "https://localhost:3000",
-              "https://localhost:5173",
-              "https://localhost:5174",
-              "https://localhost:5175",
-              "https://localhost:8080")
+        policy.WithOrigins(corsOrigins)
               .AllowAnyMethod()
               .AllowAnyHeader()
               .AllowCredentials();
@@ -148,6 +157,19 @@ app.UseMiddleware<ExceptionHandlerMiddleware>();
 app.UseAuthentication();
 app.UseMiddleware<EmpresaContextMiddleware>();
 app.UseAuthorization();
+
+// Rotas mínimas antes dos controllers (/, /health) — após deploy: GET / e GET /health devem retornar 200, não 404
+app.MapGet("/", () => Results.Json(new
+{
+    name = "CRMVEXA API",
+    ok = true,
+    endpoints = new { health = "/health", login = "POST /api/Auth/login" }
+})).AllowAnonymous();
+
+app.MapGet("/health", () => Results.Json(new { status = "ok", service = "CRMVEXA" }))
+    .AllowAnonymous()
+    .WithName("Health");
+
 app.MapControllers();
 
 app.Run();
