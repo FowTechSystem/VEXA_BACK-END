@@ -9,11 +9,16 @@ using System.Text.Json;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Dev local: HTTPS fixo. Docker/produção: HTTP em todas as interfaces (proxy TLS na frente).
-if (builder.Environment.IsDevelopment())
-    builder.WebHost.UseUrls("https://localhost:5001");
-else
-    builder.WebHost.UseUrls("http://+:8080");
+// URLs de escuta — alterne manualmente antes de publicar no servidor (Docker/VPS + Nginx).
+//
+// Uso LOCAL (npm run dev / Vite): mantenha a linha LOCAL descomentada e a SERVIDOR comentada.
+// Deploy no SERVIDOR: comente a linha LOCAL e descomente a linha SERVIDOR; depois build/push da imagem.
+//
+// LOCAL — front em http://localhost:5173 com proxy para https://localhost:5001
+builder.WebHost.UseUrls("https://localhost:5001");
+
+// SERVIDOR — HTTP na 8080 (TLS fica no Nginx na frente)
+// builder.WebHost.UseUrls("http://+:8080");
 
 // ============ CONFIGURAÇÕES DE SERVIÇOS ============
 
