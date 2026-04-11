@@ -106,8 +106,9 @@ namespace CRMVEXA.API.Controllers
         }
 
         [HttpPost("{id}/cancelar")]
-        public async Task<ActionResult> Cancelar([FromRoute] int id, [FromBody] CancelarVendaRequest request)
+        public async Task<ActionResult> Cancelar([FromRoute] int id, [FromBody] CancelarVendaRequest? request)
         {
+            request ??= new CancelarVendaRequest();
             try
             {
                 request.Id = id;

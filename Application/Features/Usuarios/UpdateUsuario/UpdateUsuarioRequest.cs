@@ -24,6 +24,9 @@ namespace CRMVEXA.Application.Features.Usuarios.UpdateUsuario
         /// <summary>Nova senha (opcional). Se preenchido, atualiza a senha com hash BCrypt.</summary>
         public string? NovaSenha { get; set; }
 
+        /// <summary>Data URL ou base64 após <c>POST .../upload-foto</c>; null = não alterar.</summary>
+        public string? FotoUrl { get; set; }
+
         public bool PodeVender { get; set; }
         public bool PodeEditarEstoque { get; set; }
         public bool PodeEditarProduto { get; set; }

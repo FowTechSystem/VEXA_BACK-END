@@ -1,3 +1,4 @@
+using CRMVEXA.Application.Features.Clientes;
 using CRMVEXA.Application.Services;
 using CRMVEXA.Domain.Entities;
 using CRMVEXA.Infrastructure.Data;
@@ -45,9 +46,16 @@ namespace CRMVEXA.Application.Features.Clientes.UpdateCliente.Validators
                 cnpj: request.Cnpj,
                 dataNascimento: request.DataNascimento,
                 preferencias: request.Preferencias,
-                observacoes: request.Observacoes,
-                fotoBase64: request.FotoUrl
-            );
+                observacoes: request.Observacoes);
+
+            if (request.FotoUrl != null)
+            {
+                var bytes = ClienteFotoPayloadHelper.TryDecodeToBytes(request.FotoUrl);
+                if (bytes != null)
+                    cliente.Foto = bytes;
+                else if (string.IsNullOrWhiteSpace(request.FotoUrl))
+                    cliente.Foto = null;
+            }
 
             // Usar endereço: Endereco (objeto) > Enderecos[0] > campos flat
             var e = request.Endereco ?? request.Enderecos?.FirstOrDefault();

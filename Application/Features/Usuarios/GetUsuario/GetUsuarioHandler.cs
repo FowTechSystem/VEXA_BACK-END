@@ -1,3 +1,4 @@
+using CRMVEXA.Application.Features.Clientes;
 using CRMVEXA.Application.Features.Usuarios.GetListaUsuarios;
 using CRMVEXA.Application.Services;
 using CRMVEXA.Infrastructure.Data;
@@ -52,6 +53,7 @@ namespace CRMVEXA.Application.Features.Usuarios.GetUsuario
                 PodeAbrirFecharCaixa = usuario.PodeAbrirFecharCaixa,
                 PodeEmitirRelatorios = usuario.PodeEmitirRelatorios,
                 PodeCadastrarFornecedores = usuario.PodeCadastrarFornecedores,
+                FotoUrl = ClienteFotoUrlHelper.ToApiFotoUrl(usuario.Foto),
                 Enderecos = usuario.Enderecos.Select(e => new EnderecoResponse
                 {
                     Id = e.Id,

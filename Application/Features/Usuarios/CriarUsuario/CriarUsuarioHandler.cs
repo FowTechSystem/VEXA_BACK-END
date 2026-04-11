@@ -1,4 +1,5 @@
 using System;
+using CRMVEXA.Application.Features.Clientes;
 using CRMVEXA.Application.Features.Usuarios.CriarUsuario;
 using CRMVEXA.Application.Services;
 using CRMVEXA.Domain.Entities;
@@ -54,6 +55,8 @@ namespace CRMVEXA.Application.Features.Usuarios.CriarUsuario
                     request.PodeEmitirRelatorios,
                     request.PodeCadastrarFornecedores
                 );
+
+                usuario.Foto = ClienteFotoPayloadHelper.TryDecodeToBytes(request.FotoBase64);
 
                 _context.Usuarios.Add(usuario);
                 await _context.SaveChangesAsync(cancellationToken);

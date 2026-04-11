@@ -15,5 +15,6 @@ namespace CRMVEXA.Application.Features.Auth.Login
         public string Nome { get; set; } = string.Empty;
         public string Email { get; set; } = string.Empty;
         public string Perfil { get; set; } = string.Empty; // Cargo no sistema (ex: Administrador)
+        public string? FotoUrl { get; set; }
     }
 }

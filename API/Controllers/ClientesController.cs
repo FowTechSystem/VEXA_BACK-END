@@ -13,12 +13,10 @@ namespace CRMVEXA.API.Controllers
     public class ClientesController : ControllerBase
     {
         private readonly IMediator _mediator;
-        private readonly IWebHostEnvironment _environment;
 
-        public ClientesController(IMediator mediator, IWebHostEnvironment environment)
+        public ClientesController(IMediator mediator)
         {
             _mediator = mediator;
-            _environment = environment;
         }
 
         [HttpGet("{id:int}")]
@@ -116,6 +114,9 @@ namespace CRMVEXA.API.Controllers
             }
         }
 
+        /// <summary>
+        /// Multipart → data URL e base64 para o front enviar no PUT (campo fotoUrl). Sem gravar arquivo em disco.
+        /// </summary>
         [HttpPost("upload-foto")]
         public async Task<ActionResult> UploadFoto(IFormFile file)
         {
@@ -132,24 +133,23 @@ namespace CRMVEXA.API.Controllers
 
                 if (file.Length > 5 * 1024 * 1024)
                     return BadRequest(new { sucesso = false, mensagem = "Arquivo muito grande. Tamanho máximo: 5MB." });
-                  
-                var nomeArquivo = $"{Guid.NewGuid()}{extensao}";
 
-                var pastaUploads = Path.Combine(_environment.ContentRootPath, "wwwroot", "uploads", "clientes");
+                await using var ms = new MemoryStream();
+                await file.CopyToAsync(ms);
+                var bytes = ms.ToArray();
+                var b64 = Convert.ToBase64String(bytes);
+                var mime = string.IsNullOrWhiteSpace(file.ContentType) || file.ContentType == "application/octet-stream"
+                    ? extensao switch
+                    {
+                        ".png" => "image/png",
+                        ".gif" => "image/gif",
+                        ".webp" => "image/webp",
+                        _ => "image/jpeg"
+                    }
+                    : file.ContentType.Split(';')[0].Trim();
+                var dataUrl = $"data:{mime};base64,{b64}";
 
-                if (!Directory.Exists(pastaUploads))
-                    Directory.CreateDirectory(pastaUploads);
-
-                var caminhoCompleto = Path.Combine(pastaUploads, nomeArquivo);
-
-                using (var stream = new FileStream(caminhoCompleto, FileMode.Create))
-                {
-                    await file.CopyToAsync(stream);
-                }
-
-                var url = $"/uploads/clientes/{nomeArquivo}";
-
-                return Ok(new { sucesso = true, url, fotoUrl = url });
+                return Ok(new { sucesso = true, url = dataUrl, fotoUrl = dataUrl, fotoBase64 = b64 });
             }
             catch (Exception ex)
             {

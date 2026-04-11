@@ -15,10 +15,10 @@ var builder = WebApplication.CreateBuilder(args);
 // Deploy no SERVIDOR: comente a linha LOCAL e descomente a linha SERVIDOR; depois build/push da imagem.
 //
 // LOCAL — front em http://localhost:5173 com proxy para https://localhost:5001
-// builder.WebHost.UseUrls("https://localhost:5001");
+builder.WebHost.UseUrls("https://localhost:5001");
 
 // SERVIDOR — HTTP na 8080 (TLS fica no Nginx na frente)
-builder.WebHost.UseUrls("http://+:8080");
+// builder.WebHost.UseUrls("http://+:8080");
 
 // ============ CONFIGURAÇÕES DE SERVIÇOS ============
 

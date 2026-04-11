@@ -1,9 +1,11 @@
 using System;
+using System.Security.Claims;
 using CRMVEXA.Application.Features.Vendas.CancelarVenda;
 using CRMVEXA.Application.Services;
 using CRMVEXA.Domain.Entities;
 using CRMVEXA.Infrastructure.Data;
 using MediatR;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 
 namespace CRMVEXA.Application.Features.Vendas.CancelarVenda
@@ -12,11 +14,16 @@ namespace CRMVEXA.Application.Features.Vendas.CancelarVenda
     {
         private readonly AppDbContext _context;
         private readonly IEmpresaContext _empresaContext;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public CancelarVendaHandler(AppDbContext context, IEmpresaContext empresaContext)
+        public CancelarVendaHandler(
+            AppDbContext context,
+            IEmpresaContext empresaContext,
+            IHttpContextAccessor httpContextAccessor)
         {
             _context = context;
             _empresaContext = empresaContext;
+            _httpContextAccessor = httpContextAccessor;
         }
 
         public async Task<Unit> Handle(CancelarVendaRequest request, CancellationToken cancellationToken)
@@ -37,6 +44,12 @@ namespace CRMVEXA.Application.Features.Vendas.CancelarVenda
                 throw new Exception("Venda já está cancelada");
             }
 
+            var usuarioIdMov = request.UsuarioId > 0
+                ? request.UsuarioId
+                : ObterUsuarioIdDoToken();
+            if (usuarioIdMov <= 0)
+                usuarioIdMov = venda.UsuarioId;
+
             // Restaurar estoque
             foreach (var item in venda.Itens)
             {
@@ -48,13 +61,16 @@ namespace CRMVEXA.Application.Features.Vendas.CancelarVenda
                     produto.Estoque.AtualizarQuantidade(item.Quantidade);
 
                     // Registrar movimentação de estoque
+                    var motivoTxt = string.IsNullOrWhiteSpace(request.Motivo)
+                        ? $"Cancelamento da venda {venda.CodigoVenda}"
+                        : $"Cancelamento da venda {venda.CodigoVenda}: {request.Motivo.Trim()}";
                     var movimentacao = new MovimentacaoEstoque(
                         empresaId,
                         item.ProdutoId,
                         "Entrada",
                         item.Quantidade,
-                        $"Cancelamento da venda {venda.CodigoVenda}",
-                        request.UsuarioId
+                        motivoTxt,
+                        usuarioIdMov
                     );
                     _context.MovimentacoesEstoque.Add(movimentacao);
                 }
@@ -64,6 +80,12 @@ namespace CRMVEXA.Application.Features.Vendas.CancelarVenda
             await _context.SaveChangesAsync(cancellationToken);
 
             return Unit.Value;
+        }
+
+        private int ObterUsuarioIdDoToken()
+        {
+            var idStr = _httpContextAccessor.HttpContext?.User?.FindFirstValue(ClaimTypes.NameIdentifier);
+            return int.TryParse(idStr, out var id) ? id : 0;
         }
     }
 }

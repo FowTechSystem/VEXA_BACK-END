@@ -39,14 +39,27 @@ public class GetCaixaResumoHandler : IRequestHandler<GetCaixaResumoRequest, GetC
                 && c.Status == "pendente")
             .SumAsync(c => c.ValorTotal, cancellationToken);
 
-        var totalEntradas = totalVendas + totalCondicionais;
-
-        var totalSaidas = await _context.Compras
+        var totalSaidasCompras = await _context.Compras
             .Where(c => c.EmpresaId == empresaId
                 && c.DataHora >= inicio
                 && c.DataHora < fim)
             .SumAsync(c => c.ValorTotal, cancellationToken);
 
+        var manuaisNoPeriodo = await _context.MovimentacoesCaixaManuais
+            .Where(m => m.EmpresaId == empresaId
+                && m.DataLancamento >= inicio
+                && m.DataLancamento < fim)
+            .ToListAsync(cancellationToken);
+
+        var totalEntradasManuais = manuaisNoPeriodo
+            .Where(m => m.TipoResumo == "entrada_manual")
+            .Sum(m => m.Valor);
+        var totalSaidasManuais = manuaisNoPeriodo
+            .Where(m => m.TipoResumo == "saida_manual")
+            .Sum(m => m.Valor);
+
+        var totalEntradas = totalVendas + totalCondicionais + totalEntradasManuais;
+        var totalSaidas = totalSaidasCompras + totalSaidasManuais;
         var saldoAtual = totalEntradas - totalSaidas;
         var totalEntradasMenosSaldo = totalEntradas - saldoAtual;
 
@@ -65,16 +78,19 @@ public class GetCaixaResumoHandler : IRequestHandler<GetCaixaResumoRequest, GetC
         var vendas = vendasEntidades.Select(v =>
         {
             clientes.TryGetValue(v.ClienteId ?? 0, out var cli);
+            var valor = Math.Abs(v.ValorTotal);
             return new MovimentacaoResumoItem
             {
                 Id = v.Id,
                 Tipo = "venda",
                 Data = v.DataHora,
-                Valor = v.ValorTotal,
+                Valor = valor,
                 Descricao = "Venda #" + v.CodigoVenda,
                 ClienteFornecedor = cli?.NomeCompleto,
                 FormaPagamento = v.FormaPagamento,
-                Status = v.Status
+                Status = v.Status,
+                VendaId = v.Id,
+                Natureza = "entrada"
             };
         }).ToList();
 
@@ -92,16 +108,19 @@ public class GetCaixaResumoHandler : IRequestHandler<GetCaixaResumoRequest, GetC
         var compras = comprasEntidades.Select(c =>
         {
             fornecedores.TryGetValue(c.FornecedorId, out var forn);
+            var valor = -Math.Abs(c.ValorTotal);
             return new MovimentacaoResumoItem
             {
                 Id = c.Id,
                 Tipo = "compra",
                 Data = c.DataHora,
-                Valor = c.ValorTotal,
+                Valor = valor,
                 Descricao = string.IsNullOrWhiteSpace(c.Observacoes) ? "Compra " + c.CodigoCompra : c.Observacoes,
                 ClienteFornecedor = forn?.Nome,
                 FormaPagamento = null,
-                Status = c.Status
+                Status = c.Status,
+                CompraId = c.Id,
+                Natureza = "saida"
             };
         }).ToList();
 
@@ -118,16 +137,37 @@ public class GetCaixaResumoHandler : IRequestHandler<GetCaixaResumoRequest, GetC
             Id = c.Id,
             Tipo = "condicional",
             Data = c.Data,
-            Valor = c.ValorTotal,
+            Valor = Math.Abs(c.ValorTotal),
             Descricao = "Condicional #" + c.Id,
             ClienteFornecedor = c.Cliente?.NomeCompleto,
             FormaPagamento = null,
-            Status = c.Status
+            Status = c.Status,
+            Natureza = "entrada"
+        }).ToList();
+
+        var manuaisItens = manuaisNoPeriodo.Select(m =>
+        {
+            var entrada = m.TipoResumo == "entrada_manual";
+            var valorAbs = Math.Abs(m.Valor);
+            return new MovimentacaoResumoItem
+            {
+                Id = m.Id,
+                Tipo = m.TipoResumo,
+                Data = m.DataLancamento,
+                Valor = entrada ? valorAbs : -valorAbs,
+                Descricao = m.Descricao,
+                ClienteFornecedor = null,
+                FormaPagamento = m.FormaPagamento,
+                Status = null,
+                Categoria = m.Categoria,
+                Natureza = entrada ? "entrada" : "saida"
+            };
         }).ToList();
 
         var movimentacoes = vendas
             .Concat(compras)
             .Concat(condicionais)
+            .Concat(manuaisItens)
             .OrderByDescending(m => m.Data)
             .ToList();
 

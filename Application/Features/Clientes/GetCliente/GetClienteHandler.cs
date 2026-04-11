@@ -1,3 +1,4 @@
+using CRMVEXA.Application.Features.Clientes;
 using CRMVEXA.Application.Services;
 using CRMVEXA.Infrastructure.Data;
 using MediatR;
@@ -27,10 +28,6 @@ public class GetClienteHandler : IRequestHandler<GetClienteRequest, GetClienteRe
         if (cliente == null)
             return null;
 
-        var fotoUrl = cliente.FotoBase64 != null && cliente.FotoBase64.StartsWith("data:")
-            ? cliente.FotoBase64
-            : (cliente.FotoBase64 != null ? "data:image/jpeg;base64," + cliente.FotoBase64 : null);
-
         return new GetClienteResponse
         {
             Id = cliente.Id,
@@ -44,7 +41,7 @@ public class GetClienteHandler : IRequestHandler<GetClienteRequest, GetClienteRe
             WhatsApp = cliente.WhatsApp,
             Preferencias = cliente.Preferencias,
             Observacoes = cliente.Observacoes,
-            FotoUrl = fotoUrl,
+            FotoUrl = ClienteFotoUrlHelper.ToApiFotoUrl(cliente.Foto),
             DataCadastro = cliente.DataCadastro,
             Enderecos = cliente.Enderecos?.Select(e => new EnderecoClienteResponse
             {

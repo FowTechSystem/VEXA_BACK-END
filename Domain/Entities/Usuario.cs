@@ -22,6 +22,9 @@ namespace CRMVEXA.Domain.Entities
         public string? Observacoes { get; set; }
         public bool Ativo { get; set; } = true;
 
+        /// <summary>Foto de perfil (PostgreSQL bytea).</summary>
+        public byte[]? Foto { get; set; }
+
         // Permissões em booleans (mantidas para compatibilidade)
         public bool PodeVender { get; set; }
         public bool PodeEditarEstoque { get; set; }

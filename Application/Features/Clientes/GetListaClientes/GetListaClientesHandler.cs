@@ -1,3 +1,4 @@
+using CRMVEXA.Application.Features.Clientes;
 using CRMVEXA.Application.Services;
 using CRMVEXA.Infrastructure.Data;
 using MediatR;
@@ -64,7 +65,7 @@ namespace CRMVEXA.Application.Features.Clientes.GetListaClientes
                 WhatsApp = c.WhatsApp,
                 Preferencias = c.Preferencias,
                 Observacoes = c.Observacoes,
-                FotoUrl = c.FotoBase64 != null && c.FotoBase64.StartsWith("data:") ? c.FotoBase64 : (c.FotoBase64 != null ? "data:image/jpeg;base64," + c.FotoBase64 : null),
+                FotoUrl = ClienteFotoUrlHelper.ToApiFotoUrl(c.Foto),
                 DataCadastro = c.DataCadastro,
                 Enderecos = c.Enderecos?.Select(e => new EnderecoClienteResponse
                 {
