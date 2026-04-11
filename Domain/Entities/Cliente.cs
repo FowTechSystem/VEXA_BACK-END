@@ -14,7 +14,8 @@ public class Cliente
     public DateTime? DataNascimento { get; set; }
     public string? Preferencias { get; set; }
     public string? Observacoes { get; set; }
-    public string? FotoBase64 { get; set; }
+    /// <summary>Imagem do cliente (PostgreSQL bytea). Não usar disco/wwwroot.</summary>
+    public byte[]? Foto { get; set; }
     public DateTime DataCadastro { get; set; }
 
     public ICollection<Endereco> Enderecos { get; set; } = new List<Endereco>();
@@ -34,7 +35,7 @@ public class Cliente
         DateTime dataCadastro,
         string? rg = null,
         string? cnpj = null,
-        string? fotoBase64 = null)
+        byte[]? foto = null)
     {
         NomeCompleto = nomeCompleto;
         CPF = cpf;
@@ -47,7 +48,7 @@ public class Cliente
         Preferencias = preferencias;
         Observacoes = observacoes;
         DataCadastro = dataCadastro;
-        FotoBase64 = fotoBase64;
+        Foto = foto;
         Enderecos = new List<Endereco>();
     }
 
@@ -61,8 +62,7 @@ public class Cliente
         string? cnpj = null,
         DateTime? dataNascimento = null,
         string? preferencias = null,
-        string? observacoes = null,
-        string? fotoBase64 = null)
+        string? observacoes = null)
     {
         NomeCompleto = nomeCompleto;
         Telefone = telefone;
@@ -74,7 +74,6 @@ public class Cliente
         DataNascimento = dataNascimento;
         Preferencias = preferencias;
         Observacoes = observacoes;
-        FotoBase64 = fotoBase64;
     }
 
 

@@ -1,5 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using MediatR;
+using CRMVEXA.Application.Features.Caixa.CriarMovimentacaoManual;
+using CRMVEXA.Application.Features.Caixa.ExcluirMovimentacaoManual;
 using CRMVEXA.Application.Features.Caixa.GetResumo;
 
 namespace CRMVEXA.API.Controllers
@@ -40,6 +42,44 @@ namespace CRMVEXA.API.Controllers
             catch (InvalidOperationException ex)
             {
                 return BadRequest(new { sucesso = false, mensagem = ex.Message });
+            }
+        }
+
+        /// <summary>Lançamento manual de lucro (entrada) ou despesa (saída).</summary>
+        [HttpPost("movimentacoes/manual")]
+        public async Task<ActionResult<CriarMovimentacaoManualResponse>> CriarMovimentacaoManual(
+            [FromBody] CriarMovimentacaoManualRequest? request)
+        {
+            if (request == null)
+                return BadRequest(new { sucesso = false, message = "Corpo JSON obrigatório.", mensagem = "Corpo JSON obrigatório." });
+
+            try
+            {
+                var resultado = await _mediator.Send(request);
+                return StatusCode(StatusCodes.Status201Created, resultado);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { sucesso = false, message = ex.Message, mensagem = ex.Message });
+            }
+        }
+
+        /// <summary>Remove apenas lançamento manual (não venda/compra).</summary>
+        [HttpDelete("movimentacoes/{id:int}")]
+        public async Task<IActionResult> ExcluirMovimentacaoManual(int id)
+        {
+            try
+            {
+                await _mediator.Send(new ExcluirMovimentacaoManualRequest { Id = id });
+                return NoContent();
+            }
+            catch (KeyNotFoundException)
+            {
+                return NotFound(new { sucesso = false, message = "Movimentação manual não encontrada.", mensagem = "Movimentação manual não encontrada." });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { sucesso = false, message = ex.Message, mensagem = ex.Message });
             }
         }
     }

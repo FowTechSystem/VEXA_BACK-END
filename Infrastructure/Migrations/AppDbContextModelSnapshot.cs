@@ -175,9 +175,8 @@ namespace CRMVEXA.Infrastructure.Migrations
                     b.Property<int>("EmpresaId")
                         .HasColumnType("integer");
 
-                    b.Property<string>("FotoBase64")
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)");
+                    b.Property<byte[]>("Foto")
+                        .HasColumnType("bytea");
 
                     b.Property<string>("NomeCompleto")
                         .IsRequired()
@@ -736,6 +735,61 @@ namespace CRMVEXA.Infrastructure.Migrations
                     b.ToTable("MovimentacoesCaixa", (string)null);
                 });
 
+            modelBuilder.Entity("CRMVEXA.Domain.Entities.MovimentacaoCaixaManual", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Categoria")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<DateTime>("CriadoEmUtc")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<DateTime>("DataLancamento")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<string>("Descricao")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<int>("EmpresaId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("FormaPagamento")
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)");
+
+                    b.Property<string>("Observacoes")
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)");
+
+                    b.Property<string>("TipoResumo")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)");
+
+                    b.Property<int?>("UsuarioId")
+                        .HasColumnType("integer");
+
+                    b.Property<decimal>("Valor")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UsuarioId");
+
+                    b.HasIndex("EmpresaId", "DataLancamento");
+
+                    b.ToTable("MovimentacoesCaixaManuais", (string)null);
+                });
+
             modelBuilder.Entity("CRMVEXA.Domain.Entities.MovimentacaoEstoque", b =>
                 {
                     b.Property<int>("Id")
@@ -996,6 +1050,9 @@ namespace CRMVEXA.Infrastructure.Migrations
 
                     b.Property<int>("EmpresaId")
                         .HasColumnType("integer");
+
+                    b.Property<byte[]>("Foto")
+                        .HasColumnType("bytea");
 
                     b.Property<string>("Login")
                         .IsRequired()
@@ -1387,6 +1444,20 @@ namespace CRMVEXA.Infrastructure.Migrations
                         .HasForeignKey("EmpresaId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("CRMVEXA.Domain.Entities.MovimentacaoCaixaManual", b =>
+                {
+                    b.HasOne("CRMVEXA.Domain.Entities.Empresa", null)
+                        .WithMany()
+                        .HasForeignKey("EmpresaId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("CRMVEXA.Domain.Entities.Usuario", null)
+                        .WithMany()
+                        .HasForeignKey("UsuarioId")
+                        .OnDelete(DeleteBehavior.SetNull);
                 });
 
             modelBuilder.Entity("CRMVEXA.Domain.Entities.MovimentacaoEstoque", b =>

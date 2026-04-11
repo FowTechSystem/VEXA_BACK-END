@@ -31,6 +31,9 @@ namespace CRMVEXA.Application.Features.Usuarios.CriarUsuario
         public bool PodeEmitirRelatorios { get; set; }
         public bool PodeCadastrarFornecedores { get; set; }
 
+        /// <summary>Base64 puro ou null (mesmo contrato de clientes).</summary>
+        public string? FotoBase64 { get; set; }
+
         /// <summary>Ids das permissões adicionais (ex.: Gerenciar clientes, Acesso financeiro, Configurações do sistema).</summary>
         public List<int>? PermissaoIds { get; set; }
 

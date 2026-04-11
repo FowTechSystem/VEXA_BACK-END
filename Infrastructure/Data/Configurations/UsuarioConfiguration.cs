@@ -20,6 +20,7 @@ namespace CRMVEXA.Infrastructure.Data.Configurations
             builder.Property(x => x.Perfil).HasMaxLength(50);
             builder.Property(x => x.Departamento).HasMaxLength(100);
             builder.Property(x => x.Observacoes).HasMaxLength(2000);
+            builder.Property(x => x.Foto).HasColumnType("bytea");
             builder.ToTable("Usuarios");
         }
     }

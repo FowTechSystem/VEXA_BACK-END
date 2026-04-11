@@ -6,5 +6,6 @@ namespace CRMVEXA.Application.Features.Vendas.CancelarVenda
     {
         public int Id { get; set; }
         public int UsuarioId { get; set; }
+        public string? Motivo { get; set; }
     }
 }

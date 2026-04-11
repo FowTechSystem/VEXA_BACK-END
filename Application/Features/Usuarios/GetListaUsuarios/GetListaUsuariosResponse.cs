@@ -35,6 +35,7 @@ namespace CRMVEXA.Application.Features.Usuarios.GetListaUsuarios
         public bool PodeAbrirFecharCaixa { get; set; }
         public bool PodeEmitirRelatorios { get; set; }
         public bool PodeCadastrarFornecedores { get; set; }
+        public string? FotoUrl { get; set; }
         public List<EnderecoResponse> Enderecos { get; set; } = new();
         public List<int> PermissaoIds { get; set; } = new();
     }

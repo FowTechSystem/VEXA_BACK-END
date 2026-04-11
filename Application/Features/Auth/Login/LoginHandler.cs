@@ -1,3 +1,4 @@
+using CRMVEXA.Application.Features.Clientes;
 using CRMVEXA.Domain.Entities;
 using CRMVEXA.Infrastructure.Data;
 using MediatR;
@@ -67,7 +68,8 @@ namespace CRMVEXA.Application.Features.Auth.Login
                     EmpresaNome = usuario.Empresa?.Nome ?? string.Empty,
                     Nome = usuario.Nome,
                     Email = usuario.Email,
-                    Perfil = usuario.Cargo ?? "Usuário"
+                    Perfil = usuario.Cargo ?? "Usuário",
+                    FotoUrl = ClienteFotoUrlHelper.ToApiFotoUrl(usuario.Foto)
                 }
             };
         }

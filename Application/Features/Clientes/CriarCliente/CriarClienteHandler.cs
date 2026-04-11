@@ -1,3 +1,4 @@
+using CRMVEXA.Application.Features.Clientes;
 using CRMVEXA.Application.Features.Clientes.CriarCliente;
 using CRMVEXA.Application.Services;
 using CRMVEXA.Domain.Entities;
@@ -19,6 +20,8 @@ public class CriarClienteHandler : IRequestHandler<CriarClienteRequest, CriarCli
     {
         try
         {
+            var fotoBytes = ClienteFotoPayloadHelper.TryDecodeToBytes(request.FotoBase64);
+
             var cliente = new Cliente
             {
                 EmpresaId = _empresaContext.EmpresaId,
@@ -33,7 +36,7 @@ public class CriarClienteHandler : IRequestHandler<CriarClienteRequest, CriarCli
                 DataCadastro = request.dataCadastro.ToUniversalTime(),
                 RG = request.rg,
                 CNPJ = request.cnpj,
-                FotoBase64 = request.FotoBase64
+                Foto = fotoBytes
             };
 
             _context.Clientes.Add(cliente);
@@ -95,7 +98,7 @@ public class CriarClienteHandler : IRequestHandler<CriarClienteRequest, CriarCli
                     WhatsApp = cliente.WhatsApp,
                     Preferencias = cliente.Preferencias,
                     Observacoes = cliente.Observacoes,
-                    FotoUrl = cliente.FotoBase64 != null && cliente.FotoBase64.StartsWith("data:") ? cliente.FotoBase64 : (cliente.FotoBase64 != null ? "data:image/jpeg;base64," + cliente.FotoBase64 : null),
+                    FotoUrl = ClienteFotoUrlHelper.ToApiFotoUrl(cliente.Foto),
                     DataCadastro = cliente.DataCadastro,
                     Enderecos = new List<EnderecoClienteCriarResponse>
                     {
@@ -117,7 +120,7 @@ public class CriarClienteHandler : IRequestHandler<CriarClienteRequest, CriarCli
                 WhatsApp = cliente.WhatsApp,
                 Preferencias = cliente.Preferencias,
                 Observacoes = cliente.Observacoes,
-                FotoUrl = cliente.FotoBase64 != null && cliente.FotoBase64.StartsWith("data:") ? cliente.FotoBase64 : (cliente.FotoBase64 != null ? "data:image/jpeg;base64," + cliente.FotoBase64 : null),
+                FotoUrl = ClienteFotoUrlHelper.ToApiFotoUrl(cliente.Foto),
                 DataCadastro = cliente.DataCadastro,
                 Enderecos = new List<EnderecoClienteCriarResponse>()
             };
