@@ -11,16 +11,19 @@ using System.Text.Json;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// URLs de escuta — alterne manualmente antes de publicar no servidor (Docker/VPS + Nginx).
-//
-// Uso LOCAL (npm run dev / Vite): mantenha a linha LOCAL descomentada e a SERVIDOR comentada.
-// Deploy no SERVIDOR: comente a linha LOCAL e descomente a linha SERVIDOR; depois build/push da imagem.
-//
-// LOCAL — front em http://localhost:5173 com proxy para https://localhost:5001
-builder.WebHost.UseUrls("https://localhost:5001");
-
-// SERVIDOR — HTTP na 8080 (TLS fica no Nginx na frente)
-// builder.WebHost.UseUrls("http://+:8080");
+// URLs de escuta (ordem):
+// 1) "Urls" no appsettings / variáveis de ambiente (ex.: Urls=http://0.0.0.0:8080)
+// 2) ASPNETCORE_URLS (Docker, systemd, IIS, launchSettings) — se definido, não chamar UseUrls
+// 3) fallback: https://localhost:5001 (máquina local sem env)
+var urlsConfig = builder.Configuration["Urls"];
+if (!string.IsNullOrWhiteSpace(urlsConfig))
+{
+    builder.WebHost.UseUrls(urlsConfig.Split(';', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries));
+}
+else if (string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("ASPNETCORE_URLS")))
+{
+    builder.WebHost.UseUrls("https://localhost:5001");
+}
 
 // ============ CONFIGURAÇÕES DE SERVIÇOS ============
 
