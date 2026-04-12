@@ -27,6 +27,9 @@ namespace CRMVEXA.Application.Features.Usuarios.UpdateUsuario
         /// <summary>Data URL ou base64 após <c>POST .../upload-foto</c>; null = não alterar.</summary>
         public string? FotoUrl { get; set; }
 
+        /// <summary>Mesmo payload que <see cref="FotoUrl"/> — o POST de criação usa <c>fotoBase64</c>; alguns clients enviam o mesmo nome no PUT.</summary>
+        public string? FotoBase64 { get; set; }
+
         public bool PodeVender { get; set; }
         public bool PodeEditarEstoque { get; set; }
         public bool PodeEditarProduto { get; set; }

@@ -109,6 +109,47 @@ namespace CRMVEXA.API.Controllers
             }
         }
 
+        /// <summary>Multipart → data URL para <c>foto1Url</c>…<c>foto5Url</c> no PUT (igual cliente/usuário). Sem gravar em disco.</summary>
+        [HttpPost("upload-foto")]
+        public async Task<ActionResult> UploadFoto(IFormFile file)
+        {
+            if (file == null || file.Length == 0)
+                return BadRequest(Erro("Nenhum arquivo enviado."));
+
+            try
+            {
+                var extensoesPermitidas = new[] { ".jpg", ".jpeg", ".png", ".gif", ".webp" };
+                var extensao = Path.GetExtension(file.FileName).ToLowerInvariant();
+
+                if (!extensoesPermitidas.Contains(extensao))
+                    return BadRequest(Erro("Formato de arquivo não permitido. Use JPG, PNG, GIF ou WEBP."));
+
+                if (file.Length > 5 * 1024 * 1024)
+                    return BadRequest(Erro("Arquivo muito grande. Tamanho máximo: 5MB."));
+
+                await using var ms = new MemoryStream();
+                await file.CopyToAsync(ms);
+                var bytes = ms.ToArray();
+                var b64 = Convert.ToBase64String(bytes);
+                var mime = string.IsNullOrWhiteSpace(file.ContentType) || file.ContentType == "application/octet-stream"
+                    ? extensao switch
+                    {
+                        ".png" => "image/png",
+                        ".gif" => "image/gif",
+                        ".webp" => "image/webp",
+                        _ => "image/jpeg"
+                    }
+                    : file.ContentType.Split(';')[0].Trim();
+                var dataUrl = $"data:{mime};base64,{b64}";
+
+                return Ok(new { sucesso = true, url = dataUrl, fotoUrl = dataUrl, fotoBase64 = b64 });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(Erro(ObterMensagemErro(ex)));
+            }
+        }
+
         /// <summary>Obtém a mensagem mais relevante (inner exception para erros de DB).</summary>
         private static string ObterMensagemErro(Exception ex)
         {

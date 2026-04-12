@@ -57,13 +57,20 @@ namespace CRMVEXA.Application.Features.Usuarios.UpdateUsuario
                 usuario.SenhaHash = BCrypt.Net.BCrypt.HashPassword(request.NovaSenha);
             }
 
-            if (request.FotoUrl != null)
+            var payloadFoto = request.FotoUrl ?? request.FotoBase64;
+            if (payloadFoto != null)
             {
-                var bytes = ClienteFotoPayloadHelper.TryDecodeToBytes(request.FotoUrl);
+                var bytes = ClienteFotoPayloadHelper.TryDecodeToBytes(payloadFoto);
                 if (bytes != null)
+                {
                     usuario.Foto = bytes;
-                else if (string.IsNullOrWhiteSpace(request.FotoUrl))
+                    _context.Entry(usuario).Property(u => u.Foto).IsModified = true;
+                }
+                else if (string.IsNullOrWhiteSpace(payloadFoto))
+                {
                     usuario.Foto = null;
+                    _context.Entry(usuario).Property(u => u.Foto).IsModified = true;
+                }
             }
 
             usuario.DefinirPermissoes(

@@ -886,8 +886,15 @@ namespace CRMVEXA.Infrastructure.Migrations
                     b.Property<int?>("CorId")
                         .HasColumnType("integer");
 
+                    b.Property<string>("Cores")
+                        .IsRequired()
+                        .HasColumnType("jsonb");
+
                     b.Property<string>("DescricaoCurta")
                         .HasColumnType("text");
+
+                    b.Property<bool>("EmPromocao")
+                        .HasColumnType("boolean");
 
                     b.Property<int>("EmpresaId")
                         .HasColumnType("integer");
@@ -895,20 +902,20 @@ namespace CRMVEXA.Infrastructure.Migrations
                     b.Property<int?>("FornecedorId")
                         .HasColumnType("integer");
 
-                    b.Property<string>("Foto1")
-                        .HasColumnType("text");
+                    b.Property<byte[]>("Foto1")
+                        .HasColumnType("bytea");
 
-                    b.Property<string>("Foto2")
-                        .HasColumnType("text");
+                    b.Property<byte[]>("Foto2")
+                        .HasColumnType("bytea");
 
-                    b.Property<string>("Foto3")
-                        .HasColumnType("text");
+                    b.Property<byte[]>("Foto3")
+                        .HasColumnType("bytea");
 
-                    b.Property<string>("Foto4")
-                        .HasColumnType("text");
+                    b.Property<byte[]>("Foto4")
+                        .HasColumnType("bytea");
 
-                    b.Property<string>("Foto5")
-                        .HasColumnType("text");
+                    b.Property<byte[]>("Foto5")
+                        .HasColumnType("bytea");
 
                     b.Property<int>("GeneroId")
                         .HasColumnType("integer");
@@ -916,15 +923,26 @@ namespace CRMVEXA.Infrastructure.Migrations
                     b.Property<int?>("MarcaId")
                         .HasColumnType("integer");
 
+                    b.Property<string>("Material")
+                        .HasMaxLength(120)
+                        .HasColumnType("character varying(120)");
+
                     b.Property<string>("Nome")
                         .IsRequired()
                         .HasMaxLength(200)
                         .HasColumnType("character varying(200)");
 
+                    b.Property<string>("Observacoes")
+                        .HasMaxLength(4000)
+                        .HasColumnType("character varying(4000)");
+
                     b.Property<decimal?>("Peso")
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<decimal>("PrecoCusto")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal?>("PrecoPromocional")
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<decimal>("PrecoVenda")
@@ -940,6 +958,14 @@ namespace CRMVEXA.Infrastructure.Migrations
 
                     b.Property<int?>("TamanhoId")
                         .HasColumnType("integer");
+
+                    b.Property<string>("Tamanhos")
+                        .IsRequired()
+                        .HasColumnType("jsonb");
+
+                    b.Property<string>("TipoTamanho")
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)");
 
                     b.HasKey("Id");
 

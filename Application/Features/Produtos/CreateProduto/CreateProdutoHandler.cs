@@ -1,4 +1,5 @@
 using System;
+using CRMVEXA.Application.Features.Produtos;
 using CRMVEXA.Application.Features.Produtos.CreateProduto;
 using CRMVEXA.Application.Services;
 using CRMVEXA.Domain.Entities;
@@ -63,14 +64,23 @@ namespace CRMVEXA.Application.Features.Produtos.CreateProduto
                     MarcaId = request.MarcaId,
                     FornecedorId = request.FornecedorId,
                     CodigoBarras = request.CodigoBarras,
-                    Foto1 = request.Foto1,
-                    Foto2 = request.Foto2,
-                    Foto3 = request.Foto3,
-                    Foto4 = request.Foto4,
-                    Foto5 = request.Foto5,
+                    Foto1 = ProdutoFotoSlotHelper.DecodificarCriacao(request.Foto1Base64, request.Foto1),
+                    Foto2 = ProdutoFotoSlotHelper.DecodificarCriacao(request.Foto2Base64, request.Foto2),
+                    Foto3 = ProdutoFotoSlotHelper.DecodificarCriacao(request.Foto3Base64, request.Foto3),
+                    Foto4 = ProdutoFotoSlotHelper.DecodificarCriacao(request.Foto4Base64, request.Foto4),
+                    Foto5 = ProdutoFotoSlotHelper.DecodificarCriacao(request.Foto5Base64, request.Foto5),
                     DescricaoCurta = request.DescricaoCurta,
-                    Peso = request.Peso
+                    Peso = request.Peso,
+                    Cores = ProdutoListaStringHelper.Normalizar(request.Cores),
+                    Tamanhos = ProdutoListaStringHelper.Normalizar(request.Tamanhos),
+                    TipoTamanho = string.IsNullOrWhiteSpace(request.TipoTamanho) ? null : request.TipoTamanho.Trim(),
+                    Material = string.IsNullOrWhiteSpace(request.Material) ? null : request.Material.Trim()
                 };
+
+                var (precoPromo, emPromo) = ProdutoPromocaoHelper.NormalizarPromocao(request.PrecoPromocional);
+                produto.PrecoPromocional = precoPromo;
+                produto.EmPromocao = emPromo;
+                produto.Observacoes = ProdutoPromocaoHelper.NormalizarObservacoes(request.Observacoes);
 
                 var estoque = new CRMVEXA.Domain.Entities.Estoque(empresaId, 0, request.QuantidadeEstoque, request.EstoqueMinimo, request.LocalizacaoEstoque);
                 produto.Estoque = estoque;

@@ -1,4 +1,7 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
+using CRMVEXA.Application.Features.Clientes;
 using CRMVEXA.Application.Features.Produtos.GetProduto;
 using CRMVEXA.Application.Services;
 using CRMVEXA.Infrastructure.Data;
@@ -52,17 +55,24 @@ namespace CRMVEXA.Application.Features.Produtos.GetProduto
                 FornecedorId = produto.FornecedorId,
                 PrecoCusto = produto.PrecoCusto,
                 PrecoVenda = produto.PrecoVenda,
+                PrecoPromocional = produto.PrecoPromocional,
+                EmPromocao = produto.EmPromocao,
+                Observacoes = produto.Observacoes,
                 CodigoBarras = produto.CodigoBarras,
                 QuantidadeEstoque = produto.Estoque?.Quantidade ?? 0,
                 EstoqueMinimo = produto.Estoque?.EstoqueMinimo ?? 1,
                 LocalizacaoEstoque = produto.Estoque?.LocalizacaoEstoque,
-                Foto1 = produto.Foto1,
-                Foto2 = produto.Foto2,
-                Foto3 = produto.Foto3,
-                Foto4 = produto.Foto4,
-                Foto5 = produto.Foto5,
+                Foto1 = ClienteFotoUrlHelper.ToApiFotoUrl(produto.Foto1),
+                Foto2 = ClienteFotoUrlHelper.ToApiFotoUrl(produto.Foto2),
+                Foto3 = ClienteFotoUrlHelper.ToApiFotoUrl(produto.Foto3),
+                Foto4 = ClienteFotoUrlHelper.ToApiFotoUrl(produto.Foto4),
+                Foto5 = ClienteFotoUrlHelper.ToApiFotoUrl(produto.Foto5),
                 DescricaoCurta = produto.DescricaoCurta,
-                Peso = produto.Peso
+                Peso = produto.Peso,
+                Cores = produto.Cores.Count > 0 ? produto.Cores.ToList() : new List<string>(),
+                Tamanhos = produto.Tamanhos.Count > 0 ? produto.Tamanhos.ToList() : new List<string>(),
+                TipoTamanho = produto.TipoTamanho,
+                Material = produto.Material
             };
         }
     }
