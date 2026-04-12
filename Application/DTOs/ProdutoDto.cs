@@ -1,4 +1,6 @@
-﻿namespace CRMVEXA.Application.DTOs
+using System.Collections.Generic;
+
+namespace CRMVEXA.Application.DTOs
 {
     public class ProdutoDto
     {
@@ -14,6 +16,9 @@
         public int? FornecedorId { get; set; }
         public decimal PrecoCusto { get; set; }
         public decimal PrecoVenda { get; set; }
+        public decimal? PrecoPromocional { get; set; }
+        public bool EmPromocao { get; set; }
+        public string? Observacoes { get; set; }
         public string? CodigoBarras { get; set; }
         public int QuantidadeEstoque { get; set; }
         public int EstoqueMinimo { get; set; }
@@ -25,5 +30,9 @@
         public string? Foto5 { get; set; }
         public string? DescricaoCurta { get; set; }
         public decimal? Peso { get; set; }
+        public List<string> Cores { get; set; } = new();
+        public List<string> Tamanhos { get; set; } = new();
+        public string? TipoTamanho { get; set; }
+        public string? Material { get; set; }
     }
 }

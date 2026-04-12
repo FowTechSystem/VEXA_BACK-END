@@ -1,7 +1,9 @@
 using System.Text;
+using System.Threading.RateLimiting;
 using CRMVEXA.API.Middleware;
 using CRMVEXA.Application.Services;
 using CRMVEXA.Infrastructure.Data;
+using CRMVEXA.Infrastructure.Email;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -9,16 +11,19 @@ using System.Text.Json;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// URLs de escuta — alterne manualmente antes de publicar no servidor (Docker/VPS + Nginx).
-//
-// Uso LOCAL (npm run dev / Vite): mantenha a linha LOCAL descomentada e a SERVIDOR comentada.
-// Deploy no SERVIDOR: comente a linha LOCAL e descomente a linha SERVIDOR; depois build/push da imagem.
-//
-// LOCAL — front em http://localhost:5173 com proxy para https://localhost:5001
-builder.WebHost.UseUrls("https://localhost:5001");
-
-// SERVIDOR — HTTP na 8080 (TLS fica no Nginx na frente)
-// builder.WebHost.UseUrls("http://+:8080");
+// URLs de escuta (ordem):
+// 1) "Urls" no appsettings / variáveis de ambiente (ex.: Urls=http://0.0.0.0:8080)
+// 2) ASPNETCORE_URLS (Docker, systemd, IIS, launchSettings) — se definido, não chamar UseUrls
+// 3) fallback: https://localhost:5001 (máquina local sem env)
+var urlsConfig = builder.Configuration["Urls"];
+if (!string.IsNullOrWhiteSpace(urlsConfig))
+{
+    builder.WebHost.UseUrls(urlsConfig.Split(';', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries));
+}
+else if (string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("ASPNETCORE_URLS")))
+{
+    builder.WebHost.UseUrls("https://localhost:5001");
+}
 
 // ============ CONFIGURAÇÕES DE SERVIÇOS ============
 
@@ -28,6 +33,10 @@ AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<IEmpresaContext, EmpresaContext>();
 builder.Services.AddScoped<IEntradaEstoquePorCompraService, EntradaEstoquePorCompraService>();
+if (!string.IsNullOrWhiteSpace(builder.Configuration["Email:SmtpHost"]))
+    builder.Services.AddScoped<IEmailSender, SmtpEmailSender>();
+else
+    builder.Services.AddScoped<IEmailSender, LogOnlyEmailSender>();
 
 // 1. Configurar DbContext
 builder.Services.AddDbContext<AppDbContext>(options =>
@@ -140,6 +149,34 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
 builder.Services.AddAuthorization();
 
+builder.Services.AddRateLimiter(options =>
+{
+    options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+    options.OnRejected = async (context, _) =>
+    {
+        context.HttpContext.Response.StatusCode = StatusCodes.Status429TooManyRequests;
+        await context.HttpContext.Response.WriteAsJsonAsync(new
+        {
+            message = "Muitas tentativas. Aguarde alguns minutos e tente novamente.",
+            Message = "Muitas tentativas. Aguarde alguns minutos e tente novamente."
+        }, cancellationToken: context.HttpContext.RequestAborted);
+    };
+    options.AddPolicy("auth-password-recovery", httpContext =>
+    {
+        var ip = httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown";
+        return RateLimitPartition.GetFixedWindowLimiter(
+            ip,
+            _ => new FixedWindowRateLimiterOptions
+            {
+                AutoReplenishment = true,
+                PermitLimit = 10,
+                Window = TimeSpan.FromMinutes(15),
+                QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
+                QueueLimit = 0
+            });
+    });
+});
+
 // 7. Swagger - ✅ VERSÃO SIMPLES (SEM ERRO)
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -158,6 +195,7 @@ if (app.Environment.IsDevelopment())
 app.UseStaticFiles();
 app.UseRouting();
 app.UseCors("AllowFrontend");
+app.UseRateLimiter();
 app.UseMiddleware<ExceptionHandlerMiddleware>();
 app.UseAuthentication();
 app.UseMiddleware<EmpresaContextMiddleware>();
@@ -168,7 +206,13 @@ app.MapGet("/", () => Results.Json(new
 {
     name = "CRMVEXA API",
     ok = true,
-    endpoints = new { health = "/health", login = "POST /api/Auth/login" }
+    endpoints = new
+    {
+        health = "/health",
+        login = "POST /api/Auth/login",
+        forgotPassword = "POST /api/Auth/forgot-password",
+        resetPassword = "POST /api/Auth/reset-password"
+    }
 })).AllowAnonymous();
 
 app.MapGet("/health", () => Results.Json(new { status = "ok", service = "CRMVEXA" }))

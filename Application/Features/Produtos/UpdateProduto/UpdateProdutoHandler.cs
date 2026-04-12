@@ -1,6 +1,8 @@
 using System;
+using CRMVEXA.Application.Features.Produtos;
 using CRMVEXA.Application.Features.Produtos.UpdateProduto;
 using CRMVEXA.Application.Services;
+using CRMVEXA.Domain.Entities;
 using CRMVEXA.Infrastructure.Data;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -44,14 +46,28 @@ namespace CRMVEXA.Application.Features.Produtos.UpdateProduto
                 request.MarcaId,
                 request.FornecedorId,
                 request.CodigoBarras,
-                request.Foto1,
-                request.Foto2,
-                request.Foto3,
-                request.Foto4,
-                request.Foto5,
                 request.DescricaoCurta,
-                request.Peso
-            );
+                request.Peso);
+
+            var (precoPromo, emPromo) = ProdutoPromocaoHelper.NormalizarPromocao(request.PrecoPromocional);
+            produto.PrecoPromocional = precoPromo;
+            produto.EmPromocao = emPromo;
+            produto.Observacoes = ProdutoPromocaoHelper.NormalizarObservacoes(request.Observacoes);
+
+            if (request.Cores != null)
+                produto.Cores = ProdutoListaStringHelper.Normalizar(request.Cores);
+            if (request.Tamanhos != null)
+                produto.Tamanhos = ProdutoListaStringHelper.Normalizar(request.Tamanhos);
+            if (request.TipoTamanho != null)
+                produto.TipoTamanho = string.IsNullOrWhiteSpace(request.TipoTamanho) ? null : request.TipoTamanho.Trim();
+            if (request.Material != null)
+                produto.Material = string.IsNullOrWhiteSpace(request.Material) ? null : request.Material.Trim();
+
+            ProdutoFotoSlotHelper.AplicarAtualizacaoSlot(_context, produto, nameof(Produto.Foto1), request.Foto1Url, request.Foto1Base64, request.Foto1);
+            ProdutoFotoSlotHelper.AplicarAtualizacaoSlot(_context, produto, nameof(Produto.Foto2), request.Foto2Url, request.Foto2Base64, request.Foto2);
+            ProdutoFotoSlotHelper.AplicarAtualizacaoSlot(_context, produto, nameof(Produto.Foto3), request.Foto3Url, request.Foto3Base64, request.Foto3);
+            ProdutoFotoSlotHelper.AplicarAtualizacaoSlot(_context, produto, nameof(Produto.Foto4), request.Foto4Url, request.Foto4Base64, request.Foto4);
+            ProdutoFotoSlotHelper.AplicarAtualizacaoSlot(_context, produto, nameof(Produto.Foto5), request.Foto5Url, request.Foto5Base64, request.Foto5);
 
             if (produto.Estoque != null)
             {

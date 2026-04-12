@@ -20,6 +20,7 @@ namespace CRMVEXA.Infrastructure.Data
         public DbSet<Subcategoria> Subcategorias { get; set; }
         public DbSet<Tamanho> Tamanhos { get; set; }
         public DbSet<Usuario> Usuarios { get; set; }
+        public DbSet<PasswordResetToken> PasswordResetTokens { get; set; }
         public DbSet<Permissao> Permissoes { get; set; }
         public DbSet<UsuarioPermissao> UsuarioPermissoes { get; set; }
         public DbSet<Venda> Vendas { get; set; }

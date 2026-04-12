@@ -1,3 +1,6 @@
+using System.Collections.Generic;
+using System.Linq;
+using CRMVEXA.Application.Features.Clientes;
 using CRMVEXA.Application.Features.Produtos.GetListaProdutos;
 using CRMVEXA.Application.Services;
 using CRMVEXA.Infrastructure.Data;
@@ -76,18 +79,25 @@ namespace CRMVEXA.Application.Features.Produtos.GetListaProdutos
                 FornecedorId = p.FornecedorId,
                 PrecoCusto = p.PrecoCusto,
                 PrecoVenda = p.PrecoVenda,
+                PrecoPromocional = p.PrecoPromocional,
+                EmPromocao = p.EmPromocao,
+                Observacoes = p.Observacoes,
                 CodigoBarras = p.CodigoBarras,
                 QuantidadeEstoque = p.Estoque?.Quantidade ?? 0,
                 EstoqueMinimo = p.Estoque?.EstoqueMinimo ?? 10,
                 EstoqueMaximo = 0,
                 LocalizacaoEstoque = p.Estoque?.LocalizacaoEstoque,
-                Foto1 = p.Foto1,
-                Foto2 = p.Foto2,
-                Foto3 = p.Foto3,
-                Foto4 = p.Foto4,
-                Foto5 = p.Foto5,
+                Foto1 = ClienteFotoUrlHelper.ToApiFotoUrl(p.Foto1),
+                Foto2 = ClienteFotoUrlHelper.ToApiFotoUrl(p.Foto2),
+                Foto3 = ClienteFotoUrlHelper.ToApiFotoUrl(p.Foto3),
+                Foto4 = ClienteFotoUrlHelper.ToApiFotoUrl(p.Foto4),
+                Foto5 = ClienteFotoUrlHelper.ToApiFotoUrl(p.Foto5),
                 DescricaoCurta = p.DescricaoCurta,
-                Peso = p.Peso
+                Peso = p.Peso,
+                Cores = p.Cores.Count > 0 ? p.Cores.ToList() : new List<string>(),
+                Tamanhos = p.Tamanhos.Count > 0 ? p.Tamanhos.ToList() : new List<string>(),
+                TipoTamanho = p.TipoTamanho,
+                Material = p.Material
             }).ToList();
 
             return new GetListaProdutosResponse

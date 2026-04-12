@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 namespace CRMVEXA.Domain.Entities
 {
     public class Produto
@@ -15,14 +17,28 @@ namespace CRMVEXA.Domain.Entities
         public int? FornecedorId { get; set; }
         public decimal PrecoCusto { get; set; }
         public decimal PrecoVenda { get; set; }
+        /// <summary>Preço em promoção (&gt; 0) ou null se não houver promoção.</summary>
+        public decimal? PrecoPromocional { get; set; }
+        public bool EmPromocao { get; set; }
+        /// <summary>Observações internas (uso interno da loja).</summary>
+        public string? Observacoes { get; set; }
         public string? CodigoBarras { get; set; }
-        public string? Foto1 { get; set; }
-        public string? Foto2 { get; set; }
-        public string? Foto3 { get; set; }
-        public string? Foto4 { get; set; }
-        public string? Foto5 { get; set; }
+        /// <summary>Fotos (PostgreSQL bytea), até 5 slots.</summary>
+        public byte[]? Foto1 { get; set; }
+        public byte[]? Foto2 { get; set; }
+        public byte[]? Foto3 { get; set; }
+        public byte[]? Foto4 { get; set; }
+        public byte[]? Foto5 { get; set; }
         public string? DescricaoCurta { get; set; }
         public decimal? Peso { get; set; }
+
+        /// <summary>Nomes de cor (português), como enviado pelo front — persistido em JSON.</summary>
+        public List<string> Cores { get; set; } = new();
+        /// <summary>Códigos de tamanho (ex.: P, M, 38), como enviado pelo front.</summary>
+        public List<string> Tamanhos { get; set; } = new();
+        /// <summary>roupas | calcados | acessorios</summary>
+        public string? TipoTamanho { get; set; }
+        public string? Material { get; set; }
 
         // Navegação
         public Categoria Categoria { get; set; } = null!;
@@ -60,11 +76,6 @@ namespace CRMVEXA.Domain.Entities
             int? marcaId = null,
             int? fornecedorId = null,
             string? codigoBarras = null,
-            string? foto1 = null,
-            string? foto2 = null,
-            string? foto3 = null,
-            string? foto4 = null,
-            string? foto5 = null,
             string? descricaoCurta = null,
             decimal? peso = null)
         {
@@ -80,11 +91,6 @@ namespace CRMVEXA.Domain.Entities
             MarcaId = marcaId;
             FornecedorId = fornecedorId;
             CodigoBarras = codigoBarras;
-            Foto1 = foto1;
-            Foto2 = foto2;
-            Foto3 = foto3;
-            Foto4 = foto4;
-            Foto5 = foto5;
             DescricaoCurta = descricaoCurta;
             Peso = peso;
         }

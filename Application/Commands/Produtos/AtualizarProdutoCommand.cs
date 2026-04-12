@@ -1,4 +1,4 @@
-﻿using MediatR;
+using MediatR;
 
 namespace CRMVEXA.Application.Commands.Produtos
 {
@@ -19,11 +19,6 @@ namespace CRMVEXA.Application.Commands.Produtos
         int QuantidadeEstoque,
         int EstoqueMinimo,
         string? LocalizacaoEstoque,
-        string? Foto1,
-        string? Foto2,
-        string? Foto3,
-        string? Foto4,
-        string? Foto5,
         string? DescricaoCurta,
         decimal? Peso
     ) : IRequest<bool>;
