@@ -40,7 +40,8 @@ public class EmpresaContext : IEmpresaContext
                 return mid;
 
             // 2. Fallback: claim do token
-            return ctx.User?.FindFirstValue("empresa_id") is string s && int.TryParse(s, out var id)
+            var empresaClaim = ctx.User?.FindFirst("empresa_id")?.Value;
+            return !string.IsNullOrEmpty(empresaClaim) && int.TryParse(empresaClaim, out var id)
                 ? id
                 : null;
         }

@@ -6,8 +6,8 @@ using Microsoft.EntityFrameworkCore;
 namespace CRMVEXA.API.Middleware;
 
 /// <summary>
-/// Resolve o EmpresaId efetivo: para dev@gmail.com com header X-Empresa-Id, usa o header (validado).
-/// Caso contrário, usa empresa_id do token. Ignora X-Empresa-Id para usuários que não sejam dev.
+/// Resolve o EmpresaId efetivo: para o admin dev com header X-Empresa-Id, usa o header (validado no banco).
+/// Usuário comum não pode enviar X-Empresa-Id (403). Demais casos usam claim empresa_id do token.
 /// </summary>
 public class EmpresaContextMiddleware
 {
@@ -25,12 +25,20 @@ public class EmpresaContextMiddleware
         var user = context.User;
         if (user.Identity?.IsAuthenticated == true)
         {
-            var email = user.FindFirstValue(ClaimTypes.Email);
-            var empresaIdClaim = user.FindFirstValue("empresa_id");
+            var empresaIdClaim = user.FindFirst("empresa_id")?.Value;
 
             var headerEmpresaId = context.Request.Headers["X-Empresa-Id"].FirstOrDefault();
-            var isDev = !string.IsNullOrEmpty(email) &&
-                        string.Equals(email.Trim(), SistemaConstants.EmailAdminSistema, StringComparison.OrdinalIgnoreCase);
+            var isDev = SistemaConstants.IsUsuarioDevAdmin(user);
+
+            if (!string.IsNullOrWhiteSpace(headerEmpresaId) && !isDev)
+            {
+                context.Response.StatusCode = StatusCodes.Status403Forbidden;
+                await context.Response.WriteAsJsonAsync(new
+                {
+                    message = "Acesso restrito ao administrador de desenvolvimento."
+                }, context.RequestAborted);
+                return;
+            }
 
             int? resolvedEmpresaId = null;
 

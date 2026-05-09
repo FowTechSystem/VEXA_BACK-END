@@ -1,4 +1,3 @@
-using System.Security.Claims;
 using CRMVEXA.Application.Constants;
 using CRMVEXA.Application.Features.Empresas.CriarEmpresa;
 using CRMVEXA.Application.Features.Empresas.CriarPrimeiroUsuario;
@@ -24,12 +23,12 @@ namespace CRMVEXA.API.Controllers
             _mediator = mediator;
         }
 
-        private bool UsuarioPodeGerenciarEmpresas()
+        private bool UsuarioPodeGerenciarEmpresas() => SistemaConstants.IsUsuarioDevAdmin(User);
+
+        private static object RespostaAcessoNegadoDev() => new
         {
-            var email = User.FindFirstValue(ClaimTypes.Email);
-            return !string.IsNullOrEmpty(email) &&
-                   string.Equals(email.Trim(), SistemaConstants.EmailAdminSistema, StringComparison.OrdinalIgnoreCase);
-        }
+            message = "Acesso restrito ao administrador de desenvolvimento."
+        };
 
         /// <summary>
         /// Lista todas as empresas. Apenas dev@gmail.com.
@@ -38,9 +37,7 @@ namespace CRMVEXA.API.Controllers
         public async Task<ActionResult<GetListaEmpresasResponse>> Listar()
         {
             if (!UsuarioPodeGerenciarEmpresas())
-            {
-                return StatusCode(403, new { message = "Apenas o administrador do sistema pode acessar o cadastro de empresas." });
-            }
+                return StatusCode(403, RespostaAcessoNegadoDev());
 
             try
             {
@@ -60,9 +57,7 @@ namespace CRMVEXA.API.Controllers
         public async Task<ActionResult<CriarEmpresaResponse>> Criar([FromBody] CriarEmpresaRequest request)
         {
             if (!UsuarioPodeGerenciarEmpresas())
-            {
-                return StatusCode(403, new { message = "Apenas o administrador do sistema pode cadastrar empresas." });
-            }
+                return StatusCode(403, RespostaAcessoNegadoDev());
 
             if (string.IsNullOrWhiteSpace(request?.Nome))
             {
@@ -94,9 +89,7 @@ namespace CRMVEXA.API.Controllers
             [FromBody] CriarPrimeiroUsuarioBodyRequest body)
         {
             if (!UsuarioPodeGerenciarEmpresas())
-            {
-                return StatusCode(403, new { message = "Apenas o administrador do sistema pode criar usuários para empresas." });
-            }
+                return StatusCode(403, RespostaAcessoNegadoDev());
 
             if (string.IsNullOrWhiteSpace(body?.Nome) || string.IsNullOrWhiteSpace(body?.Email) || string.IsNullOrWhiteSpace(body?.Senha))
             {
