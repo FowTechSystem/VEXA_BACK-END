@@ -108,7 +108,11 @@ namespace CRMVEXA.API.Controllers
                 request.Id = id;
                 var resultado = await _mediator.Send(request);
                 if (!resultado.Sucesso)
+                {
+                    if (resultado.Codigo == 409)
+                        return StatusCode(409, resultado);
                     return BadRequest(resultado);
+                }
                 return Ok(resultado);
             }
             catch (Exception ex)

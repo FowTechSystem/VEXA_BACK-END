@@ -1,4 +1,5 @@
 using System.Security.Claims;
+using CRMVEXA.Application.Constants;
 using CRMVEXA.Application.Features.Compras.GetCompra;
 using CRMVEXA.Application.Features.Compras.GetListaCompras;
 using CRMVEXA.Application.Services;
@@ -15,12 +16,18 @@ public class UpdateCompraHandler : IRequestHandler<UpdateCompraRequest, UpdateCo
     private readonly AppDbContext _context;
     private readonly IEmpresaContext _empresaContext;
     private readonly IHttpContextAccessor _httpContextAccessor;
+    private readonly IEntradaEstoquePorCompraService _entradaEstoque;
 
-    public UpdateCompraHandler(AppDbContext context, IEmpresaContext empresaContext, IHttpContextAccessor httpContextAccessor)
+    public UpdateCompraHandler(
+        AppDbContext context,
+        IEmpresaContext empresaContext,
+        IHttpContextAccessor httpContextAccessor,
+        IEntradaEstoquePorCompraService entradaEstoque)
     {
         _context = context;
         _empresaContext = empresaContext;
         _httpContextAccessor = httpContextAccessor;
+        _entradaEstoque = entradaEstoque;
     }
 
     public async Task<UpdateCompraResponse> Handle(UpdateCompraRequest request, CancellationToken cancellationToken)
@@ -33,6 +40,8 @@ public class UpdateCompraHandler : IRequestHandler<UpdateCompraRequest, UpdateCo
 
         if (compra == null)
             return new UpdateCompraResponse { Sucesso = false, Mensagem = "Compra não encontrada" };
+
+        var statusAnterior = compra.Status?.Trim().ToLowerInvariant() ?? "";
 
         var statusAtual = compra.Status?.Trim().ToLowerInvariant();
         if (statusAtual == "recebida")
@@ -82,6 +91,28 @@ public class UpdateCompraHandler : IRequestHandler<UpdateCompraRequest, UpdateCo
         var compraAtualizada = await _context.Compras
             .Include(c => c.Itens)
             .FirstOrDefaultAsync(c => c.Id == compra.Id, cancellationToken);
+
+        if (compraAtualizada != null)
+        {
+            var novoStatus = compraAtualizada.Status?.Trim().ToLowerInvariant() ?? "";
+            if (CompraEstoqueConstants.StatusDisparaEntradaFisica(novoStatus) && statusAnterior != CompraEstoqueConstants.StatusRecebida)
+            {
+                try
+                {
+                    await _entradaEstoque.RegistrarEntradaAsync(
+                        empresaId,
+                        compraAtualizada,
+                        usuarioId,
+                        $"Compra {compraAtualizada.CodigoCompra} recebida",
+                        cancellationToken);
+                    await _context.SaveChangesAsync(cancellationToken);
+                }
+                catch (InvalidOperationException ex)
+                {
+                    return new UpdateCompraResponse { Sucesso = false, Mensagem = ex.Message };
+                }
+            }
+        }
 
         var response = await MontarGetCompraResponse(compraAtualizada!, cancellationToken);
         return new UpdateCompraResponse { Sucesso = true, Compra = response };

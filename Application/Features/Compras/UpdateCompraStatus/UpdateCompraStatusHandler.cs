@@ -41,26 +41,45 @@ public class UpdateCompraStatusHandler : IRequestHandler<UpdateCompraStatusReque
         if (status != "pendente" && status != "aprovada" && status != "recebida" && status != "cancelada")
             return new UpdateCompraStatusResponse { Sucesso = false, Mensagem = "Status inválido. Use: pendente, aprovada, recebida ou cancelada" };
 
-        if (compra.Status.ToLowerInvariant() == "recebida" && status == "recebida")
+        var anterior = compra.Status?.Trim().ToLowerInvariant() ?? "";
+
+        if (anterior == "recebida" && status == "recebida")
             return new UpdateCompraStatusResponse { Sucesso = true, Mensagem = "Compra já está com status recebida" };
 
-        compra.Status = status;
-
-        if (status == "recebida")
+        try
         {
-            var jaEntrouEstoque = await _context.MovimentacoesEstoque
-                .AnyAsync(m => m.CompraId == compra.Id, cancellationToken);
-
-            if (!jaEntrouEstoque)
+            if (status == "cancelada" && anterior == "recebida")
             {
-                var usuarioId = ObterUsuarioIdDoToken();
-                var motivo = $"Compra {compra.CodigoCompra} recebida";
-                await _entradaEstoque.RegistrarEntradaAsync(empresaId, compra, usuarioId, motivo, cancellationToken);
+                var usuarioEstorno = ObterUsuarioIdDoToken();
+                if (usuarioEstorno <= 0)
+                    return new UpdateCompraStatusResponse { Sucesso = false, Mensagem = "Usuário não identificado." };
+                await _entradaEstoque.EstornarEntradaPorCompraAsync(empresaId, compra, usuarioEstorno, cancellationToken);
             }
-        }
 
-        await _context.SaveChangesAsync(cancellationToken);
-        return new UpdateCompraStatusResponse { Sucesso = true, Mensagem = $"Status atualizado para {status}" };
+            compra.Status = status;
+
+            if (status == "recebida" && anterior != "recebida")
+            {
+                var jaTemEntrada = await _context.MovimentacoesEstoque
+                    .AnyAsync(m => m.CompraId == compra.Id && m.TipoMovimentacao == "Entrada", cancellationToken);
+
+                if (!jaTemEntrada)
+                {
+                    var usuarioId = ObterUsuarioIdDoToken();
+                    if (usuarioId <= 0)
+                        return new UpdateCompraStatusResponse { Sucesso = false, Mensagem = "Usuário não identificado." };
+                    var motivo = $"Compra {compra.CodigoCompra} recebida";
+                    await _entradaEstoque.RegistrarEntradaAsync(empresaId, compra, usuarioId, motivo, cancellationToken);
+                }
+            }
+
+            await _context.SaveChangesAsync(cancellationToken);
+            return new UpdateCompraStatusResponse { Sucesso = true, Mensagem = $"Status atualizado para {status}" };
+        }
+        catch (InvalidOperationException ex)
+        {
+            return new UpdateCompraStatusResponse { Sucesso = false, Mensagem = ex.Message, Codigo = 409 };
+        }
     }
 
     private int ObterUsuarioIdDoToken()

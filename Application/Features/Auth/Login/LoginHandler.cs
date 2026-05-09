@@ -1,3 +1,4 @@
+using CRMVEXA.Application.Constants;
 using CRMVEXA.Application.Features.Clientes;
 using CRMVEXA.Domain.Entities;
 using CRMVEXA.Infrastructure.Data;
@@ -92,6 +93,9 @@ namespace CRMVEXA.Application.Features.Auth.Login
                 new("cargo", usuario.Cargo ?? ""),
                 new("empresa_id", usuario.EmpresaId.ToString())
             };
+
+            if (SistemaConstants.IsDevAdminEmail(usuario.Email))
+                claims.Add(new Claim(ClaimTypes.Role, SistemaConstants.RoleDevAdmin));
 
             var token = new JwtSecurityToken(
                 issuer: issuer,

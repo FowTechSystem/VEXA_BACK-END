@@ -1,5 +1,6 @@
 using System;
 using System.Security.Claims;
+using CRMVEXA.Application.Constants;
 using CRMVEXA.Application.Features.Compras.CreateCompra;
 using CRMVEXA.Application.Services;
 using CRMVEXA.Domain.Entities;
@@ -39,6 +40,9 @@ namespace CRMVEXA.Application.Features.Compras.CreateCompra
             if (fornecedor == null)
                 throw new InvalidOperationException($"Fornecedor com ID {request.FornecedorId} não encontrado. Selecione um fornecedor cadastrado.");
 
+            if (request.Itens == null || request.Itens.Count == 0)
+                throw new InvalidOperationException("A compra deve conter pelo menos um item.");
+
             var usuarioId = request.UsuarioId ?? ObterUsuarioIdDoToken();
             if (usuarioId <= 0)
                 throw new InvalidOperationException("Usuário não identificado. Faça login novamente.");
@@ -65,9 +69,10 @@ namespace CRMVEXA.Application.Features.Compras.CreateCompra
             _context.Compras.Add(compra);
             await _context.SaveChangesAsync(cancellationToken);
 
-            if (!string.Equals(compra.Status, "cancelada", StringComparison.OrdinalIgnoreCase))
+            // Entrada física só quando recebida (alinhado ao front Estoque.jsx + contrato de negócio).
+            if (CompraEstoqueConstants.StatusDisparaEntradaFisica(compra.Status))
             {
-                var motivo = $"Compra {compra.CodigoCompra} lançada";
+                var motivo = $"Compra {compra.CodigoCompra} recebida";
                 await _entradaEstoque.RegistrarEntradaAsync(empresaId, compra, usuarioId, motivo, cancellationToken);
                 await _context.SaveChangesAsync(cancellationToken);
             }
