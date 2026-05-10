@@ -36,6 +36,13 @@ namespace CRMVEXA.Infrastructure.Data
         public DbSet<Catalogo> Catalogos { get; set; }
         public DbSet<ItemCatalogo> ItensCatalogo { get; set; }
 
+        public DbSet<PermissaoCatalogo> PermissoesCatalogo { get; set; }
+        public DbSet<PerfilAcesso> PerfisAcesso { get; set; }
+        public DbSet<PerfilPermissaoCatalogo> PerfilPermissoesCatalogo { get; set; }
+        public DbSet<ParametroSistema> ParametrosSistema { get; set; }
+        public DbSet<SolicitacaoAprovacao> SolicitacoesAprovacao { get; set; }
+        public DbSet<AuditoriaAcao> AuditoriaAcoes { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<Fornecedor>()

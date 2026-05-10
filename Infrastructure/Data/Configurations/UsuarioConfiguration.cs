@@ -21,6 +21,7 @@ namespace CRMVEXA.Infrastructure.Data.Configurations
             builder.Property(x => x.Departamento).HasMaxLength(100);
             builder.Property(x => x.Observacoes).HasMaxLength(2000);
             builder.Property(x => x.Foto).HasColumnType("bytea");
+            builder.HasOne(x => x.PerfilAcesso).WithMany(x => x.Usuarios).HasForeignKey(x => x.PerfilAcessoId).OnDelete(DeleteBehavior.SetNull);
             builder.ToTable("Usuarios");
         }
     }

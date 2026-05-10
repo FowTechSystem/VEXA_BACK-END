@@ -36,6 +36,10 @@ namespace CRMVEXA.Domain.Entities
         // Permissões adicionais via entidade Permissao (ex.: Gerenciar clientes, Acesso financeiro, Configurações do sistema)
         public ICollection<UsuarioPermissao> UsuarioPermissoes { get; set; } = new List<UsuarioPermissao>();
 
+        /// <summary>Perfil RBAC (novo módulo). Opcional enquanto migra do modelo legado.</summary>
+        public int? PerfilAcessoId { get; set; }
+        public PerfilAcesso? PerfilAcesso { get; set; }
+
         // Endereços do usuário
         public ICollection<Endereco> Enderecos { get; set; } = new List<Endereco>();
 
