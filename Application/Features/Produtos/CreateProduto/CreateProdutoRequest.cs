@@ -35,6 +35,16 @@ namespace CRMVEXA.Application.Features.Produtos.CreateProduto
         public string? Foto3Base64 { get; set; }
         public string? Foto4Base64 { get; set; }
         public string? Foto5Base64 { get; set; }
+        /// <summary>
+        /// Galeria adicional (além da principal). Ordem preservada; cada item pode ser URL http(s) ou data URL/base64.
+        /// Mapeia para os slots Foto2..Foto5.
+        /// </summary>
+        public List<string>? FotosAdicionaisUrls { get; set; }
+        /// <summary>
+        /// Galeria adicional em base64 puro (sem prefixo data URI). Ordem preservada.
+        /// Mapeia para os slots Foto2..Foto5.
+        /// </summary>
+        public List<string>? FotosAdicionaisBase64 { get; set; }
         public string? DescricaoCurta { get; set; }
         public decimal? Peso { get; set; }
 

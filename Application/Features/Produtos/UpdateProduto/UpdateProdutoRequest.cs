@@ -34,6 +34,16 @@ namespace CRMVEXA.Application.Features.Produtos.UpdateProduto
         public string? Foto3Base64 { get; set; }
         public string? Foto4Base64 { get; set; }
         public string? Foto5Base64 { get; set; }
+        /// <summary>
+        /// Quando enviado (inclui []), substitui a galeria adicional por ordem (slots Foto2..Foto5).
+        /// Aceita URL http(s), data URL ou base64 puro.
+        /// </summary>
+        public List<string>? FotosAdicionaisUrls { get; set; }
+        /// <summary>
+        /// Complementa <see cref="FotosAdicionaisUrls"/> para payloads em base64 puro (sem data URI).
+        /// Quando qualquer lista adicional for enviada, a galeria adicional passa a ser substituída.
+        /// </summary>
+        public List<string>? FotosAdicionaisBase64 { get; set; }
         /// <summary>Legado: mesmo significado que <see cref="Foto1Url"/> (data URL/base64).</summary>
         public string? Foto1 { get; set; }
         public string? Foto2 { get; set; }

@@ -68,6 +68,11 @@ namespace CRMVEXA.Application.Features.Produtos.UpdateProduto
             ProdutoFotoSlotHelper.AplicarAtualizacaoSlot(_context, produto, nameof(Produto.Foto3), request.Foto3Url, request.Foto3Base64, request.Foto3);
             ProdutoFotoSlotHelper.AplicarAtualizacaoSlot(_context, produto, nameof(Produto.Foto4), request.Foto4Url, request.Foto4Base64, request.Foto4);
             ProdutoFotoSlotHelper.AplicarAtualizacaoSlot(_context, produto, nameof(Produto.Foto5), request.Foto5Url, request.Foto5Base64, request.Foto5);
+            ProdutoFotoSlotHelper.AplicarAtualizacaoAdicionais(
+                _context,
+                produto,
+                request.FotosAdicionaisUrls,
+                request.FotosAdicionaisBase64);
 
             if (produto.Estoque != null)
             {

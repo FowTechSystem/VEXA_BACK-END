@@ -49,6 +49,14 @@ namespace CRMVEXA.Application.Features.Produtos.CreateProduto
                     if (!marcaExiste)
                         throw new Exception($"Marca com Id {request.MarcaId} não encontrada.");
                 }
+                var adicionais = ProdutoFotoSlotHelper.DecodificarAdicionaisCriacao(
+                    request.FotosAdicionaisUrls,
+                    request.FotosAdicionaisBase64,
+                    request.Foto2Base64 ?? request.Foto2,
+                    request.Foto3Base64 ?? request.Foto3,
+                    request.Foto4Base64 ?? request.Foto4,
+                    request.Foto5Base64 ?? request.Foto5);
+
                 var produto = new Produto(
                     request.SKU,
                     request.Nome,
@@ -65,10 +73,10 @@ namespace CRMVEXA.Application.Features.Produtos.CreateProduto
                     FornecedorId = request.FornecedorId,
                     CodigoBarras = request.CodigoBarras,
                     Foto1 = ProdutoFotoSlotHelper.DecodificarCriacao(request.Foto1Base64, request.Foto1),
-                    Foto2 = ProdutoFotoSlotHelper.DecodificarCriacao(request.Foto2Base64, request.Foto2),
-                    Foto3 = ProdutoFotoSlotHelper.DecodificarCriacao(request.Foto3Base64, request.Foto3),
-                    Foto4 = ProdutoFotoSlotHelper.DecodificarCriacao(request.Foto4Base64, request.Foto4),
-                    Foto5 = ProdutoFotoSlotHelper.DecodificarCriacao(request.Foto5Base64, request.Foto5),
+                    Foto2 = adicionais[0],
+                    Foto3 = adicionais[1],
+                    Foto4 = adicionais[2],
+                    Foto5 = adicionais[3],
                     DescricaoCurta = request.DescricaoCurta,
                     Peso = request.Peso,
                     Cores = ProdutoListaStringHelper.Normalizar(request.Cores),
