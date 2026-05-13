@@ -1,6 +1,6 @@
 using System.Text;
 using System.Threading.RateLimiting;
-using CRMVEXA.API.Middleware;
+using CRMVEXA.Presentation.Middleware;
 using CRMVEXA.Application.Abstractions;
 using CRMVEXA.Application.Constants;
 using CRMVEXA.Application.Services;

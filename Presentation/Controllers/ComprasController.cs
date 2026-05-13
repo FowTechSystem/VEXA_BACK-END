@@ -7,7 +7,7 @@ using CRMVEXA.Application.Features.Compras.DeleteCompra;
 using CRMVEXA.Application.Features.Compras.UpdateCompra;
 using CRMVEXA.Application.Features.Compras.UpdateCompraStatus;
 
-namespace CRMVEXA.API.Controllers
+namespace CRMVEXA.Presentation.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]

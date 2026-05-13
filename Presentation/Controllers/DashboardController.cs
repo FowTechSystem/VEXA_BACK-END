@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using MediatR;
 using CRMVEXA.Application.Features.Dashboard.GetDashboardData;
 
-namespace CRMVEXA.API.Controllers
+namespace CRMVEXA.Presentation.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]

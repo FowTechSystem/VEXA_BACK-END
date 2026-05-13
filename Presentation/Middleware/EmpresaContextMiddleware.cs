@@ -2,7 +2,7 @@ using CRMVEXA.Application.Constants;
 using CRMVEXA.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 
-namespace CRMVEXA.API.Middleware;
+namespace CRMVEXA.Presentation.Middleware;
 
 /// <summary>
 /// Resolve o EmpresaId efetivo: para o admin dev com header X-Empresa-Id, usa o header (validado no master).

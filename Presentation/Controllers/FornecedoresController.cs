@@ -1,4 +1,4 @@
-﻿using CRMVEXA.Application.Features.Fornecedor.CreateFornecedor;
+using CRMVEXA.Application.Features.Fornecedor.CreateFornecedor;
 using CRMVEXA.Application.Features.Fornecedor.DeleteFornecedor;
 using CRMVEXA.Application.Features.Fornecedor.GetFornecedor;
 using CRMVEXA.Application.Features.Fornecedor.UpdateClienteFornecedor;
@@ -7,7 +7,7 @@ using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
 
-namespace CRMVEXA.API.Controllers;
+namespace CRMVEXA.Presentation.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
@@ -99,7 +99,7 @@ public class FornecedoresController : ControllerBase
                 return NotFound(new 
                 {
                     sucesso = false,
-                    mensagem = "Fornecedor não encontrado." 
+                    mensagem = "Fornecedor n�o encontrado." 
                 });
 
             return Ok(new 

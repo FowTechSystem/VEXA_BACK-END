@@ -6,7 +6,7 @@ using CRMVEXA.Application.Features.Usuarios.UpdateUsuario;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
-namespace CRMVEXA.API.Controllers
+namespace CRMVEXA.Presentation.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]

@@ -6,7 +6,7 @@ using CRMVEXA.Application.Features.Produtos.GetProduto;
 using CRMVEXA.Application.Features.Produtos.GetListaProdutos;
 using CRMVEXA.Application.Features.Produtos.DeleteProduto;
 
-namespace CRMVEXA.API.Controllers
+namespace CRMVEXA.Presentation.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]

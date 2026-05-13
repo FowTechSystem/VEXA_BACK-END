@@ -6,7 +6,7 @@ using CRMVEXA.Application.Features.Vendas.GetVenda;
 using CRMVEXA.Application.Features.Vendas.GetListaVendas;
 using CRMVEXA.Application.Features.Vendas.CancelarVenda;
 
-namespace CRMVEXA.API.Controllers
+namespace CRMVEXA.Presentation.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]

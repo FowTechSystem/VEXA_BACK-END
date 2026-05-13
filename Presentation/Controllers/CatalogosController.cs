@@ -7,7 +7,7 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace CRMVEXA.API.Controllers;
+namespace CRMVEXA.Presentation.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]

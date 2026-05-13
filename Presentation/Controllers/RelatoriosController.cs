@@ -4,7 +4,7 @@ using CRMVEXA.Infrastructure.Data;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
-namespace CRMVEXA.API.Controllers;
+namespace CRMVEXA.Presentation.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]

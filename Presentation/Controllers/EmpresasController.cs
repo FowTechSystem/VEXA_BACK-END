@@ -6,7 +6,7 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace CRMVEXA.API.Controllers
+namespace CRMVEXA.Presentation.Controllers
 {
     /// <summary>
     /// Cadastro e listagem de empresas. Apenas o usuário dev@gmail.com (administrador do sistema) pode acessar.

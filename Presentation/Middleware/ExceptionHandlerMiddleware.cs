@@ -2,7 +2,7 @@ using System.Net;
 using System.Text.Json;
 using Npgsql;
 
-namespace CRMVEXA.API.Middleware;
+namespace CRMVEXA.Presentation.Middleware;
 
 /// <summary>
 /// Captura exceções não tratadas e retorna resposta JSON padronizada (sucesso, mensagem, message).

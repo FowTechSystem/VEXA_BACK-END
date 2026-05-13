@@ -3,7 +3,7 @@ using MediatR;
 using CRMVEXA.Application.Features.Estoque.GetListaEstoque;
 using CRMVEXA.Application.Features.Estoque.GetListaMovimentacoes;
 
-namespace CRMVEXA.API.Controllers;
+namespace CRMVEXA.Presentation.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]

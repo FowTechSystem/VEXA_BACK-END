@@ -1,30 +1,30 @@
-using CRMVEXA.Application.Features.Categorias.CreateCategoria;
-using CRMVEXA.Application.Features.Categorias.DeleteCategoria;
-using CRMVEXA.Application.Features.Categorias.GetCategoria;
-using CRMVEXA.Application.Features.Categorias.GetListaCategorias;
-using CRMVEXA.Application.Features.Categorias.UpdateCategoria;
+using CRMVEXA.Application.Features.Marcas.CreateMarca;
+using CRMVEXA.Application.Features.Marcas.DeleteMarca;
+using CRMVEXA.Application.Features.Marcas.GetMarca;
+using CRMVEXA.Application.Features.Marcas.GetListaMarcas;
+using CRMVEXA.Application.Features.Marcas.UpdateMarca;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
-namespace CRMVEXA.API.Controllers;
+namespace CRMVEXA.Presentation.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class CategoriasController : ControllerBase
+public class MarcasController : ControllerBase
 {
     private readonly IMediator _mediator;
 
-    public CategoriasController(IMediator mediator)
+    public MarcasController(IMediator mediator)
     {
         _mediator = mediator;
     }
 
     [HttpGet]
-    public async Task<ActionResult<GetListaCategoriasResponse>> Listar(CancellationToken cancellationToken)
+    public async Task<ActionResult<GetListaMarcasResponse>> Listar(CancellationToken cancellationToken)
     {
         try
         {
-            var resultado = await _mediator.Send(new GetListaCategoriasRequest(), cancellationToken);
+            var resultado = await _mediator.Send(new GetListaMarcasRequest(), cancellationToken);
             return Ok(resultado);
         }
         catch (Exception ex)
@@ -34,13 +34,13 @@ public class CategoriasController : ControllerBase
     }
 
     [HttpGet("{id:int}")]
-    public async Task<ActionResult<GetCategoriaResponse>> ObterPorId(int id, CancellationToken cancellationToken)
+    public async Task<ActionResult<GetMarcaResponse>> ObterPorId(int id, CancellationToken cancellationToken)
     {
         try
         {
-            var resultado = await _mediator.Send(new GetCategoriaRequest { Id = id }, cancellationToken);
+            var resultado = await _mediator.Send(new GetMarcaRequest { Id = id }, cancellationToken);
             if (resultado == null)
-                return NotFound(new { sucesso = false, mensagem = "Categoria não encontrada.", message = "Categoria não encontrada." });
+                return NotFound(new { sucesso = false, mensagem = "Marca não encontrada.", message = "Marca não encontrada." });
             return Ok(resultado);
         }
         catch (Exception ex)
@@ -50,14 +50,14 @@ public class CategoriasController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<IActionResult> Criar([FromBody] CreateCategoriaRequest request, CancellationToken cancellationToken)
+    public async Task<IActionResult> Criar([FromBody] CreateMarcaRequest request, CancellationToken cancellationToken)
     {
         try
         {
             if (request == null || string.IsNullOrWhiteSpace(request.Nome))
                 return BadRequest(new { sucesso = false, mensagem = "Nome é obrigatório.", message = "Nome é obrigatório." });
             var id = await _mediator.Send(request, cancellationToken);
-            return Ok(new { sucesso = true, id, mensagem = "Categoria criada com sucesso!" });
+            return Ok(new { sucesso = true, id, mensagem = "Marca criada com sucesso!" });
         }
         catch (Exception ex)
         {
@@ -66,7 +66,7 @@ public class CategoriasController : ControllerBase
     }
 
     [HttpPut("{id:int}")]
-    public async Task<IActionResult> Atualizar(int id, [FromBody] UpdateCategoriaRequest request, CancellationToken cancellationToken)
+    public async Task<IActionResult> Atualizar(int id, [FromBody] UpdateMarcaRequest request, CancellationToken cancellationToken)
     {
         try
         {
@@ -89,7 +89,7 @@ public class CategoriasController : ControllerBase
     {
         try
         {
-            var resultado = await _mediator.Send(new DeleteCategoriaRequest { Id = id }, cancellationToken);
+            var resultado = await _mediator.Send(new DeleteMarcaRequest { Id = id }, cancellationToken);
             if (!resultado.Sucesso)
                 return BadRequest(new { sucesso = false, mensagem = resultado.Mensagem, message = resultado.Mensagem });
             return Ok(new { sucesso = true, mensagem = resultado.Mensagem });

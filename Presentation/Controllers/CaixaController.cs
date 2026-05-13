@@ -4,7 +4,7 @@ using CRMVEXA.Application.Features.Caixa.CriarMovimentacaoManual;
 using CRMVEXA.Application.Features.Caixa.ExcluirMovimentacaoManual;
 using CRMVEXA.Application.Features.Caixa.GetResumo;
 
-namespace CRMVEXA.API.Controllers
+namespace CRMVEXA.Presentation.Controllers
 {
     /// <summary>
     /// Resumo do Caixa (entradas, saídas, saldo e movimentações unificadas).
