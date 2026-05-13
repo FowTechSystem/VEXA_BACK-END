@@ -6,19 +6,20 @@ namespace CRMVEXA.Application.Features.Empresas.GetListaEmpresas
 {
     public class GetListaEmpresasHandler : IRequestHandler<GetListaEmpresasRequest, GetListaEmpresasResponse>
     {
-        private readonly AppDbContext _context;
+        private readonly MasterDbContext _master;
 
-        public GetListaEmpresasHandler(AppDbContext context)
+        public GetListaEmpresasHandler(MasterDbContext master)
         {
-            _context = context;
+            _master = master;
         }
 
         public async Task<GetListaEmpresasResponse> Handle(GetListaEmpresasRequest request, CancellationToken cancellationToken)
         {
-            var empresas = await _context.Empresas
+            var empresas = await _master.Tenants
                 .AsNoTracking()
                 .OrderBy(e => e.Nome)
-                .ToListAsync(cancellationToken);
+                .ToListAsync(cancellationToken)
+                .ConfigureAwait(false);
 
             return new GetListaEmpresasResponse
             {
@@ -27,7 +28,7 @@ namespace CRMVEXA.Application.Features.Empresas.GetListaEmpresas
                     Id = e.Id,
                     Nome = e.Nome,
                     NomeFantasia = e.NomeFantasia,
-                    Cnpj = e.CNPJ,
+                    Cnpj = e.Cnpj,
                     Email = e.Email,
                     Telefone = e.Telefone,
                     Ativo = e.Ativo,

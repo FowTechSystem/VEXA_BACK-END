@@ -1,12 +1,18 @@
 using System.Text;
 using System.Threading.RateLimiting;
-using CRMVEXA.API.Middleware;
+using CRMVEXA.Presentation.Middleware;
+using CRMVEXA.Application.Abstractions;
+using CRMVEXA.Application.Constants;
 using CRMVEXA.Application.Services;
+using CRMVEXA.Domain.Entities.Master;
 using CRMVEXA.Infrastructure.Data;
 using CRMVEXA.Infrastructure.Email;
+using CRMVEXA.Infrastructure.MultiTenancy;
+using CRMVEXA.Infrastructure.Security;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Npgsql;
 using System.Text.Json;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -38,12 +44,34 @@ if (!string.IsNullOrWhiteSpace(builder.Configuration["Email:SmtpHost"]))
 else
     builder.Services.AddScoped<IEmailSender, LogOnlyEmailSender>();
 
-// 1. Configurar DbContext
-builder.Services.AddDbContext<AppDbContext>(options =>
+builder.Services.AddMemoryCache();
+builder.Services.AddDataProtection();
+
+builder.Services.AddScoped<IConnectionStringProtector, DataProtectionConnectionStringProtector>();
+builder.Services.AddScoped<ITenantConnectionResolver, TenantConnectionResolver>();
+builder.Services.AddScoped<ITenantAppDbContextFactory, TenantAppDbContextFactory>();
+builder.Services.AddScoped<IUserTenantDirectoryService, UserTenantDirectoryService>();
+builder.Services.AddScoped<ICrossTenantResolver, CrossTenantResolver>();
+builder.Services.AddScoped<ITenantProvisioningService, TenantProvisioningService>();
+
+builder.Services.AddDbContext<MasterDbContext>(options =>
 {
-    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"));
-    // Permite rodar "dotnet ef database update" mesmo com pequenas diferenças modelo/snapshot
+    var cs = builder.Configuration.GetConnectionString("MasterConnection")
+        ?? throw new InvalidOperationException("ConnectionStrings:MasterConnection é obrigatória.");
+    options.UseNpgsql(cs);
     options.ConfigureWarnings(w => w.Ignore(Microsoft.EntityFrameworkCore.Diagnostics.RelationalEventId.PendingModelChangesWarning));
+});
+
+builder.Services.AddScoped<AppDbContext>(sp =>
+{
+    var http = sp.GetRequiredService<IHttpContextAccessor>().HttpContext;
+    if (http?.Items.TryGetValue(TenantHttpKeys.EmpresaId, out var v) != true || v is not int tenantId)
+    {
+        throw new InvalidOperationException(
+            "Não foi possível resolver o banco do tenant. Esta operação exige um usuário autenticado com claim empresa_id (ou header X-Empresa-Id para admin dev).");
+    }
+
+    return sp.GetRequiredService<ITenantAppDbContextFactory>().CreateDbContext(tenantId);
 });
 
 // 2. AutoMapper
@@ -183,6 +211,67 @@ builder.Services.AddSwaggerGen();
 
 // ============ BUILD DA APLICAÇÃO ============
 var app = builder.Build();
+
+await using (var startupScope = app.Services.CreateAsyncScope())
+{
+    var cfg = startupScope.ServiceProvider.GetRequiredService<IConfiguration>();
+    if (cfg.GetValue("MultiTenancy:RunMasterMigrationsOnStartup", true))
+    {
+        var masterCtx = startupScope.ServiceProvider.GetRequiredService<MasterDbContext>();
+        await masterCtx.Database.MigrateAsync();
+    }
+
+    var masterForBootstrap = startupScope.ServiceProvider.GetRequiredService<MasterDbContext>();
+
+    if (cfg.GetValue("MultiTenancy:SyncTenantsFromLegacyEmpresas", false))
+    {
+        var legacyCs = cfg.GetConnectionString("DefaultConnection");
+        if (string.IsNullOrWhiteSpace(legacyCs))
+            throw new InvalidOperationException("MultiTenancy:SyncTenantsFromLegacyEmpresas exige ConnectionStrings:DefaultConnection apontando ao banco legado com a tabela Empresas.");
+
+        var legacyDbName = new NpgsqlConnectionStringBuilder(legacyCs).Database
+            ?? cfg["MultiTenancy:LegacyTenantDatabaseName"]
+            ?? "CRMVEXA";
+
+        var tenantOpts = new DbContextOptionsBuilder<AppDbContext>()
+            .UseNpgsql(legacyCs)
+            .Options;
+        await using var legacyDbCtx = new AppDbContext(tenantOpts);
+        var empresas = await legacyDbCtx.Empresas.AsNoTracking().ToListAsync();
+
+        foreach (var e in empresas)
+        {
+            if (await masterForBootstrap.Tenants.AnyAsync(t => t.Id == e.Id))
+                continue;
+
+            await masterForBootstrap.Database.ExecuteSqlInterpolatedAsync($"""
+                INSERT INTO "Tenants" ("Id", "Nome", "NomeFantasia", "Cnpj", "Email", "Telefone", "Ativo", "DataCadastro", "DatabaseName")
+                OVERRIDING SYSTEM VALUE
+                VALUES ({e.Id}, {e.Nome}, {e.NomeFantasia}, {e.CNPJ}, {e.Email}, {e.Telefone}, {e.Ativo}, {e.DataCadastro}, {legacyDbName})
+                """);
+        }
+
+        await masterForBootstrap.Database.ExecuteSqlRawAsync(
+            """
+            SELECT setval(pg_get_serial_sequence('"Tenants"', 'Id'), COALESCE((SELECT MAX("Id") FROM "Tenants"), 1));
+            """);
+    }
+    else if (cfg.GetValue("MultiTenancy:SeedLegacyTenantIfEmpty", false))
+    {
+        if (!await masterForBootstrap.Tenants.AnyAsync())
+        {
+            var dbName = cfg["MultiTenancy:LegacyTenantDatabaseName"] ?? "CRMVEXA";
+            masterForBootstrap.Tenants.Add(new TenantCatalog
+            {
+                Nome = cfg["MultiTenancy:LegacyTenantDisplayName"] ?? "Tenant principal",
+                DatabaseName = dbName,
+                Ativo = true,
+                DataCadastro = DateTime.UtcNow
+            });
+            await masterForBootstrap.SaveChangesAsync();
+        }
+    }
+}
 
 // ============ MIDDLEWARE PIPELINE ============
 

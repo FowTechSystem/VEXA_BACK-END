@@ -1,10 +1,12 @@
 using System;
+using CRMVEXA.Application.Abstractions;
 using CRMVEXA.Application.Features.Clientes;
 using CRMVEXA.Application.Features.Usuarios.CriarUsuario;
 using CRMVEXA.Application.Services;
 using CRMVEXA.Domain.Entities;
 using CRMVEXA.Infrastructure.Data;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 
 namespace CRMVEXA.Application.Features.Usuarios.CriarUsuario
 {
@@ -12,11 +14,19 @@ namespace CRMVEXA.Application.Features.Usuarios.CriarUsuario
     {
         private readonly AppDbContext _context;
         private readonly IEmpresaContext _empresaContext;
+        private readonly IUserTenantDirectoryService _directory;
+        private readonly MasterDbContext _master;
 
-        public CriarUsuarioHandler(AppDbContext context, IEmpresaContext empresaContext)
+        public CriarUsuarioHandler(
+            AppDbContext context,
+            IEmpresaContext empresaContext,
+            IUserTenantDirectoryService directory,
+            MasterDbContext master)
         {
             _context = context;
             _empresaContext = empresaContext;
+            _directory = directory;
+            _master = master;
         }
 
         public async Task<int> Handle(CriarUsuarioRequest request, CancellationToken cancellationToken)
@@ -24,6 +34,16 @@ namespace CRMVEXA.Application.Features.Usuarios.CriarUsuario
             try
             {
                 var empresaId = _empresaContext.EmpresaId;
+                var emailKey = (request.Email ?? "").Trim().ToLowerInvariant();
+                if (string.IsNullOrEmpty(emailKey))
+                    throw new ArgumentException("E-mail é obrigatório.");
+
+                if (await _master.UserTenantDirectory.AsNoTracking().AnyAsync(e => e.EmailNormalized == emailKey, cancellationToken).ConfigureAwait(false))
+                    throw new Exception("Já existe um usuário com este e-mail em outra empresa ou neste catálogo.");
+
+                if (await _context.Usuarios.AnyAsync(u => u.Email.ToLower() == emailKey, cancellationToken).ConfigureAwait(false))
+                    throw new Exception("Já existe um usuário com este e-mail.");
+
                 var senhaTexto = !string.IsNullOrEmpty(request.SenhaHash) ? request.SenhaHash : request.Senha ?? "";
                 var senhaHash = BCrypt.Net.BCrypt.HashPassword(senhaTexto);
 
@@ -60,6 +80,8 @@ namespace CRMVEXA.Application.Features.Usuarios.CriarUsuario
 
                 _context.Usuarios.Add(usuario);
                 await _context.SaveChangesAsync(cancellationToken);
+
+                await _directory.UpsertAsync(empresaId, emailKey, usuario.Id, cancellationToken).ConfigureAwait(false);
 
                 var enderecosValidos = request.Enderecos?
                     .Where(e => !string.IsNullOrWhiteSpace(e.Cep) || !string.IsNullOrWhiteSpace(e.Rua) || !string.IsNullOrWhiteSpace(e.Endereco) ||

@@ -1,7 +1,7 @@
 namespace CRMVEXA.Domain.Entities;
 
 /// <summary>
-/// Empresa (tenant) para multi-tenancy. Um banco único, dados filtrados por EmpresaId.
+/// Empresa (tenant). Em database-per-tenant o Id costuma coincidir com o registro em Tenants no banco master.
 /// </summary>
 public class Empresa
 {

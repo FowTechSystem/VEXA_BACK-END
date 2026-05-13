@@ -1,9 +1,8 @@
 using CRMVEXA.Application.Constants;
 using CRMVEXA.Application.Features.Clientes;
 using CRMVEXA.Domain.Entities;
-using CRMVEXA.Infrastructure.Data;
+using CRMVEXA.Infrastructure.MultiTenancy;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
@@ -14,30 +13,27 @@ namespace CRMVEXA.Application.Features.Auth.Login
 {
     public class LoginHandler : IRequestHandler<LoginRequest, LoginResponse?>
     {
-        private readonly AppDbContext _context;
+        private readonly ICrossTenantResolver _crossTenant;
         private readonly IConfiguration _configuration;
 
-        public LoginHandler(AppDbContext context, IConfiguration configuration)
+        public LoginHandler(ICrossTenantResolver crossTenant, IConfiguration configuration)
         {
-            _context = context;
+            _crossTenant = crossTenant;
             _configuration = configuration;
         }
 
         public async Task<LoginResponse?> Handle(LoginRequest request, CancellationToken cancellationToken)
         {
-            var usuario = await _context.Usuarios
-                .AsNoTracking()
-                .Include(u => u.Empresa)
-                .FirstOrDefaultAsync(u => u.Email.ToLower() == request.Email.Trim().ToLower(), cancellationToken);
-
-            if (usuario == null)
+            var snap = await _crossTenant.ResolveUsuarioLoginAsync(request.Email, cancellationToken).ConfigureAwait(false);
+            if (snap == null)
                 return null;
+
+            var usuario = snap.Usuario;
 
             var senhaHash = usuario.SenhaHash;
             if (string.IsNullOrEmpty(senhaHash))
                 return null;
 
-            // Suporta senha em texto (legado) ou hash BCrypt
             bool senhaValida = false;
             if (senhaHash.StartsWith("$2") && senhaHash.Length > 50)
             {

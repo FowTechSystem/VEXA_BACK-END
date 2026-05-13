@@ -39,7 +39,7 @@ namespace CRMVEXA.Infrastructure.Migrations
                         .HasColumnType("jsonb");
 
                     b.Property<DateTime>("CriadoEm")
-                        .HasColumnType("timestamp without time zone");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("DepoisJson")
                         .HasColumnType("jsonb");
@@ -81,10 +81,10 @@ namespace CRMVEXA.Infrastructure.Migrations
                         .HasColumnType("boolean");
 
                     b.Property<DateTime>("DataAbertura")
-                        .HasColumnType("timestamp without time zone");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTime?>("DataFechamento")
-                        .HasColumnType("timestamp without time zone");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<int>("EmpresaId")
                         .HasColumnType("integer");
@@ -122,7 +122,7 @@ namespace CRMVEXA.Infrastructure.Migrations
                         .HasDefaultValue(true);
 
                     b.Property<DateTime>("CriadoEm")
-                        .HasColumnType("timestamp without time zone");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<int>("CriadorId")
                         .HasColumnType("integer");
@@ -172,7 +172,7 @@ namespace CRMVEXA.Infrastructure.Migrations
                         .HasDefaultValue(true);
 
                     b.Property<DateTime>("DataCadastro")
-                        .HasColumnType("timestamp without time zone");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Descricao")
                         .HasMaxLength(500)
@@ -210,10 +210,10 @@ namespace CRMVEXA.Infrastructure.Migrations
                         .HasColumnType("character varying(14)");
 
                     b.Property<DateTime>("DataCadastro")
-                        .HasColumnType("timestamp without time zone");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTime?>("DataNascimento")
-                        .HasColumnType("timestamp without time zone");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Email")
                         .HasMaxLength(100)
@@ -269,10 +269,10 @@ namespace CRMVEXA.Infrastructure.Migrations
                         .HasColumnType("character varying(50)");
 
                     b.Property<DateTime?>("DataEntregaPrevista")
-                        .HasColumnType("timestamp without time zone");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTime>("DataHora")
-                        .HasColumnType("timestamp without time zone");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<int>("EmpresaId")
                         .HasColumnType("integer");
@@ -319,7 +319,7 @@ namespace CRMVEXA.Infrastructure.Migrations
                         .HasColumnType("integer");
 
                     b.Property<DateTime>("Data")
-                        .HasColumnType("timestamp without time zone");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<int>("EmpresaId")
                         .HasColumnType("integer");
@@ -387,7 +387,7 @@ namespace CRMVEXA.Infrastructure.Migrations
                         .HasColumnType("character varying(18)");
 
                     b.Property<DateTime>("DataCadastro")
-                        .HasColumnType("timestamp without time zone");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Email")
                         .HasMaxLength(200)
@@ -524,7 +524,7 @@ namespace CRMVEXA.Infrastructure.Migrations
                         .HasColumnType("text");
 
                     b.Property<DateTime>("DataCadastro")
-                        .HasColumnType("timestamp without time zone");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Email")
                         .HasColumnType("text");
@@ -719,7 +719,7 @@ namespace CRMVEXA.Infrastructure.Migrations
                         .HasDefaultValue(true);
 
                     b.Property<DateTime>("DataCadastro")
-                        .HasColumnType("timestamp without time zone");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Descricao")
                         .HasMaxLength(500)
@@ -752,7 +752,7 @@ namespace CRMVEXA.Infrastructure.Migrations
                         .HasColumnType("integer");
 
                     b.Property<DateTime>("DataHora")
-                        .HasColumnType("timestamp without time zone");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Descricao")
                         .HasColumnType("text");
@@ -796,10 +796,10 @@ namespace CRMVEXA.Infrastructure.Migrations
                         .HasColumnType("character varying(200)");
 
                     b.Property<DateTime>("CriadoEmUtc")
-                        .HasColumnType("timestamp without time zone");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTime>("DataLancamento")
-                        .HasColumnType("timestamp without time zone");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Descricao")
                         .IsRequired()
@@ -849,7 +849,7 @@ namespace CRMVEXA.Infrastructure.Migrations
                         .HasColumnType("integer");
 
                     b.Property<DateTime>("DataHora")
-                        .HasColumnType("timestamp without time zone");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<int>("EmpresaId")
                         .HasColumnType("integer");
@@ -899,7 +899,7 @@ namespace CRMVEXA.Infrastructure.Migrations
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<DateTime>("AtualizadoEm")
-                        .HasColumnType("timestamp without time zone");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<int?>("AtualizadoPorUsuarioId")
                         .HasColumnType("integer");
@@ -948,10 +948,10 @@ namespace CRMVEXA.Infrastructure.Migrations
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp without time zone");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTime>("ExpiresAt")
-                        .HasColumnType("timestamp without time zone");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("TokenHash")
                         .IsRequired()
@@ -959,7 +959,7 @@ namespace CRMVEXA.Infrastructure.Migrations
                         .HasColumnType("character varying(88)");
 
                     b.Property<DateTime?>("UsedAt")
-                        .HasColumnType("timestamp without time zone");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<int>("UsuarioId")
                         .HasColumnType("integer");
@@ -1248,7 +1248,7 @@ namespace CRMVEXA.Infrastructure.Migrations
                         .HasColumnType("jsonb");
 
                     b.Property<DateTime>("CriadoEm")
-                        .HasColumnType("timestamp without time zone");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<int>("EmpresaId")
                         .HasColumnType("integer");
@@ -1259,7 +1259,7 @@ namespace CRMVEXA.Infrastructure.Migrations
                         .HasColumnType("character varying(20)");
 
                     b.Property<DateTime?>("ExpiraEm")
-                        .HasColumnType("timestamp without time zone");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Motivo")
                         .HasMaxLength(2000)
@@ -1271,7 +1271,7 @@ namespace CRMVEXA.Infrastructure.Migrations
                         .HasColumnType("character varying(100)");
 
                     b.Property<DateTime?>("RespondidoEm")
-                        .HasColumnType("timestamp without time zone");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("RespostaNota")
                         .HasMaxLength(2000)
@@ -1366,7 +1366,7 @@ namespace CRMVEXA.Infrastructure.Migrations
                         .HasColumnType("text");
 
                     b.Property<DateTime?>("DataNascimento")
-                        .HasColumnType("timestamp without time zone");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Departamento")
                         .HasMaxLength(100)
@@ -1479,7 +1479,7 @@ namespace CRMVEXA.Infrastructure.Migrations
                         .HasColumnType("character varying(50)");
 
                     b.Property<DateTime>("DataHora")
-                        .HasColumnType("timestamp without time zone");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<decimal?>("Desconto")
                         .HasColumnType("decimal(18,2)");

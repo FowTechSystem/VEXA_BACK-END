@@ -1,10 +1,10 @@
 Explicação de cada pasta
-API
+Presentation
 Controllers: Controllers REST da sua aplicação (ClienteController, ProdutoController, etc).
 
 Extensions: Métodos de extensão para configuração, DI extra, mapeamento, etc.
 
-Middlewares: Middlewares customizados (exemplo: tratamento de exceções, logs).
+Middleware: Middlewares customizados (exemplo: tratamento de exceções, logs).
 
 Application
 Commands: Lógica de operações (CriarClienteCommand, AtualizarProdutoCommand) usando CQRS e MediatR.
