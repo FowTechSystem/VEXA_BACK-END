@@ -1,17 +1,15 @@
-using CRMVEXA.Application.Features.Auth;
-using CRMVEXA.Infrastructure.Data;
+using CRMVEXA.Infrastructure.MultiTenancy;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 
 namespace CRMVEXA.Application.Features.Auth.ResetPassword;
 
 public class ResetPasswordHandler : IRequestHandler<ResetPasswordRequest, ResetPasswordResult>
 {
-    private readonly AppDbContext _context;
+    private readonly ICrossTenantResolver _crossTenant;
 
-    public ResetPasswordHandler(AppDbContext context)
+    public ResetPasswordHandler(ICrossTenantResolver crossTenant)
     {
-        _context = context;
+        _crossTenant = crossTenant;
     }
 
     public async Task<ResetPasswordResult> Handle(ResetPasswordRequest request, CancellationToken cancellationToken)
@@ -27,23 +25,6 @@ public class ResetPasswordHandler : IRequestHandler<ResetPasswordRequest, ResetP
         if (senha.Length > 256)
             return ResetPasswordResult.Fail("Senha muito longa.");
 
-        var agora = DateTime.UtcNow;
-        var hashB64 = PasswordResetTokenCrypto.HashPlainToken(token);
-        var row = await _context.PasswordResetTokens
-            .Include(t => t.Usuario)
-            .FirstOrDefaultAsync(
-                t => t.TokenHash == hashB64 && t.UsedAt == null && t.ExpiresAt > agora,
-                cancellationToken);
-        if (row == null)
-            return ResetPasswordResult.Fail("Token inválido ou expirado.");
-
-        if (!row.Usuario.Ativo)
-            return ResetPasswordResult.Fail("Token inválido ou expirado.");
-
-        row.Usuario.SenhaHash = BCrypt.Net.BCrypt.HashPassword(senha);
-        row.UsedAt = agora;
-
-        await _context.SaveChangesAsync(cancellationToken);
-        return ResetPasswordResult.Ok();
+        return await _crossTenant.TryResetPasswordAsync(token, senha, cancellationToken).ConfigureAwait(false);
     }
 }

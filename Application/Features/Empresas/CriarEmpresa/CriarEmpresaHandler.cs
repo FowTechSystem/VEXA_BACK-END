@@ -1,43 +1,38 @@
-using CRMVEXA.Domain.Entities;
-using CRMVEXA.Infrastructure.Data;
+using CRMVEXA.Application.Abstractions;
 using MediatR;
 
 namespace CRMVEXA.Application.Features.Empresas.CriarEmpresa
 {
     public class CriarEmpresaHandler : IRequestHandler<CriarEmpresaRequest, CriarEmpresaResponse>
     {
-        private readonly AppDbContext _context;
+        private readonly ITenantProvisioningService _provisioning;
 
-        public CriarEmpresaHandler(AppDbContext context)
+        public CriarEmpresaHandler(ITenantProvisioningService provisioning)
         {
-            _context = context;
+            _provisioning = provisioning;
         }
 
         public async Task<CriarEmpresaResponse> Handle(CriarEmpresaRequest request, CancellationToken cancellationToken)
         {
-            var dataCadastro = DateTime.UtcNow;
-            var empresa = new Empresa(request.Nome.Trim(), dataCadastro)
-            {
-                NomeFantasia = string.IsNullOrWhiteSpace(request.NomeFantasia) ? null : request.NomeFantasia.Trim(),
-                CNPJ = string.IsNullOrWhiteSpace(request.Cnpj) ? null : request.Cnpj.Trim(),
-                Email = string.IsNullOrWhiteSpace(request.Email) ? null : request.Email.Trim(),
-                Telefone = string.IsNullOrWhiteSpace(request.Telefone) ? null : request.Telefone.Trim(),
-                Ativo = request.Ativo
-            };
-
-            _context.Empresas.Add(empresa);
-            await _context.SaveChangesAsync(cancellationToken);
+            var id = await _provisioning.ProvisionAsync(
+                request.Nome,
+                request.NomeFantasia,
+                request.Cnpj,
+                request.Email,
+                request.Telefone,
+                request.Ativo,
+                cancellationToken).ConfigureAwait(false);
 
             return new CriarEmpresaResponse
             {
-                Id = empresa.Id,
-                Nome = empresa.Nome,
-                NomeFantasia = empresa.NomeFantasia,
-                Cnpj = empresa.CNPJ,
-                Email = empresa.Email,
-                Telefone = empresa.Telefone,
-                Ativo = empresa.Ativo,
-                DataCadastro = empresa.DataCadastro
+                Id = id,
+                Nome = request.Nome.Trim(),
+                NomeFantasia = string.IsNullOrWhiteSpace(request.NomeFantasia) ? null : request.NomeFantasia.Trim(),
+                Cnpj = string.IsNullOrWhiteSpace(request.Cnpj) ? null : request.Cnpj.Trim(),
+                Email = string.IsNullOrWhiteSpace(request.Email) ? null : request.Email.Trim(),
+                Telefone = string.IsNullOrWhiteSpace(request.Telefone) ? null : request.Telefone.Trim(),
+                Ativo = request.Ativo,
+                DataCadastro = DateTime.UtcNow
             };
         }
     }

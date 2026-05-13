@@ -1,5 +1,4 @@
-using System.Security.Claims;
-using CRMVEXA.API.Middleware;
+using CRMVEXA.Application.Constants;
 
 namespace CRMVEXA.Application.Services;
 
@@ -35,11 +34,9 @@ public class EmpresaContext : IEmpresaContext
             var ctx = _httpContextAccessor.HttpContext;
             if (ctx == null) return null;
 
-            // 1. Valor resolvido pelo middleware (inclui X-Empresa-Id validado para dev)
-            if (ctx.Items[EmpresaContextMiddleware.HttpContextKeyEmpresaId] is int mid)
+            if (ctx.Items[TenantHttpKeys.EmpresaId] is int mid)
                 return mid;
 
-            // 2. Fallback: claim do token
             var empresaClaim = ctx.User?.FindFirst("empresa_id")?.Value;
             return !string.IsNullOrEmpty(empresaClaim) && int.TryParse(empresaClaim, out var id)
                 ? id

@@ -1,16 +1,15 @@
-using CRMVEXA.Infrastructure.Data;
+using CRMVEXA.Infrastructure.MultiTenancy;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 
 namespace CRMVEXA.Application.Features.Catalogo.GetCatalogoPublicoPorSlug;
 
 public class GetCatalogoPublicoPorSlugHandler : IRequestHandler<GetCatalogoPublicoPorSlugRequest, GetCatalogoPublicoPorSlugResponse?>
 {
-    private readonly AppDbContext _context;
+    private readonly ICrossTenantResolver _crossTenant;
 
-    public GetCatalogoPublicoPorSlugHandler(AppDbContext context)
+    public GetCatalogoPublicoPorSlugHandler(ICrossTenantResolver crossTenant)
     {
-        _context = context;
+        _crossTenant = crossTenant;
     }
 
     public async Task<GetCatalogoPublicoPorSlugResponse?> Handle(GetCatalogoPublicoPorSlugRequest request, CancellationToken cancellationToken)
@@ -18,12 +17,11 @@ public class GetCatalogoPublicoPorSlugHandler : IRequestHandler<GetCatalogoPubli
         if (string.IsNullOrWhiteSpace(request.Slug))
             return null;
 
-        var catalogo = await _context.Catalogos
-            .Include(c => c.Produtos)
-            .FirstOrDefaultAsync(c => c.Slug == request.Slug.Trim() && c.Ativo, cancellationToken);
-
-        if (catalogo == null)
+        var found = await _crossTenant.FindCatalogoBySlugAsync(request.Slug, cancellationToken).ConfigureAwait(false);
+        if (found == null)
             return null;
+
+        var catalogo = found.Catalogo;
 
         return new GetCatalogoPublicoPorSlugResponse
         {

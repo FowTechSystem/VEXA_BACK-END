@@ -1,4 +1,3 @@
-using System.Security.Claims;
 using CRMVEXA.Application.Constants;
 using CRMVEXA.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
@@ -6,12 +5,12 @@ using Microsoft.EntityFrameworkCore;
 namespace CRMVEXA.API.Middleware;
 
 /// <summary>
-/// Resolve o EmpresaId efetivo: para o admin dev com header X-Empresa-Id, usa o header (validado no banco).
+/// Resolve o EmpresaId efetivo: para o admin dev com header X-Empresa-Id, usa o header (validado no master).
 /// Usuário comum não pode enviar X-Empresa-Id (403). Demais casos usam claim empresa_id do token.
 /// </summary>
 public class EmpresaContextMiddleware
 {
-    public const string HttpContextKeyEmpresaId = "EmpresaContext.EmpresaId";
+    public const string HttpContextKeyEmpresaId = TenantHttpKeys.EmpresaId;
 
     private readonly RequestDelegate _next;
 
@@ -44,19 +43,13 @@ public class EmpresaContextMiddleware
 
             if (isDev && !string.IsNullOrWhiteSpace(headerEmpresaId) && int.TryParse(headerEmpresaId.Trim(), out var headerId))
             {
-                // Dev enviou X-Empresa-Id: validar que a empresa existe e está ativa
-                var db = context.RequestServices.GetRequiredService<AppDbContext>();
-                var empresa = await db.Empresas
-                    .AsNoTracking()
-                    .Where(e => e.Id == headerId && e.Ativo)
-                    .Select(e => new { e.Id })
-                    .FirstOrDefaultAsync(context.RequestAborted);
-
-                if (empresa != null)
-                    resolvedEmpresaId = empresa.Id;
+                var master = context.RequestServices.GetRequiredService<MasterDbContext>();
+                var tenantOk = await master.Tenants.AsNoTracking()
+                    .AnyAsync(e => e.Id == headerId && e.Ativo, context.RequestAborted);
+                if (tenantOk)
+                    resolvedEmpresaId = headerId;
             }
 
-            // Se não resolved (não dev, ou header inválido, ou empresa não existe): usar claim
             if (!resolvedEmpresaId.HasValue && int.TryParse(empresaIdClaim, out var claimId))
                 resolvedEmpresaId = claimId;
 
