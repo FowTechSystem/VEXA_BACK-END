@@ -74,10 +74,14 @@ namespace CRMVEXA.Application.Features.Produtos.UpdateProduto
                 request.FotosAdicionaisUrls,
                 request.FotosAdicionaisBase64);
 
+            ProdutoFotoSlotHelper.GarantirFotoPrincipal(produto, _context);
+
             if (produto.Estoque != null)
             {
                 produto.Estoque.DefinirEstoqueMinimo(request.EstoqueMinimo);
                 produto.Estoque.LocalizacaoEstoque = request.LocalizacaoEstoque;
+                if (request.QuantidadeEstoque.HasValue && request.QuantidadeEstoque.Value >= 0)
+                    produto.Estoque.Quantidade = request.QuantidadeEstoque.Value;
             }
 
             await _context.SaveChangesAsync(cancellationToken);

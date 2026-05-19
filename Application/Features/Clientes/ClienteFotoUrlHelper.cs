@@ -24,6 +24,9 @@ public static class ClienteFotoUrlHelper
             return "image/gif";
         if (data.Length >= 12 && data[0] == 0x52 && data[1] == 0x49 && data[2] == 0x46 && data[8] == 0x57 && data[9] == 0x45 && data[10] == 0x42 && data[11] == 0x50)
             return "image/webp";
+        if (data.Length >= 12 && data[4] == 0x66 && data[5] == 0x74 && data[6] == 0x79 && data[7] == 0x70
+            && data[8] == 0x61 && data[9] == 0x76 && data[10] == 0x69 && data[11] == 0x66)
+            return "image/avif";
         return "image/jpeg";
     }
 }
