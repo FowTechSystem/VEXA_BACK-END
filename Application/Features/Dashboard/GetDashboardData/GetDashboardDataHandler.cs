@@ -37,8 +37,8 @@ public class GetDashboardDataHandler : IRequestHandler<GetDashboardDataRequest, 
             .ToListAsync(cancellationToken);
 
         var vendaIds = vendasDoMes.Select(v => v.Id).ToList();
-        var itensVenda = vendasDoMes.SelectMany(v => v.Itens).ToList();
-        var produtoIds = itensVenda.Select(i => i.ProdutoId).Distinct().ToList();
+        var itensVenda = vendasDoMes.SelectMany(v => v.Itens).Where(i => i.ProdutoId.HasValue).ToList();
+        var produtoIds = itensVenda.Select(i => i.ProdutoId!.Value).Distinct().ToList();
 
         var produtos = await _context.Produtos
             .Where(p => produtoIds.Contains(p.Id))
@@ -52,7 +52,7 @@ public class GetDashboardDataHandler : IRequestHandler<GetDashboardDataRequest, 
 
         foreach (var item in itensVenda)
         {
-            if (!produtoDict.TryGetValue(item.ProdutoId, out var produto)) continue;
+            if (!item.ProdutoId.HasValue || !produtoDict.TryGetValue(item.ProdutoId.Value, out var produto)) continue;
             var lucroUnitario = item.PrecoUnitario - produto.PrecoCusto;
             faturamentoMesLucro += lucroUnitario * item.Quantidade;
         }
@@ -93,9 +93,10 @@ public class GetDashboardDataHandler : IRequestHandler<GetDashboardDataRequest, 
         }
 
         var vendasPorCategoria = itensVenda
+            .Where(i => i.ProdutoId.HasValue)
             .Select(i =>
             {
-                produtoDict.TryGetValue(i.ProdutoId, out var p);
+                produtoDict.TryGetValue(i.ProdutoId!.Value, out var p);
                 return new { CatId = p?.CategoriaId ?? 0, CatNome = p?.Categoria?.Nome ?? "Sem categoria", Qtd = i.Quantidade, Valor = i.Subtotal };
             })
             .GroupBy(x => new { x.CatId, x.CatNome })
@@ -110,7 +111,8 @@ public class GetDashboardDataHandler : IRequestHandler<GetDashboardDataRequest, 
             .ToList();
 
         var produtosMaisVendidos = itensVenda
-            .GroupBy(i => i.ProdutoId)
+            .Where(i => i.ProdutoId.HasValue)
+            .GroupBy(i => i.ProdutoId!.Value)
             .Select(g =>
             {
                 produtoDict.TryGetValue(g.Key, out var p);

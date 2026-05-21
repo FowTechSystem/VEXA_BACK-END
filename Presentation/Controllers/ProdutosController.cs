@@ -5,6 +5,7 @@ using CRMVEXA.Application.Features.Produtos.CreateProduto;
 using CRMVEXA.Application.Features.Produtos.UpdateProduto;
 using CRMVEXA.Application.Features.Produtos.GetProduto;
 using CRMVEXA.Application.Features.Produtos.GetListaProdutos;
+using CRMVEXA.Application.Features.Produtos.BuscaProdutosPdv;
 using CRMVEXA.Application.Features.Produtos.DeleteProduto;
 
 namespace CRMVEXA.Presentation.Controllers
@@ -18,6 +19,23 @@ namespace CRMVEXA.Presentation.Controllers
         public ProdutosController(IMediator mediator)
         {
             _mediator = mediator;
+        }
+
+        /// <summary>Busca unificada PDV: produtos normais + peças bazar disponíveis.</summary>
+        [HttpGet("busca")]
+        public async Task<ActionResult<List<BuscaProdutoPdvItem>>> BuscaPdv(
+            [FromQuery] string? valor,
+            [FromQuery] int limite = 30)
+        {
+            try
+            {
+                var resultado = await _mediator.Send(new BuscaProdutosPdvRequest(valor, limite));
+                return Ok(resultado);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(Erro(ObterMensagemErro(ex)));
+            }
         }
 
         [HttpGet]

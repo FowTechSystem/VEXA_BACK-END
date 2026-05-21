@@ -17,9 +17,19 @@ namespace CRMVEXA.Infrastructure.Data.Configurations
                 .HasColumnType("decimal(18,2)")
                 .IsRequired();
 
+            builder.Property(x => x.TipoItem)
+                .IsRequired()
+                .HasMaxLength(10)
+                .HasDefaultValue("normal");
+
             builder.HasOne<Produto>()
                 .WithMany()
                 .HasForeignKey(x => x.ProdutoId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            builder.HasOne<BazarProduto>()
+                .WithMany()
+                .HasForeignKey(x => x.BazarProdutoId)
                 .OnDelete(DeleteBehavior.Restrict);
 
             builder.ToTable("ItensVenda");

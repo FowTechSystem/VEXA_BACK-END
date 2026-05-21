@@ -69,6 +69,310 @@ namespace CRMVEXA.Infrastructure.Migrations
                     b.ToTable("AuditoriaAcoes", (string)null);
                 });
 
+            modelBuilder.Entity("CRMVEXA.Domain.Entities.BazarConsignante", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<bool>("Ativo")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(true);
+
+                    b.Property<DateTime>("AtualizadoEm")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Cpf")
+                        .HasMaxLength(14)
+                        .HasColumnType("character varying(14)");
+
+                    b.Property<DateTime>("CriadoEm")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime?>("DeletadoEm")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("EmpresaId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Nome")
+                        .IsRequired()
+                        .HasMaxLength(120)
+                        .HasColumnType("character varying(120)");
+
+                    b.Property<string>("Observacao")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Telefone")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("EmpresaId", "Ativo");
+
+                    b.HasIndex("EmpresaId", "Cpf")
+                        .IsUnique()
+                        .HasFilter("\"Cpf\" IS NOT NULL AND \"DeletadoEm\" IS NULL");
+
+                    b.HasIndex("EmpresaId", "Nome");
+
+                    b.ToTable("BazarConsignantes", (string)null);
+                });
+
+            modelBuilder.Entity("CRMVEXA.Domain.Entities.BazarProduto", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("AtualizadoEm")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("CodigoEtiqueta")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<int>("ConsignanteId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Cor")
+                        .HasMaxLength(40)
+                        .HasColumnType("character varying(40)");
+
+                    b.Property<DateTime>("CriadoEm")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime?>("DataDevolucao")
+                        .HasColumnType("date");
+
+                    b.Property<DateTime>("DataEntrada")
+                        .HasColumnType("date");
+
+                    b.Property<DateTime?>("DataVenda")
+                        .HasColumnType("date");
+
+                    b.Property<DateTime?>("DeletadoEm")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Descricao")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<int>("EmpresaId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("SacolaId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasDefaultValue("Disponivel");
+
+                    b.Property<string>("Tamanho")
+                        .HasMaxLength(10)
+                        .HasColumnType("character varying(10)");
+
+                    b.Property<decimal>("ValorCompra")
+                        .HasColumnType("decimal(10,2)");
+
+                    b.Property<decimal>("ValorVenda")
+                        .HasColumnType("decimal(10,2)");
+
+                    b.Property<int?>("VendaId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ConsignanteId");
+
+                    b.HasIndex("SacolaId");
+
+                    b.HasIndex("VendaId");
+
+                    b.HasIndex("EmpresaId", "CodigoEtiqueta")
+                        .HasFilter("\"CodigoEtiqueta\" IS NOT NULL AND \"DeletadoEm\" IS NULL");
+
+                    b.HasIndex("EmpresaId", "SacolaId");
+
+                    b.HasIndex("EmpresaId", "Status");
+
+                    b.HasIndex("EmpresaId", "ConsignanteId", "Status");
+
+                    b.ToTable("BazarProdutos", (string)null);
+                });
+
+            modelBuilder.Entity("CRMVEXA.Domain.Entities.BazarProdutoFoto", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CriadoEm")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("Ordem")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("ProdutoId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Url")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProdutoId", "Ordem");
+
+                    b.ToTable("BazarProdutoFotos", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_BazarProdutoFotos_Ordem", "\"Ordem\" >= 0 AND \"Ordem\" <= 2");
+                        });
+                });
+
+            modelBuilder.Entity("CRMVEXA.Domain.Entities.BazarRepasse", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("AtualizadoEm")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("ConsignanteId")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("CriadoEm")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("CriadoPor")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("DataGeracao")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime?>("DataPagamento")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime?>("DeletadoEm")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("EmpresaId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("FormaPagamento")
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)");
+
+                    b.Property<string>("Observacao")
+                        .HasColumnType("text");
+
+                    b.Property<int?>("PagoPor")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasDefaultValue("Pendente");
+
+                    b.Property<decimal>("ValorTotal")
+                        .HasColumnType("decimal(10,2)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ConsignanteId");
+
+                    b.HasIndex("CriadoPor");
+
+                    b.HasIndex("PagoPor");
+
+                    b.HasIndex("EmpresaId", "ConsignanteId", "Status");
+
+                    b.HasIndex("EmpresaId", "Status", "DataGeracao");
+
+                    b.ToTable("BazarRepasses", (string)null);
+                });
+
+            modelBuilder.Entity("CRMVEXA.Domain.Entities.BazarRepasseItem", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("ProdutoId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("RepasseId")
+                        .HasColumnType("integer");
+
+                    b.Property<decimal>("Valor")
+                        .HasColumnType("decimal(10,2)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProdutoId")
+                        .IsUnique();
+
+                    b.HasIndex("RepasseId");
+
+                    b.ToTable("BazarRepasseItens", (string)null);
+                });
+
+            modelBuilder.Entity("CRMVEXA.Domain.Entities.BazarSacola", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("AtualizadoEm")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("ConsignanteId")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("CriadoEm")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime>("DataCadastro")
+                        .HasColumnType("date");
+
+                    b.Property<int>("EmpresaId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Observacao")
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ConsignanteId");
+
+                    b.HasIndex("EmpresaId", "ConsignanteId", "DataCadastro");
+
+                    b.ToTable("BazarSacolas", (string)null);
+                });
+
             modelBuilder.Entity("CRMVEXA.Domain.Entities.Caixa", b =>
                 {
                     b.Property<int>("Id")
@@ -684,19 +988,31 @@ namespace CRMVEXA.Infrastructure.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
+                    b.Property<int?>("BazarProdutoId")
+                        .HasColumnType("integer");
+
                     b.Property<decimal>("PrecoUnitario")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<int>("ProdutoId")
+                    b.Property<int?>("ProdutoId")
                         .HasColumnType("integer");
 
                     b.Property<int>("Quantidade")
                         .HasColumnType("integer");
 
+                    b.Property<string>("TipoItem")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(10)
+                        .HasColumnType("character varying(10)")
+                        .HasDefaultValue("normal");
+
                     b.Property<int>("VendaId")
                         .HasColumnType("integer");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("BazarProdutoId");
 
                     b.HasIndex("ProdutoId");
 
@@ -1535,6 +1851,134 @@ namespace CRMVEXA.Infrastructure.Migrations
                     b.Navigation("Usuario");
                 });
 
+            modelBuilder.Entity("CRMVEXA.Domain.Entities.BazarConsignante", b =>
+                {
+                    b.HasOne("CRMVEXA.Domain.Entities.Empresa", "Empresa")
+                        .WithMany()
+                        .HasForeignKey("EmpresaId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Empresa");
+                });
+
+            modelBuilder.Entity("CRMVEXA.Domain.Entities.BazarProduto", b =>
+                {
+                    b.HasOne("CRMVEXA.Domain.Entities.BazarConsignante", "Consignante")
+                        .WithMany("Produtos")
+                        .HasForeignKey("ConsignanteId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("CRMVEXA.Domain.Entities.Empresa", "Empresa")
+                        .WithMany()
+                        .HasForeignKey("EmpresaId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("CRMVEXA.Domain.Entities.BazarSacola", "Sacola")
+                        .WithMany("Produtos")
+                        .HasForeignKey("SacolaId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("CRMVEXA.Domain.Entities.Venda", "Venda")
+                        .WithMany()
+                        .HasForeignKey("VendaId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("Consignante");
+
+                    b.Navigation("Empresa");
+
+                    b.Navigation("Sacola");
+
+                    b.Navigation("Venda");
+                });
+
+            modelBuilder.Entity("CRMVEXA.Domain.Entities.BazarProdutoFoto", b =>
+                {
+                    b.HasOne("CRMVEXA.Domain.Entities.BazarProduto", "Produto")
+                        .WithMany("Fotos")
+                        .HasForeignKey("ProdutoId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Produto");
+                });
+
+            modelBuilder.Entity("CRMVEXA.Domain.Entities.BazarRepasse", b =>
+                {
+                    b.HasOne("CRMVEXA.Domain.Entities.BazarConsignante", "Consignante")
+                        .WithMany("Repasses")
+                        .HasForeignKey("ConsignanteId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("CRMVEXA.Domain.Entities.Usuario", "CriadoPorUsuario")
+                        .WithMany()
+                        .HasForeignKey("CriadoPor")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("CRMVEXA.Domain.Entities.Empresa", "Empresa")
+                        .WithMany()
+                        .HasForeignKey("EmpresaId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("CRMVEXA.Domain.Entities.Usuario", "PagoPorUsuario")
+                        .WithMany()
+                        .HasForeignKey("PagoPor")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("Consignante");
+
+                    b.Navigation("CriadoPorUsuario");
+
+                    b.Navigation("Empresa");
+
+                    b.Navigation("PagoPorUsuario");
+                });
+
+            modelBuilder.Entity("CRMVEXA.Domain.Entities.BazarRepasseItem", b =>
+                {
+                    b.HasOne("CRMVEXA.Domain.Entities.BazarProduto", "Produto")
+                        .WithOne("RepasseItem")
+                        .HasForeignKey("CRMVEXA.Domain.Entities.BazarRepasseItem", "ProdutoId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("CRMVEXA.Domain.Entities.BazarRepasse", "Repasse")
+                        .WithMany("Itens")
+                        .HasForeignKey("RepasseId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Produto");
+
+                    b.Navigation("Repasse");
+                });
+
+            modelBuilder.Entity("CRMVEXA.Domain.Entities.BazarSacola", b =>
+                {
+                    b.HasOne("CRMVEXA.Domain.Entities.BazarConsignante", "Consignante")
+                        .WithMany("Sacolas")
+                        .HasForeignKey("ConsignanteId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("CRMVEXA.Domain.Entities.Empresa", "Empresa")
+                        .WithMany()
+                        .HasForeignKey("EmpresaId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Consignante");
+
+                    b.Navigation("Empresa");
+                });
+
             modelBuilder.Entity("CRMVEXA.Domain.Entities.Caixa", b =>
                 {
                     b.HasOne("CRMVEXA.Domain.Entities.Empresa", "Empresa")
@@ -1760,11 +2204,15 @@ namespace CRMVEXA.Infrastructure.Migrations
 
             modelBuilder.Entity("CRMVEXA.Domain.Entities.ItemVenda", b =>
                 {
+                    b.HasOne("CRMVEXA.Domain.Entities.BazarProduto", null)
+                        .WithMany()
+                        .HasForeignKey("BazarProdutoId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.HasOne("CRMVEXA.Domain.Entities.Produto", null)
                         .WithMany()
                         .HasForeignKey("ProdutoId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("CRMVEXA.Domain.Entities.Venda", null)
                         .WithMany("Itens")
@@ -2068,6 +2516,32 @@ namespace CRMVEXA.Infrastructure.Migrations
                         .IsRequired();
 
                     b.Navigation("Empresa");
+                });
+
+            modelBuilder.Entity("CRMVEXA.Domain.Entities.BazarConsignante", b =>
+                {
+                    b.Navigation("Produtos");
+
+                    b.Navigation("Repasses");
+
+                    b.Navigation("Sacolas");
+                });
+
+            modelBuilder.Entity("CRMVEXA.Domain.Entities.BazarProduto", b =>
+                {
+                    b.Navigation("Fotos");
+
+                    b.Navigation("RepasseItem");
+                });
+
+            modelBuilder.Entity("CRMVEXA.Domain.Entities.BazarRepasse", b =>
+                {
+                    b.Navigation("Itens");
+                });
+
+            modelBuilder.Entity("CRMVEXA.Domain.Entities.BazarSacola", b =>
+                {
+                    b.Navigation("Produtos");
                 });
 
             modelBuilder.Entity("CRMVEXA.Domain.Entities.Catalogo", b =>

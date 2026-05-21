@@ -50,23 +50,37 @@ namespace CRMVEXA.Application.Features.Vendas.CancelarVenda
             if (usuarioIdMov <= 0)
                 usuarioIdMov = venda.UsuarioId;
 
-            // Restaurar estoque
             foreach (var item in venda.Itens)
             {
+                if (string.Equals(item.TipoItem, "bazar", StringComparison.OrdinalIgnoreCase) && item.BazarProdutoId.HasValue)
+                {
+                    var pecaBazar = await _context.BazarProdutos
+                        .FirstOrDefaultAsync(p => p.Id == item.BazarProdutoId.Value && p.EmpresaId == empresaId, cancellationToken);
+                    if (pecaBazar != null && pecaBazar.VendaId == venda.Id)
+                    {
+                        pecaBazar.Status = Domain.Enums.BazarProdutoStatus.Disponivel;
+                        pecaBazar.DataVenda = null;
+                        pecaBazar.VendaId = null;
+                        pecaBazar.AtualizadoEm = DateTime.UtcNow;
+                    }
+                    continue;
+                }
+
+                if (!item.ProdutoId.HasValue) continue;
+
                 var produto = await _context.Produtos
                     .Include(p => p.Estoque)
-                    .FirstOrDefaultAsync(p => p.Id == item.ProdutoId, cancellationToken);
+                    .FirstOrDefaultAsync(p => p.Id == item.ProdutoId.Value, cancellationToken);
                 if (produto != null && produto.Estoque != null)
                 {
                     produto.Estoque.AtualizarQuantidade(item.Quantidade);
 
-                    // Registrar movimentação de estoque
                     var motivoTxt = string.IsNullOrWhiteSpace(request.Motivo)
                         ? $"Cancelamento da venda {venda.CodigoVenda}"
                         : $"Cancelamento da venda {venda.CodigoVenda}: {request.Motivo.Trim()}";
                     var movimentacao = new MovimentacaoEstoque(
                         empresaId,
-                        item.ProdutoId,
+                        item.ProdutoId.Value,
                         "Entrada",
                         item.Quantidade,
                         motivoTxt,

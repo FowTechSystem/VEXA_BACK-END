@@ -1,7 +1,10 @@
 using System.Security.Claims;
+using CRMVEXA.Application.Exceptions;
+using CRMVEXA.Application.Features.Vendas;
 using CRMVEXA.Application.Features.Vendas.CreateVenda;
 using CRMVEXA.Application.Services;
 using CRMVEXA.Domain.Entities;
+using CRMVEXA.Domain.Enums;
 using CRMVEXA.Infrastructure.Data;
 using MediatR;
 using Microsoft.AspNetCore.Http;
@@ -51,62 +54,135 @@ namespace CRMVEXA.Application.Features.Vendas.CreateVenda
                 : $"VND-{DateTime.UtcNow:yyyyMMdd-HHmmss}";
             var formaPagamento = NormalizarFormaPagamento(request.FormaPagamento);
 
-            var venda = new Venda(empresaId, codigoVenda, usuarioId, formaPagamento)
+            await using var tx = await _context.Database.BeginTransactionAsync(cancellationToken);
+            try
             {
-                ClienteId = request.ClienteId,
-                Desconto = request.Desconto
-            };
-
-            foreach (var itemRequest in request.Itens)
-            {
-                var produto = await _context.Produtos
-                    .Where(p => p.EmpresaId == empresaId)
-                    .Include(p => p.Estoque)
-                    .FirstOrDefaultAsync(p => p.Id == itemRequest.ProdutoId, cancellationToken);
-                if (produto == null)
-                    throw new InvalidOperationException($"Produto com ID {itemRequest.ProdutoId} não encontrado");
-
-                if (produto.Estoque == null)
-                    throw new InvalidOperationException($"Produto '{produto.Nome}' (ID {produto.Id}) não possui registro de estoque. Cadastre o estoque antes de vender.");
-
-                var quantidadeDisponivel = produto.Estoque.Quantidade;
-                if (quantidadeDisponivel < itemRequest.Quantidade)
-                    throw new InvalidOperationException($"Estoque insuficiente para o produto {produto.Nome}. Disponível: {quantidadeDisponivel}, Solicitado: {itemRequest.Quantidade}");
-
-                var itemVenda = new ItemVenda(itemRequest.ProdutoId, itemRequest.Quantidade, itemRequest.PrecoUnitario);
-                venda.AdicionarItem(itemVenda);
-
-                produto.Estoque.AtualizarQuantidade(-itemRequest.Quantidade);
-
-                var movimentacao = new MovimentacaoEstoque(
-                    empresaId,
-                    itemRequest.ProdutoId,
-                    "Saída",
-                    itemRequest.Quantidade,
-                    $"Venda {codigoVenda}",
-                    usuarioId,
-                    compraId: null,
-                    vendaId: null);
-                _context.MovimentacoesEstoque.Add(movimentacao);
-            }
-
-            _context.Vendas.Add(venda);
-            await _context.SaveChangesAsync(cancellationToken);
-
-            var itensResponse = new List<CreateVendaItemResponse>();
-            foreach (var i in venda.Itens)
-            {
-                var p = await _context.Produtos.FindAsync(new object[] { i.ProdutoId }, cancellationToken);
-                itensResponse.Add(new CreateVendaItemResponse
+                var venda = new Venda(empresaId, codigoVenda, usuarioId, formaPagamento)
                 {
-                    ProdutoId = i.ProdutoId,
-                    Quantidade = i.Quantidade,
-                    PrecoUnitario = i.PrecoUnitario,
-                    Produto = p != null ? new CreateVendaProdutoRefResponse { Id = p.Id, Nome = p.Nome } : null
-                });
+                    ClienteId = request.ClienteId,
+                    Desconto = request.Desconto
+                };
+                _context.Vendas.Add(venda);
+                await _context.SaveChangesAsync(cancellationToken);
+
+                foreach (var itemRequest in request.Itens)
+                {
+                    var tipo = itemRequest.Tipo?.Trim().ToLowerInvariant() ?? "normal";
+                    if (tipo == "bazar")
+                    {
+                        await ProcessarItemBazarAsync(empresaId, venda, itemRequest, codigoVenda, usuarioId, cancellationToken);
+                        continue;
+                    }
+
+                    var produto = await _context.Produtos
+                        .Where(p => p.EmpresaId == empresaId)
+                        .Include(p => p.Estoque)
+                        .FirstOrDefaultAsync(p => p.Id == itemRequest.ProdutoId, cancellationToken);
+                    if (produto == null)
+                        throw new InvalidOperationException($"Produto com ID {itemRequest.ProdutoId} não encontrado");
+
+                    if (produto.Estoque == null)
+                        throw new InvalidOperationException($"Produto '{produto.Nome}' (ID {produto.Id}) não possui registro de estoque. Cadastre o estoque antes de vender.");
+
+                    var quantidadeDisponivel = produto.Estoque.Quantidade;
+                    if (quantidadeDisponivel < itemRequest.Quantidade)
+                        throw new InvalidOperationException($"Estoque insuficiente para o produto {produto.Nome}. Disponível: {quantidadeDisponivel}, Solicitado: {itemRequest.Quantidade}");
+
+                    var itemVenda = new ItemVenda(itemRequest.ProdutoId, itemRequest.Quantidade, itemRequest.PrecoUnitario);
+                    AdicionarItemVenda(venda, itemVenda);
+
+                    produto.Estoque.AtualizarQuantidade(-itemRequest.Quantidade);
+                    _context.MovimentacoesEstoque.Add(new MovimentacaoEstoque(
+                        empresaId,
+                        itemRequest.ProdutoId,
+                        "Saída",
+                        itemRequest.Quantidade,
+                        $"Venda {codigoVenda}",
+                        usuarioId,
+                        compraId: null,
+                        vendaId: venda.Id));
+                }
+
+                await _context.SaveChangesAsync(cancellationToken);
+                await tx.CommitAsync(cancellationToken);
+
+                return await MontarRespostaAsync(venda, cancellationToken);
+            }
+            catch
+            {
+                await tx.RollbackAsync(cancellationToken);
+                throw;
+            }
+        }
+
+        private void AdicionarItemVenda(Venda venda, ItemVenda item)
+        {
+            item.VendaId = venda.Id;
+            venda.AdicionarItem(item);
+            _context.ItensVenda.Add(item);
+        }
+
+        private async Task ProcessarItemBazarAsync(
+            int empresaId,
+            Venda venda,
+            ItemVendaRequest itemRequest,
+            string codigoVenda,
+            int usuarioId,
+            CancellationToken cancellationToken)
+        {
+            if (itemRequest.Quantidade != 1)
+                throw BazarException.Validation("Peça de bazar sempre tem quantidade 1.");
+
+            var hoje = DateTime.UtcNow.Date;
+            var agora = DateTime.UtcNow;
+            var atualizados = await _context.BazarProdutos
+                .Where(p => p.Id == itemRequest.ProdutoId
+                    && p.EmpresaId == empresaId
+                    && p.DeletadoEm == null
+                    && p.Status == BazarProdutoStatus.Disponivel)
+                .ExecuteUpdateAsync(s => s
+                    .SetProperty(p => p.Status, BazarProdutoStatus.Vendida)
+                    .SetProperty(p => p.DataVenda, hoje)
+                    .SetProperty(p => p.VendaId, venda.Id)
+                    .SetProperty(p => p.AtualizadoEm, agora), cancellationToken);
+
+            if (atualizados == 0)
+            {
+                var pecaInfo = await _context.BazarProdutos.AsNoTracking()
+                    .Include(p => p.Consignante)
+                    .FirstOrDefaultAsync(p => p.Id == itemRequest.ProdutoId && p.EmpresaId == empresaId, cancellationToken);
+                if (pecaInfo == null)
+                    throw new InvalidOperationException($"Peça de bazar com ID {itemRequest.ProdutoId} não encontrada");
+                var nomeConsignante = pecaInfo.Consignante?.Nome ?? "consignante";
+                throw BazarException.Conflict($"A peça '{pecaInfo.Descricao}' do consignante {nomeConsignante} já foi vendida ou devolvida.");
             }
 
-            var statusResposta = venda.Status?.Equals("Concluída", StringComparison.OrdinalIgnoreCase) == true ? "finalizada" : (venda.Status ?? "finalizada");
+            var itemVenda = new ItemVenda(itemRequest.ProdutoId, itemRequest.PrecoUnitario);
+            AdicionarItemVenda(venda, itemVenda);
+        }
+
+        private async Task<CreateVendaResponse> MontarRespostaAsync(Venda venda, CancellationToken cancellationToken)
+        {
+            var itensDb = await _context.ItensVenda
+                .Where(i => i.VendaId == venda.Id)
+                .ToListAsync(cancellationToken);
+
+            var itensMapeados = await VendaItemMapper.MapItensAsync(_context, _empresaContext.EmpresaId, itensDb, cancellationToken);
+            var itensResponse = itensMapeados.Select(i => new CreateVendaItemResponse
+            {
+                Tipo = i.Tipo,
+                ProdutoId = i.ProdutoId,
+                BazarProdutoId = i.BazarProdutoId,
+                ConsignanteNome = i.ConsignanteNome,
+                Quantidade = i.Quantidade,
+                PrecoUnitario = i.PrecoUnitario,
+                Produto = i.Produto != null
+                    ? new CreateVendaProdutoRefResponse { Id = i.Produto.Id, Nome = i.Produto.Nome }
+                    : null
+            }).ToList();
+
+            var statusResposta = venda.Status?.Equals("Concluída", StringComparison.OrdinalIgnoreCase) == true
+                ? "finalizada" : (venda.Status ?? "finalizada");
 
             return new CreateVendaResponse
             {
