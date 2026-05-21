@@ -27,6 +27,8 @@ public static class VexaPermissoesParametrosSeed
         ("admin", "gerenciar", "usuario", "admin.usuario.gerenciar", "Gerir utilizadores"),
         ("admin", "configurar", "sistema", "admin.sistema.configurar", "Alterar configurações do sistema"),
         ("admin", "gerenciar", "empresa", "admin.empresa.gerenciar", "Gerir empresas"),
+        ("bazar", "operar", "bazar", "bazar.operar", "Operar módulo bazar (cadastro, devolução)"),
+        ("bazar", "gerenciar", "repasse", "bazar.gerenciar_repasses", "Gerar e pagar repasses do bazar"),
     ];
 
     public static readonly IReadOnlyList<(string Chave, string Valor, string Tipo, string? Rotulo)> ParametrosPadrao =

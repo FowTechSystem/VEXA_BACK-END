@@ -21,7 +21,12 @@ namespace CRMVEXA.Application.Features.Vendas.GetVenda
     public class ItemVendaResponse
     {
         public int Id { get; set; }
+        /// <summary>normal | bazar</summary>
+        public string Tipo { get; set; } = "normal";
         public int ProdutoId { get; set; }
+        public int? BazarProdutoId { get; set; }
+        /// <summary>Preenchido quando <see cref="Tipo"/> é bazar.</summary>
+        public string? ConsignanteNome { get; set; }
         public ProdutoRefResponse? Produto { get; set; }
         public int Quantidade { get; set; }
         public decimal PrecoUnitario { get; set; }

@@ -57,6 +57,11 @@ namespace CRMVEXA.Application.Features.Produtos.CreateProduto
                     request.Foto4Base64 ?? request.Foto4,
                     request.Foto5Base64 ?? request.Foto5);
 
+                var foto1Payload = request.Foto1Base64 ?? request.Foto1;
+                byte[]? foto1Bytes = null;
+                if (!string.IsNullOrWhiteSpace(foto1Payload))
+                    foto1Bytes = ProdutoFotoSlotHelper.DecodificarCriacao(request.Foto1Base64, request.Foto1);
+
                 var produto = new Produto(
                     request.SKU,
                     request.Nome,
@@ -72,7 +77,7 @@ namespace CRMVEXA.Application.Features.Produtos.CreateProduto
                     MarcaId = request.MarcaId,
                     FornecedorId = request.FornecedorId,
                     CodigoBarras = request.CodigoBarras,
-                    Foto1 = ProdutoFotoSlotHelper.DecodificarCriacao(request.Foto1Base64, request.Foto1),
+                    Foto1 = foto1Bytes,
                     Foto2 = adicionais[0],
                     Foto3 = adicionais[1],
                     Foto4 = adicionais[2],
@@ -89,6 +94,8 @@ namespace CRMVEXA.Application.Features.Produtos.CreateProduto
                 produto.PrecoPromocional = precoPromo;
                 produto.EmPromocao = emPromo;
                 produto.Observacoes = ProdutoPromocaoHelper.NormalizarObservacoes(request.Observacoes);
+
+                ProdutoFotoSlotHelper.GarantirFotoPrincipal(produto);
 
                 var estoque = new CRMVEXA.Domain.Entities.Estoque(empresaId, 0, request.QuantidadeEstoque, request.EstoqueMinimo, request.LocalizacaoEstoque);
                 produto.Estoque = estoque;

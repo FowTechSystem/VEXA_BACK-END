@@ -62,16 +62,24 @@ public class RelatoriosController : ControllerBase
             {
                 i.VendaId,
                 i.ProdutoId,
+                i.BazarProdutoId,
+                i.TipoItem,
                 i.Quantidade,
                 Subtotal = i.Quantidade * i.PrecoUnitario
             })
             .ToListAsync(cancellationToken);
 
-        var produtoIds = itensVenda.Select(i => i.ProdutoId).Distinct().ToList();
+        var produtoIds = itensVenda.Where(i => i.ProdutoId.HasValue).Select(i => i.ProdutoId!.Value).Distinct().ToList();
         var produtosPorId = await _context.Produtos
             .AsNoTracking()
             .Where(p => p.EmpresaId == empresaId && produtoIds.Contains(p.Id))
             .ToDictionaryAsync(p => p.Id, p => p.Nome, cancellationToken);
+
+        var bazarIds = itensVenda.Where(i => i.BazarProdutoId.HasValue).Select(i => i.BazarProdutoId!.Value).Distinct().ToList();
+        var bazarPorId = await _context.BazarProdutos
+            .AsNoTracking()
+            .Where(p => p.EmpresaId == empresaId && bazarIds.Contains(p.Id))
+            .ToDictionaryAsync(p => p.Id, p => p.Descricao, cancellationToken);
 
         var itensPorVenda = itensVenda
             .GroupBy(i => i.VendaId)
@@ -79,7 +87,11 @@ public class RelatoriosController : ControllerBase
                 g => g.Key,
                 g => g.Select(i => new VendasPeriodoItemResponse
                 {
-                    Produto = produtosPorId.GetValueOrDefault(i.ProdutoId, "Produto removido"),
+                    Produto = i.BazarProdutoId.HasValue
+                        ? bazarPorId.GetValueOrDefault(i.BazarProdutoId.Value, "Peça bazar")
+                        : i.ProdutoId.HasValue
+                            ? produtosPorId.GetValueOrDefault(i.ProdutoId.Value, "Produto removido")
+                            : "Item removido",
                     Quantidade = i.Quantidade,
                     Subtotal = i.Subtotal
                 }).ToList());

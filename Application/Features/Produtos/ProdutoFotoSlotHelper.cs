@@ -65,7 +65,10 @@ public static class ProdutoFotoSlotHelper
         for (var i = 0; i < AdditionalSlots.Length; i++)
         {
             var payload = merged.ElementAtOrDefault(i);
-            var bytes = ClienteFotoPayloadHelper.TryDecodeToBytes(payload);
+            if (string.IsNullOrWhiteSpace(payload))
+                continue;
+
+            var bytes = DecodificarObrigatorio(payload, $"imagem adicional (slot {i + 2})");
             Atribuir(produto, AdditionalSlots[i], bytes);
             context.Entry(produto).Property(AdditionalSlots[i]).IsModified = true;
         }
@@ -83,18 +86,56 @@ public static class ProdutoFotoSlotHelper
         if (payload == null)
             return;
 
-        var bytes = ClienteFotoPayloadHelper.TryDecodeToBytes(payload);
-        if (bytes != null)
-        {
-            Atribuir(produto, propertyName, bytes);
-            context.Entry(produto).Property(propertyName).IsModified = true;
-        }
-        else if (string.IsNullOrWhiteSpace(payload))
+        if (string.IsNullOrWhiteSpace(payload))
         {
             Atribuir(produto, propertyName, null);
             context.Entry(produto).Property(propertyName).IsModified = true;
+            return;
+        }
+
+        var bytes = DecodificarObrigatorio(payload, "imagem principal (Foto1)");
+        Atribuir(produto, propertyName, bytes);
+        context.Entry(produto).Property(propertyName).IsModified = true;
+    }
+
+    /// <summary>Se Foto1 vazia e houver galeria, usa a primeira adicional como principal (lista/thumbnail).</summary>
+    public static void GarantirFotoPrincipal(Produto produto, AppDbContext? context = null)
+    {
+        if (produto.Foto1 is { Length: > 0 })
+            return;
+
+        foreach (var slot in AdditionalSlots)
+        {
+            var bytes = ObterBytes(produto, slot);
+            if (bytes is not { Length: > 0 })
+                continue;
+
+            produto.Foto1 = bytes;
+            if (context != null)
+                context.Entry(produto).Property(nameof(Produto.Foto1)).IsModified = true;
+            return;
         }
     }
+
+    private static byte[] DecodificarObrigatorio(string payload, string descricao)
+    {
+        var bytes = ClienteFotoPayloadHelper.TryDecodeToBytes(payload);
+        if (bytes is { Length: > 0 })
+            return bytes;
+
+        throw new InvalidOperationException(
+            $"Não foi possível processar a {descricao}. A imagem pode estar truncada ou em formato inválido. " +
+            "Prefira JPG/PNG ou envie pelo botão Escolher arquivo.");
+    }
+
+    private static byte[]? ObterBytes(Produto p, string name) => name switch
+    {
+        nameof(Produto.Foto2) => p.Foto2,
+        nameof(Produto.Foto3) => p.Foto3,
+        nameof(Produto.Foto4) => p.Foto4,
+        nameof(Produto.Foto5) => p.Foto5,
+        _ => null
+    };
 
     private static void Atribuir(Produto p, string name, byte[]? value)
     {

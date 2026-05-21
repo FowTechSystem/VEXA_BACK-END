@@ -23,6 +23,11 @@ public static class ClienteFotoPayloadHelper
             s = s[(comma + 1)..].Trim();
         }
 
+        // Colar data URL no campo de texto às vezes traz quebras de linha
+        s = s.Replace("\r", "", StringComparison.Ordinal)
+            .Replace("\n", "", StringComparison.Ordinal)
+            .Replace(" ", "", StringComparison.Ordinal);
+
         try
         {
             return Convert.FromBase64String(s);

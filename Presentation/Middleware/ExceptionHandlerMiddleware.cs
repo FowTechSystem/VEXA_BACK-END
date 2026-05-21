@@ -1,5 +1,6 @@
 using System.Net;
 using System.Text.Json;
+using CRMVEXA.Application.Exceptions;
 using Npgsql;
 
 namespace CRMVEXA.Presentation.Middleware;
@@ -35,19 +36,36 @@ public class ExceptionHandlerMiddleware
     private static async Task HandleExceptionAsync(HttpContext context, Exception ex)
     {
         var mensagem = ObterMensagem(ex);
-        var statusCode = ex is InvalidOperationException or ArgumentException or ArgumentNullException or PostgresException
-            ? HttpStatusCode.BadRequest
-            : HttpStatusCode.InternalServerError;
+        HttpStatusCode statusCode;
+        object payload;
+
+        if (ex is BazarException bazarEx)
+        {
+            statusCode = (HttpStatusCode)bazarEx.StatusCode;
+            payload = new
+            {
+                sucesso = false,
+                mensagem = bazarEx.Message,
+                message = bazarEx.Message,
+                detail = bazarEx.Detail,
+                errors = bazarEx.Errors
+            };
+        }
+        else
+        {
+            statusCode = ex is InvalidOperationException or ArgumentException or ArgumentNullException or PostgresException
+                ? HttpStatusCode.BadRequest
+                : HttpStatusCode.InternalServerError;
+            payload = new
+            {
+                sucesso = false,
+                mensagem,
+                message = mensagem
+            };
+        }
 
         context.Response.ContentType = "application/json";
         context.Response.StatusCode = (int)statusCode;
-
-        var payload = new
-        {
-            sucesso = false,
-            mensagem,
-            message = mensagem
-        };
 
         await context.Response.WriteAsync(JsonSerializer.Serialize(payload, new JsonSerializerOptions
         {

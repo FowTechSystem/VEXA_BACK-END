@@ -1,4 +1,4 @@
-using System;
+using CRMVEXA.Application.Features.Vendas;
 using CRMVEXA.Application.Features.Vendas.GetVenda;
 using CRMVEXA.Application.Services;
 using CRMVEXA.Infrastructure.Data;
@@ -34,28 +34,7 @@ namespace CRMVEXA.Application.Features.Vendas.GetVenda
             var usuario = await _context.Usuarios.FindAsync(new object[] { venda.UsuarioId }, cancellationToken);
             var vendedorRef = usuario != null ? new VendedorRefResponse { Id = usuario.Id, Nome = usuario.Nome ?? "" } : null;
 
-            var itensResp = new List<ItemVendaResponse>();
-            foreach (var i in venda.Itens)
-            {
-                var produto = await _context.Produtos.Include(p => p.Categoria).FirstOrDefaultAsync(p => p.Id == i.ProdutoId, cancellationToken);
-                itensResp.Add(new ItemVendaResponse
-                {
-                    Id = i.Id,
-                    ProdutoId = i.ProdutoId,
-                    Produto = produto != null ? new ProdutoRefResponse
-                    {
-                        Id = produto.Id,
-                        Nome = produto.Nome,
-                        Sku = produto.SKU ?? "",
-                        PrecoVenda = produto.PrecoVenda,
-                        PrecoCusto = produto.PrecoCusto,
-                        Categoria = produto.Categoria != null ? new CategoriaRefResponse { Id = produto.Categoria.Id, Nome = produto.Categoria.Nome } : null
-                    } : null,
-                    Quantidade = i.Quantidade,
-                    PrecoUnitario = i.PrecoUnitario,
-                    Subtotal = i.Subtotal
-                });
-            }
+            var itensResp = await VendaItemMapper.MapItensAsync(_context, empresaId, venda.Itens, cancellationToken);
             return new GetVendaResponse
             {
                 Id = venda.Id,

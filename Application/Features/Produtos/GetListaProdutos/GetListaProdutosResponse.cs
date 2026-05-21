@@ -13,9 +13,15 @@ namespace CRMVEXA.Application.Features.Produtos.GetListaProdutos
 
     public class ProdutoResponse
     {
+        /// <summary>normal (estoque) | bazar (peça consignada disponível)</summary>
+        public string Tipo { get; set; } = "normal";
         public int Id { get; set; }
         public string SKU { get; set; } = string.Empty;
         public string Nome { get; set; } = string.Empty;
+        /// <summary>Consignante, quando <see cref="Tipo"/> é bazar.</summary>
+        public string? ConsignanteNome { get; set; }
+        /// <summary>disponivel | vendida | devolvida — apenas bazar.</summary>
+        public string? StatusBazar { get; set; }
         public int CategoriaId { get; set; }
         public CategoriaRefResponse? Categoria { get; set; }
         public string? Subcategoria { get; set; }

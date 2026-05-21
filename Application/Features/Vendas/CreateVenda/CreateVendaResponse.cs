@@ -16,7 +16,10 @@ public class CreateVendaResponse
 
 public class CreateVendaItemResponse
 {
+    public string Tipo { get; set; } = "normal";
     public int ProdutoId { get; set; }
+    public int? BazarProdutoId { get; set; }
+    public string? ConsignanteNome { get; set; }
     public int Quantidade { get; set; }
     public decimal PrecoUnitario { get; set; }
     public CreateVendaProdutoRefResponse? Produto { get; set; }

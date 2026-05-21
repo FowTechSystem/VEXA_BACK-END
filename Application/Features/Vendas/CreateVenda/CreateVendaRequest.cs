@@ -25,6 +25,8 @@ namespace CRMVEXA.Application.Features.Vendas.CreateVenda
     public class ItemVendaRequest
     {
         public int ProdutoId { get; set; }
+        /// <summary>normal (padrão) | bazar</summary>
+        public string? Tipo { get; set; }
         public int Quantidade { get; set; }
         public decimal PrecoUnitario { get; set; }
     }

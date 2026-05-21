@@ -22,6 +22,8 @@ namespace CRMVEXA.Application.Features.Produtos.UpdateProduto
         public string? Observacoes { get; set; }
         public string? CodigoBarras { get; set; }
         public int EstoqueMinimo { get; set; }
+        /// <summary>Quando informado (&gt;= 0), atualiza a quantidade em <c>Estoques</c>.</summary>
+        public int? QuantidadeEstoque { get; set; }
         public string? LocalizacaoEstoque { get; set; }
         /// <summary>Por slot: null = não alterar; vazio = remover foto; data URL/base64 = gravar (após upload).</summary>
         public string? Foto1Url { get; set; }
