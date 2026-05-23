@@ -54,10 +54,16 @@ public class BazarController : ControllerBase
         return OkOrThrow(_mediator.Send(request));
     }
 
+    /// <summary>
+    /// Exclui um consignante (soft delete). Bloqueia se houver vendas (409 HAS_SALES).
+    /// Com peças em sacola (disponível), exige ?confirmed=true (409 HAS_BAG_ITEMS).
+    /// </summary>
     [HttpDelete("consignantes/{id:int}")]
-    public async Task<IActionResult> ExcluirConsignante(int id)
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status409Conflict)]
+    public async Task<IActionResult> ExcluirConsignante(int id, [FromQuery] bool confirmed = false)
     {
-        await _mediator.Send(new DeleteConsignanteRequest(id));
+        await _mediator.Send(new DeleteConsignanteRequest(id, confirmed));
         return NoContent();
     }
 
@@ -108,7 +114,12 @@ public class BazarController : ControllerBase
     public Task<ActionResult<BazarPecaResponse>> DevolverPeca(int id) =>
         OkOrThrow(_mediator.Send(new DevolverPecaRequest(id)));
 
+    /// <summary>
+    /// Exclui uma peça (soft delete). Bloqueia se vendida ou com venda vinculada (409 PRODUCT_HAS_SALE).
+    /// </summary>
     [HttpDelete("pecas/{id:int}")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status409Conflict)]
     public async Task<IActionResult> ExcluirPeca(int id)
     {
         await _mediator.Send(new DeletePecaRequest(id));

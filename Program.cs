@@ -41,6 +41,7 @@ builder.Services.AddScoped<IEmpresaContext, EmpresaContext>();
 builder.Services.AddScoped<IEntradaEstoquePorCompraService, EntradaEstoquePorCompraService>();
 builder.Services.AddScoped<CRMVEXA.Application.Services.Bazar.BazarResumoService>();
 builder.Services.AddScoped<CRMVEXA.Application.Services.Bazar.BazarFotoStorageService>();
+builder.Services.AddScoped<CRMVEXA.Application.Services.Bazar.BazarAuditoriaService>();
 if (!string.IsNullOrWhiteSpace(builder.Configuration["Email:SmtpHost"]))
     builder.Services.AddScoped<IEmailSender, SmtpEmailSender>();
 else

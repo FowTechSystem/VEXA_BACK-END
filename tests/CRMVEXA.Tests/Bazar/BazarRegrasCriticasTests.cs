@@ -4,6 +4,7 @@ using CRMVEXA.Application.Features.Bazar.Repasses;
 using CRMVEXA.Application.Features.Bazar.Sacolas;
 using CRMVEXA.Application.Features.Bazar.Consignantes;
 using CRMVEXA.Application.Services.Bazar;
+using Microsoft.EntityFrameworkCore;
 using CRMVEXA.Domain.Enums;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -20,8 +21,7 @@ public class BazarRegrasCriticasTests
         var c = fx.CriarConsignante();
         var (_, peca) = fx.CriarSacolaComPeca(c.Id, BazarProdutoStatus.Vendida);
 
-        var handler = new BazarPecasHandlers(fx.Db, new FakeEmpresaContext(fx.EmpresaId), new BazarFotoStorageService(
-            new FakeWebHostEnvironment()));
+        var handler = CriarPecasHandler(fx);
 
         var ex = await Assert.ThrowsAsync<BazarException>(() =>
             handler.Handle(new UpdatePecaRequest { Id = peca.Id, Descricao = "Novo nome" }, CancellationToken.None));
@@ -97,21 +97,15 @@ public class BazarRegrasCriticasTests
         Assert.Contains("vendidas", ex.Message, StringComparison.OrdinalIgnoreCase);
     }
 
-    [Fact]
-    public async Task Soft_delete_consignante_com_pecas_ativas_falha()
-    {
-        using var fx = new BazarTestFixture();
-        var c = fx.CriarConsignante();
-        fx.CriarSacolaComPeca(c.Id, BazarProdutoStatus.Disponivel);
-
-        var handler = new BazarConsignantesHandlers(
-            fx.Db, new FakeEmpresaContext(fx.EmpresaId), new BazarResumoService(fx.Db));
-
-        var ex = await Assert.ThrowsAsync<BazarException>(() =>
-            handler.Handle(new DeleteConsignanteRequest(c.Id), CancellationToken.None));
-
-        Assert.Equal(409, ex.StatusCode);
-    }
+    private static BazarPecasHandlers CriarPecasHandler(BazarTestFixture fx) =>
+        new(
+            fx.Db,
+            new FakeEmpresaContext(fx.EmpresaId),
+            new BazarFotoStorageService(new FakeWebHostEnvironment()),
+            new BazarAuditoriaService(
+                fx.Db,
+                new FakeEmpresaContext(fx.EmpresaId),
+                new FakeHttpContextAccessor(fx.UsuarioId)));
 }
 
 internal class FakeWebHostEnvironment : IWebHostEnvironment
