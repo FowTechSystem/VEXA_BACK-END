@@ -42,6 +42,8 @@ builder.Services.AddScoped<IEntradaEstoquePorCompraService, EntradaEstoquePorCom
 builder.Services.AddScoped<CRMVEXA.Application.Services.Bazar.BazarResumoService>();
 builder.Services.AddScoped<CRMVEXA.Application.Services.Bazar.BazarFotoStorageService>();
 builder.Services.AddScoped<CRMVEXA.Application.Services.Bazar.BazarAuditoriaService>();
+builder.Services.AddScoped<CRMVEXA.Application.Services.Personalizacao.EmpresaLogoStorageService>();
+builder.Services.AddScoped<CRMVEXA.Application.Services.Personalizacao.EmpresaModuloAccessService>();
 if (!string.IsNullOrWhiteSpace(builder.Configuration["Email:SmtpHost"]))
     builder.Services.AddScoped<IEmailSender, SmtpEmailSender>();
 else
@@ -291,6 +293,7 @@ app.UseRateLimiter();
 app.UseMiddleware<ExceptionHandlerMiddleware>();
 app.UseAuthentication();
 app.UseMiddleware<EmpresaContextMiddleware>();
+app.UseMiddleware<ModuloAtivoMiddleware>();
 app.UseAuthorization();
 
 // Rotas mínimas antes dos controllers (/, /health) — após deploy: GET / e GET /health devem retornar 200, não 404

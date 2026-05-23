@@ -11,12 +11,25 @@ public static class SistemaConstants
 {
     public const string EmailAdminSistema = "dev@gmail.com";
 
+    /// <summary>E-mails com perfil Dev (admin master multi-empresa).</summary>
+    public static readonly string[] DevAdminEmails =
+    {
+        EmailAdminSistema,
+        "rafaeldolinski14@gmail.com"
+    };
+
     /// <summary>Valor do claim de papel no JWT para o admin de desenvolvimento (opcional; o e-mail também identifica).</summary>
     public const string RoleDevAdmin = "DevAdmin";
 
-    public static bool IsDevAdminEmail(string? email) =>
-        !string.IsNullOrWhiteSpace(email) &&
-        string.Equals(email.Trim(), EmailAdminSistema, StringComparison.OrdinalIgnoreCase);
+    public static bool IsDevAdminEmail(string? email)
+    {
+        if (string.IsNullOrWhiteSpace(email))
+            return false;
+
+        var normalized = email.Trim();
+        return DevAdminEmails.Any(e =>
+            string.Equals(normalized, e, StringComparison.OrdinalIgnoreCase));
+    }
 
     /// <summary>
     /// Utilizador autorizado a gerir empresas e enviar <c>X-Empresa-Id</c>: e-mail dev no token ou papel <see cref="RoleDevAdmin"/>.
