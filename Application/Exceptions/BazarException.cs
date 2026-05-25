@@ -5,13 +5,23 @@ public class BazarException : Exception
     public int StatusCode { get; }
     public string? Detail { get; }
     public Dictionary<string, string[]>? Errors { get; }
+    public string? ErrorCode { get; }
+    public IReadOnlyDictionary<string, object?>? ExtraData { get; }
 
-    public BazarException(string message, int statusCode = 400, string? detail = null, Dictionary<string, string[]>? errors = null)
+    public BazarException(
+        string message,
+        int statusCode = 400,
+        string? detail = null,
+        Dictionary<string, string[]>? errors = null,
+        string? errorCode = null,
+        IReadOnlyDictionary<string, object?>? extraData = null)
         : base(message)
     {
         StatusCode = statusCode;
         Detail = detail;
         Errors = errors;
+        ErrorCode = errorCode;
+        ExtraData = extraData;
     }
 
     public static BazarException NotFound(string message = "Registro não encontrado.") =>
@@ -19,6 +29,12 @@ public class BazarException : Exception
 
     public static BazarException Conflict(string message) =>
         new(message, 409);
+
+    public static BazarException ConflictWithCode(
+        string errorCode,
+        string message,
+        IReadOnlyDictionary<string, object?>? extraData = null) =>
+        new(message, 409, errorCode: errorCode, extraData: extraData);
 
     public static BazarException BusinessRule(string message) =>
         new(message, 422);

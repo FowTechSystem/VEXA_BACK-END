@@ -58,12 +58,18 @@ public class BazarPecasHandlers :
     private readonly AppDbContext _db;
     private readonly IEmpresaContext _empresa;
     private readonly BazarFotoStorageService _fotos;
+    private readonly BazarAuditoriaService _auditoria;
 
-    public BazarPecasHandlers(AppDbContext db, IEmpresaContext empresa, BazarFotoStorageService fotos)
+    public BazarPecasHandlers(
+        AppDbContext db,
+        IEmpresaContext empresa,
+        BazarFotoStorageService fotos,
+        BazarAuditoriaService auditoria)
     {
         _db = db;
         _empresa = empresa;
         _fotos = fotos;
+        _auditoria = auditoria;
     }
 
     public async Task<GetListaPecasResponse> Handle(GetListaPecasRequest request, CancellationToken ct)
@@ -142,15 +148,33 @@ public class BazarPecasHandlers :
     public async Task<Unit> Handle(DeletePecaRequest request, CancellationToken ct)
     {
         var p = await ObterPecaAsync(request.Id, ct);
-        if (p.Status == BazarProdutoStatus.Vendida)
-            throw BazarException.BusinessRule("Peça vendida não pode ser excluída.");
+        if (p.Status == BazarProdutoStatus.Vendida || p.VendaId.HasValue)
+        {
+            throw BazarException.ConflictWithCode(
+                "PRODUCT_HAS_SALE",
+                "Esta peça não pode ser excluída pois possui venda vinculada.");
+        }
+
         var emRepasse = await _db.BazarRepasseItens.AnyAsync(ri => ri.ProdutoId == p.Id, ct);
         if (emRepasse)
             throw BazarException.BusinessRule("Peça já incluída em um repasse não pode ser excluída.");
 
-        p.DeletadoEm = DateTime.UtcNow;
-        p.AtualizadoEm = DateTime.UtcNow;
-        await _db.SaveChangesAsync(ct);
+        await using var tx = await _db.Database.BeginTransactionAsync(ct);
+        try
+        {
+            var agora = DateTime.UtcNow;
+            p.DeletadoEm = agora;
+            p.AtualizadoEm = agora;
+            _auditoria.RegistrarExclusao("peca", p.Id, new { p.ConsignanteId, p.SacolaId, p.Status });
+            await _db.SaveChangesAsync(ct);
+            await tx.CommitAsync(ct);
+        }
+        catch
+        {
+            await tx.RollbackAsync(ct);
+            throw;
+        }
+
         return Unit.Value;
     }
 

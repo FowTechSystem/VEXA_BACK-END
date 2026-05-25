@@ -48,7 +48,7 @@ public class UpdateConsignanteRequest : IRequest<BazarConsignanteResponse>
     public string? Observacao { get; set; }
 }
 
-public record DeleteConsignanteRequest(int Id) : IRequest<Unit>;
+public record DeleteConsignanteRequest(int Id, bool Confirmed = false) : IRequest<Unit>;
 
 public class BazarConsignantesHandlers :
     IRequestHandler<GetListaConsignantesRequest, GetListaConsignantesResponse>,
@@ -63,12 +63,18 @@ public class BazarConsignantesHandlers :
     private readonly AppDbContext _db;
     private readonly IEmpresaContext _empresa;
     private readonly BazarResumoService _resumo;
+    private readonly BazarAuditoriaService _auditoria;
 
-    public BazarConsignantesHandlers(AppDbContext db, IEmpresaContext empresa, BazarResumoService resumo)
+    public BazarConsignantesHandlers(
+        AppDbContext db,
+        IEmpresaContext empresa,
+        BazarResumoService resumo,
+        BazarAuditoriaService auditoria)
     {
         _db = db;
         _empresa = empresa;
         _resumo = resumo;
+        _auditoria = auditoria;
     }
 
     public async Task<GetListaConsignantesResponse> Handle(GetListaConsignantesRequest request, CancellationToken ct)
@@ -196,16 +202,88 @@ public class BazarConsignantesHandlers :
     public async Task<Unit> Handle(DeleteConsignanteRequest request, CancellationToken ct)
     {
         var entity = await ObterAtivoAsync(request.Id, ct);
-        var temPecasAtivas = await _db.BazarProdutos.AnyAsync(p =>
-            p.ConsignanteId == entity.Id && p.DeletadoEm == null &&
-            p.Status != BazarProdutoStatus.Devolvida, ct);
-        if (temPecasAtivas)
-            throw BazarException.Conflict("Não é possível excluir: existem peças que não foram todas devolvidas.");
 
-        entity.DeletadoEm = DateTime.UtcNow;
-        entity.Ativo = false;
-        entity.AtualizadoEm = DateTime.UtcNow;
-        await _db.SaveChangesAsync(ct);
+        var salesCount = await _db.BazarProdutos.CountAsync(p =>
+            p.ConsignanteId == entity.Id && p.DeletadoEm == null &&
+            p.Status == BazarProdutoStatus.Vendida, ct);
+        if (salesCount > 0)
+        {
+            throw BazarException.ConflictWithCode(
+                "HAS_SALES",
+                "O consignante não pode ser excluído pois existem vendas vinculadas a ele. Exclua ou desvincule as vendas primeiro.",
+                new Dictionary<string, object?> { ["salesCount"] = salesCount });
+        }
+
+        var bagItemsCount = await _db.BazarProdutos.CountAsync(p =>
+            p.ConsignanteId == entity.Id && p.DeletadoEm == null &&
+            p.Status == BazarProdutoStatus.Disponivel, ct);
+
+        if (bagItemsCount > 0 && !request.Confirmed)
+        {
+            throw BazarException.ConflictWithCode(
+                "HAS_BAG_ITEMS",
+                $"Este consignante possui {bagItemsCount} peça(s) em sacola. Deseja excluir mesmo assim?",
+                new Dictionary<string, object?>
+                {
+                    ["bagItemsCount"] = bagItemsCount,
+                    ["requiresConfirmation"] = true
+                });
+        }
+
+        await using var tx = await _db.Database.BeginTransactionAsync(ct);
+        try
+        {
+            var agora = DateTime.UtcNow;
+
+            if (request.Confirmed && bagItemsCount > 0)
+            {
+                var pecasDisponiveis = await _db.BazarProdutos
+                    .Where(p => p.ConsignanteId == entity.Id && p.DeletadoEm == null &&
+                                p.Status == BazarProdutoStatus.Disponivel)
+                    .ToListAsync(ct);
+
+                var pecaIds = pecasDisponiveis.Select(p => p.Id).ToList();
+                var fotos = await _db.BazarProdutoFotos
+                    .Where(f => pecaIds.Contains(f.ProdutoId))
+                    .ToListAsync(ct);
+                _db.BazarProdutoFotos.RemoveRange(fotos);
+                _db.BazarProdutos.RemoveRange(pecasDisponiveis);
+
+                await _db.SaveChangesAsync(ct);
+
+                var sacolaIds = pecasDisponiveis.Select(p => p.SacolaId).Distinct().ToList();
+                var sacolas = await _db.BazarSacolas
+                    .Where(s => s.EmpresaId == _empresa.EmpresaId && sacolaIds.Contains(s.Id))
+                    .ToListAsync(ct);
+
+                foreach (var sacola in sacolas)
+                {
+                    var temProdutos = await _db.BazarProdutos.AnyAsync(p => p.SacolaId == sacola.Id, ct);
+                    if (!temProdutos)
+                        _db.BazarSacolas.Remove(sacola);
+                }
+            }
+
+            entity.DeletadoEm = agora;
+            entity.Ativo = false;
+            entity.AtualizadoEm = agora;
+
+            _auditoria.RegistrarExclusao("consignante", entity.Id, new
+            {
+                confirmed = request.Confirmed,
+                bagItemsCount,
+                cascade = request.Confirmed && bagItemsCount > 0
+            });
+
+            await _db.SaveChangesAsync(ct);
+            await tx.CommitAsync(ct);
+        }
+        catch
+        {
+            await tx.RollbackAsync(ct);
+            throw;
+        }
+
         return Unit.Value;
     }
 

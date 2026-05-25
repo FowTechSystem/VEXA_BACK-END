@@ -42,14 +42,35 @@ public class ExceptionHandlerMiddleware
         if (ex is BazarException bazarEx)
         {
             statusCode = (HttpStatusCode)bazarEx.StatusCode;
-            payload = new
+            if (!string.IsNullOrEmpty(bazarEx.ErrorCode))
             {
-                sucesso = false,
-                mensagem = bazarEx.Message,
-                message = bazarEx.Message,
-                detail = bazarEx.Detail,
-                errors = bazarEx.Errors
-            };
+                var dict = new Dictionary<string, object?>
+                {
+                    ["sucesso"] = false,
+                    ["error"] = bazarEx.ErrorCode,
+                    ["message"] = bazarEx.Message,
+                    ["mensagem"] = bazarEx.Message
+                };
+                if (bazarEx.ExtraData != null)
+                {
+                    foreach (var kv in bazarEx.ExtraData)
+                        dict[kv.Key] = kv.Value;
+                }
+                if (bazarEx.Detail != null) dict["detail"] = bazarEx.Detail;
+                if (bazarEx.Errors != null) dict["errors"] = bazarEx.Errors;
+                payload = dict;
+            }
+            else
+            {
+                payload = new
+                {
+                    sucesso = false,
+                    mensagem = bazarEx.Message,
+                    message = bazarEx.Message,
+                    detail = bazarEx.Detail,
+                    errors = bazarEx.Errors
+                };
+            }
         }
         else
         {

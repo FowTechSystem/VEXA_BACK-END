@@ -50,6 +50,9 @@ namespace CRMVEXA.Infrastructure.Data
         public DbSet<BazarRepasse> BazarRepasses { get; set; }
         public DbSet<BazarRepasseItem> BazarRepasseItens { get; set; }
 
+        public DbSet<EmpresaConfiguracao> EmpresaConfiguracoes { get; set; }
+        public DbSet<EmpresaModulo> EmpresaModulos { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<Fornecedor>()

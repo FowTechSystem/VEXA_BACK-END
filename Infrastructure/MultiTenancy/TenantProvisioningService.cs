@@ -1,4 +1,5 @@
 using CRMVEXA.Application.Abstractions;
+using CRMVEXA.Application.Services.Personalizacao;
 using CRMVEXA.Domain.Entities.Master;
 using CRMVEXA.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
@@ -85,6 +86,9 @@ public sealed class TenantProvisioningService : ITenantProvisioningService
                 SELECT setval(pg_get_serial_sequence('"Empresas"', 'Id'), COALESCE((SELECT MAX("Id") FROM "Empresas"), 1));
                 """,
                 cancellationToken).ConfigureAwait(false);
+
+            await EmpresaPersonalizacaoSeed.GarantirPadraoAsync(seedCtx, tenantId, tenant.Nome, ct: cancellationToken)
+                .ConfigureAwait(false);
         }
 
         return tenantId;
