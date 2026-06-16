@@ -56,6 +56,75 @@ public class BazarRegrasCriticasTests
     }
 
     [Fact]
+    public async Task Cancelar_repasse_libera_pecas_para_novo_repasse()
+    {
+        using var fx = new BazarTestFixture();
+        var c = fx.CriarConsignante();
+        var (_, peca) = fx.CriarSacolaComPeca(c.Id, BazarProdutoStatus.Vendida);
+
+        var http = new FakeHttpContextAccessor(fx.UsuarioId);
+        var handler = new BazarRepassesHandlers(fx.Db, new FakeEmpresaContext(fx.EmpresaId), http);
+
+        var repasse = await handler.Handle(new CreateRepasseRequest
+        {
+            ConsignanteId = c.Id,
+            PecasIds = new List<int> { peca.Id }
+        }, CancellationToken.None);
+
+        await handler.Handle(new DeleteRepasseRequest(repasse.Id), CancellationToken.None);
+
+        // A peça deve voltar a aparecer como pendente de repasse
+        var pendentes = await handler.Handle(
+            new GetRepassesPendentesConsignanteRequest(c.Id), CancellationToken.None);
+        Assert.Single(pendentes);
+        Assert.Contains(pendentes[0].Pecas, p => p.Id == peca.Id);
+
+        // E deve poder entrar em um novo repasse sem conflito
+        var novo = await handler.Handle(new CreateRepasseRequest
+        {
+            ConsignanteId = c.Id,
+            PecasIds = new List<int> { peca.Id }
+        }, CancellationToken.None);
+        Assert.Contains(peca.Id, novo.PecasIds);
+    }
+
+    [Fact]
+    public async Task Cancelar_venda_com_peca_em_repasse_falha()
+    {
+        using var fx = new BazarTestFixture();
+        var c = fx.CriarConsignante();
+        var (_, peca) = fx.CriarSacolaComPeca(c.Id, BazarProdutoStatus.Vendida);
+
+        var venda = new Domain.Entities.Venda(fx.EmpresaId, "VND-REP", fx.UsuarioId, "Pix");
+        fx.Db.Vendas.Add(venda);
+        await fx.Db.SaveChangesAsync();
+
+        var item = new Domain.Entities.ItemVenda(peca.Id, 50m) { VendaId = venda.Id };
+        fx.Db.ItensVenda.Add(item);
+        var pecaDb = await fx.Db.BazarProdutos.FindAsync(peca.Id);
+        pecaDb!.VendaId = venda.Id;
+        await fx.Db.SaveChangesAsync();
+
+        var http = new FakeHttpContextAccessor(fx.UsuarioId);
+        var repassesHandler = new BazarRepassesHandlers(fx.Db, new FakeEmpresaContext(fx.EmpresaId), http);
+        await repassesHandler.Handle(new CreateRepasseRequest
+        {
+            ConsignanteId = c.Id,
+            PecasIds = new List<int> { peca.Id }
+        }, CancellationToken.None);
+
+        var cancelarHandler = new Application.Features.Vendas.CancelarVenda.CancelarVendaHandler(
+            fx.Db, new FakeEmpresaContext(fx.EmpresaId), http);
+
+        var ex = await Assert.ThrowsAsync<BazarException>(() =>
+            cancelarHandler.Handle(
+                new Application.Features.Vendas.CancelarVenda.CancelarVendaRequest { Id = venda.Id },
+                CancellationToken.None));
+
+        Assert.Equal(409, ex.StatusCode);
+    }
+
+    [Fact]
     public async Task Venda_concorrente_bazar_apenas_uma_sucede()
     {
         using var fx = new BazarTestFixture();

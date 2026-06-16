@@ -155,7 +155,9 @@ public class BazarPecasHandlers :
                 "Esta peça não pode ser excluída pois possui venda vinculada.");
         }
 
-        var emRepasse = await _db.BazarRepasseItens.AnyAsync(ri => ri.ProdutoId == p.Id, ct);
+        var emRepasse = await _db.BazarRepasseItens.AnyAsync(ri =>
+            ri.ProdutoId == p.Id &&
+            _db.BazarRepasses.Any(r => r.Id == ri.RepasseId && r.DeletadoEm == null), ct);
         if (emRepasse)
             throw BazarException.BusinessRule("Peça já incluída em um repasse não pode ser excluída.");
 

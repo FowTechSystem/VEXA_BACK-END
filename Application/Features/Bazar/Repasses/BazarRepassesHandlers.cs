@@ -125,9 +125,22 @@ public class BazarRepassesHandlers :
                     throw BazarException.Validation("Todas as peças devem pertencer ao consignante informado.");
                 if (p.Status != BazarProdutoStatus.Vendida)
                     throw BazarException.BusinessRule($"A peça '{p.Descricao}' não está vendida.");
-                if (await _db.BazarRepasseItens.AnyAsync(ri => ri.ProdutoId == p.Id, ct))
-                    throw BazarException.Conflict("Uma das peças já foi incluída em outro repasse.");
             }
+
+            var idsPecas = pecas.Select(p => p.Id).ToList();
+            var itensAnteriores = await _db.BazarRepasseItens
+                .Where(ri => idsPecas.Contains(ri.ProdutoId))
+                .Join(_db.BazarRepasses, ri => ri.RepasseId, r => r.Id,
+                    (ri, r) => new { Item = ri, r.DeletadoEm })
+                .ToListAsync(ct);
+
+            if (itensAnteriores.Any(x => x.DeletadoEm == null))
+                throw BazarException.Conflict("Uma das peças já foi incluída em outro repasse.");
+
+            // Itens órfãos de repasses cancelados precisam sair antes do insert:
+            // o índice único em ProdutoId impediria incluir a peça em um novo repasse.
+            if (itensAnteriores.Count > 0)
+                _db.BazarRepasseItens.RemoveRange(itensAnteriores.Select(x => x.Item));
 
             var agora = DateTime.UtcNow;
             var repasse = new BazarRepasse
@@ -196,6 +209,13 @@ public class BazarRepassesHandlers :
         var repasse = await ObterRepasseAsync(request.Id, ct);
         if (repasse.Status == BazarRepasseStatus.Pago)
             throw BazarException.BusinessRule("Repasse pago não pode ser cancelado.");
+
+        // Remove os itens para liberar as peças (índice único em ProdutoId);
+        // sem isso as peças nunca mais poderiam entrar em outro repasse.
+        var itens = await _db.BazarRepasseItens
+            .Where(i => i.RepasseId == repasse.Id)
+            .ToListAsync(ct);
+        _db.BazarRepasseItens.RemoveRange(itens);
 
         repasse.DeletadoEm = DateTime.UtcNow;
         repasse.AtualizadoEm = DateTime.UtcNow;

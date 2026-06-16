@@ -10,132 +10,72 @@ namespace CRMVEXA.Infrastructure.Migrations
     public partial class UsuarioCamposCompletosEPermissoes : Migration
     {
         /// <inheritdoc />
+        /// <remarks>
+        /// SQL idempotente (IF NOT EXISTS): a migration de reparo 20260210190000 e a
+        /// 20260218164406 criam os mesmos objetos — sem os guards, bancos novos
+        /// (ex.: provisionamento de tenant) falhavam com "coluna já existe".
+        /// </remarks>
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            AplicarIdempotente(migrationBuilder);
+        }
+
+        internal static void AplicarIdempotente(MigrationBuilder migrationBuilder)
+        {
             // Usuarios: novos campos
-            migrationBuilder.AddColumn<bool>(
-                name: "Ativo",
-                table: "Usuarios",
-                type: "boolean",
-                nullable: false,
-                defaultValue: true);
-            migrationBuilder.AddColumn<string>(
-                name: "CPF",
-                table: "Usuarios",
-                type: "character varying(14)",
-                maxLength: 14,
-                nullable: true);
-            migrationBuilder.AddColumn<string>(
-                name: "Departamento",
-                table: "Usuarios",
-                type: "character varying(100)",
-                maxLength: 100,
-                nullable: true);
-            migrationBuilder.AddColumn<DateTime>(
-                name: "DataNascimento",
-                table: "Usuarios",
-                type: "timestamp without time zone",
-                nullable: true);
-            migrationBuilder.AddColumn<string>(
-                name: "Observacoes",
-                table: "Usuarios",
-                type: "character varying(2000)",
-                maxLength: 2000,
-                nullable: true);
-            migrationBuilder.AddColumn<string>(
-                name: "Perfil",
-                table: "Usuarios",
-                type: "character varying(50)",
-                maxLength: 50,
-                nullable: true);
-            migrationBuilder.AddColumn<string>(
-                name: "RG",
-                table: "Usuarios",
-                type: "character varying(20)",
-                maxLength: 20,
-                nullable: true);
-            migrationBuilder.AddColumn<string>(
-                name: "Telefone",
-                table: "Usuarios",
-                type: "character varying(20)",
-                maxLength: 20,
-                nullable: true);
-            migrationBuilder.AddColumn<string>(
-                name: "WhatsApp",
-                table: "Usuarios",
-                type: "character varying(20)",
-                maxLength: 20,
-                nullable: true);
+            migrationBuilder.Sql(@"
+                ALTER TABLE ""Usuarios"" ADD COLUMN IF NOT EXISTS ""Ativo"" boolean NOT NULL DEFAULT true;
+                ALTER TABLE ""Usuarios"" ADD COLUMN IF NOT EXISTS ""CPF"" character varying(14) NULL;
+                ALTER TABLE ""Usuarios"" ADD COLUMN IF NOT EXISTS ""Departamento"" character varying(100) NULL;
+                ALTER TABLE ""Usuarios"" ADD COLUMN IF NOT EXISTS ""DataNascimento"" timestamp without time zone NULL;
+                ALTER TABLE ""Usuarios"" ADD COLUMN IF NOT EXISTS ""Observacoes"" character varying(2000) NULL;
+                ALTER TABLE ""Usuarios"" ADD COLUMN IF NOT EXISTS ""Perfil"" character varying(50) NULL;
+                ALTER TABLE ""Usuarios"" ADD COLUMN IF NOT EXISTS ""RG"" character varying(20) NULL;
+                ALTER TABLE ""Usuarios"" ADD COLUMN IF NOT EXISTS ""Telefone"" character varying(20) NULL;
+                ALTER TABLE ""Usuarios"" ADD COLUMN IF NOT EXISTS ""WhatsApp"" character varying(20) NULL;
+            ");
 
             // Enderecos: Estado e UsuarioId
-            migrationBuilder.AddColumn<string>(
-                name: "Estado",
-                table: "Enderecos",
-                type: "character varying(2)",
-                maxLength: 2,
-                nullable: true);
-            migrationBuilder.AddColumn<int>(
-                name: "UsuarioId",
-                table: "Enderecos",
-                type: "integer",
-                nullable: true);
-            migrationBuilder.CreateIndex(
-                name: "IX_Enderecos_UsuarioId",
-                table: "Enderecos",
-                column: "UsuarioId");
-            migrationBuilder.AddForeignKey(
-                name: "FK_Enderecos_Usuarios_UsuarioId",
-                table: "Enderecos",
-                column: "UsuarioId",
-                principalTable: "Usuarios",
-                principalColumn: "Id",
-                onDelete: ReferentialAction.Cascade);
+            migrationBuilder.Sql(@"
+                ALTER TABLE ""Enderecos"" ADD COLUMN IF NOT EXISTS ""Estado"" character varying(2) NULL;
+                ALTER TABLE ""Enderecos"" ADD COLUMN IF NOT EXISTS ""UsuarioId"" integer NULL;
+            ");
+            migrationBuilder.Sql(@"CREATE INDEX IF NOT EXISTS ""IX_Enderecos_UsuarioId"" ON ""Enderecos"" (""UsuarioId"");");
+            migrationBuilder.Sql(@"
+                DO $$
+                BEGIN
+                    IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'FK_Enderecos_Usuarios_UsuarioId') THEN
+                        ALTER TABLE ""Enderecos""
+                            ADD CONSTRAINT ""FK_Enderecos_Usuarios_UsuarioId""
+                            FOREIGN KEY (""UsuarioId"") REFERENCES ""Usuarios""(""Id"") ON DELETE CASCADE;
+                    END IF;
+                END $$;
+            ");
 
             // Tabela Permissoes
-            migrationBuilder.CreateTable(
-                name: "Permissoes",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    Nome = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
-                    Codigo = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false)
-                },
-                constraints: table => table.PrimaryKey("PK_Permissoes", x => x.Id));
-            migrationBuilder.CreateIndex(
-                name: "IX_Permissoes_Codigo",
-                table: "Permissoes",
-                column: "Codigo",
-                unique: true);
+            migrationBuilder.Sql(@"
+                CREATE TABLE IF NOT EXISTS ""Permissoes"" (
+                    ""Id"" integer GENERATED BY DEFAULT AS IDENTITY,
+                    ""Nome"" character varying(100) NOT NULL,
+                    ""Codigo"" character varying(50) NOT NULL,
+                    CONSTRAINT ""PK_Permissoes"" PRIMARY KEY (""Id"")
+                );
+                CREATE UNIQUE INDEX IF NOT EXISTS ""IX_Permissoes_Codigo"" ON ""Permissoes"" (""Codigo"");
+            ");
 
             // Tabela UsuarioPermissoes (N:N)
-            migrationBuilder.CreateTable(
-                name: "UsuarioPermissoes",
-                columns: table => new
-                {
-                    UsuarioId = table.Column<int>(type: "integer", nullable: false),
-                    PermissaoId = table.Column<int>(type: "integer", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_UsuarioPermissoes", x => new { x.UsuarioId, x.PermissaoId });
-                    table.ForeignKey(
-                        name: "FK_UsuarioPermissoes_Usuarios_UsuarioId",
-                        column: x => x.UsuarioId,
-                        principalTable: "Usuarios",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_UsuarioPermissoes_Permissoes_PermissaoId",
-                        column: x => x.PermissaoId,
-                        principalTable: "Permissoes",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
-                });
-            migrationBuilder.CreateIndex(
-                name: "IX_UsuarioPermissoes_PermissaoId",
-                table: "UsuarioPermissoes",
-                column: "PermissaoId");
+            migrationBuilder.Sql(@"
+                CREATE TABLE IF NOT EXISTS ""UsuarioPermissoes"" (
+                    ""UsuarioId"" integer NOT NULL,
+                    ""PermissaoId"" integer NOT NULL,
+                    CONSTRAINT ""PK_UsuarioPermissoes"" PRIMARY KEY (""UsuarioId"", ""PermissaoId""),
+                    CONSTRAINT ""FK_UsuarioPermissoes_Usuarios_UsuarioId""
+                        FOREIGN KEY (""UsuarioId"") REFERENCES ""Usuarios""(""Id"") ON DELETE CASCADE,
+                    CONSTRAINT ""FK_UsuarioPermissoes_Permissoes_PermissaoId""
+                        FOREIGN KEY (""PermissaoId"") REFERENCES ""Permissoes""(""Id"") ON DELETE RESTRICT
+                );
+                CREATE INDEX IF NOT EXISTS ""IX_UsuarioPermissoes_PermissaoId"" ON ""UsuarioPermissoes"" (""PermissaoId"");
+            ");
         }
 
         /// <inheritdoc />
