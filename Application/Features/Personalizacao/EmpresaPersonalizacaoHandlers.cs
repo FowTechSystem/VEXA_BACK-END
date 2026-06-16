@@ -105,7 +105,7 @@ public class EmpresaPersonalizacaoHandlers :
     public async Task<EmpresaSettingsResponse> Handle(UpdateDevEmpresaModulosRequest request, CancellationToken ct)
     {
         await using var db = await CriarContextoTenantAsync(request.CompanyId, ct);
-        var estado = ConstruirEstadoModulos(request.Body.Modules);
+        var estado = ConstruirEstadoModulos(request.Body.EnabledModules);
         ModuloCatalogo.ValidarModulos(estado);
 
         var agora = DateTime.UtcNow;
@@ -200,22 +200,19 @@ public class EmpresaPersonalizacaoHandlers :
             PrimaryColor = config.PrimaryColor,
             SecondaryColor = config.SecondaryColor,
             DefaultTheme = config.DefaultTheme == TemaPadraoEmpresa.Light ? "light" : "dark",
-            Modules = ModuloCatalogo.Todos.Select(def => new ModuloStatusDto
-            {
-                Key = def.Key,
-                IsEnabled = map[def.Key]
-            }).ToList()
+            EnabledModules = map.Where(kv => kv.Value).Select(kv => kv.Key).OrderBy(k => k).ToList()
         };
     }
 
-    private static Dictionary<string, bool> ConstruirEstadoModulos(IEnumerable<ModuloStatusDto> modules)
+    private static Dictionary<string, bool> ConstruirEstadoModulos(IEnumerable<string>? enabledKeys)
     {
         var estado = ModuloCatalogo.Todos.ToDictionary(m => m.Key, m => m.Fixed, StringComparer.OrdinalIgnoreCase);
-        foreach (var item in modules)
+        foreach (var key in enabledKeys ?? Enumerable.Empty<string>())
         {
-            if (!ModuloCatalogo.TryObter(item.Key, out _))
-                throw new ModuloValidacaoException("UNKNOWN_MODULE", $"Módulo desconhecido: {item.Key}.");
-            estado[item.Key] = item.IsEnabled;
+            if (string.IsNullOrWhiteSpace(key)) continue;
+            if (!ModuloCatalogo.TryObter(key, out _))
+                throw new ModuloValidacaoException("UNKNOWN_MODULE", $"Módulo desconhecido: {key}.");
+            estado[key] = true;
         }
 
         foreach (var def in ModuloCatalogo.Todos.Where(d => d.Fixed))

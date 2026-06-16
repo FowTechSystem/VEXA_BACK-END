@@ -1,45 +1,46 @@
+using System.Text.Json.Serialization;
+
 namespace CRMVEXA.Application.Features.Personalizacao;
+
+// O frontend (companySettingsService.js) fala snake_case nestes endpoints
+// (display_name, primary_color, enabled_modules...). O resto da API usa camelCase,
+// então marcamos explicitamente o JSON aqui para o binding/serialização baterem.
 
 public class EmpresaSettingsResponse
 {
-    public string? LogoUrl { get; set; }
-    public string DisplayName { get; set; } = "";
-    public string PrimaryColor { get; set; } = "";
-    public string SecondaryColor { get; set; } = "";
-    public string DefaultTheme { get; set; } = "dark";
-    public List<ModuloStatusDto> Modules { get; set; } = new();
+    [JsonPropertyName("logo_url")] public string? LogoUrl { get; set; }
+    [JsonPropertyName("display_name")] public string DisplayName { get; set; } = "";
+    [JsonPropertyName("primary_color")] public string PrimaryColor { get; set; } = "";
+    [JsonPropertyName("secondary_color")] public string SecondaryColor { get; set; } = "";
+    [JsonPropertyName("default_theme")] public string DefaultTheme { get; set; } = "dark";
+    [JsonPropertyName("enabled_modules")] public List<string> EnabledModules { get; set; } = new();
 }
 
 public class EmpresaSettingsMeResponse
 {
-    public string? LogoUrl { get; set; }
-    public string DisplayName { get; set; } = "";
-    public string PrimaryColor { get; set; } = "";
-    public string SecondaryColor { get; set; } = "";
-    public string DefaultTheme { get; set; } = "dark";
-    public List<string> EnabledModules { get; set; } = new();
-}
-
-public class ModuloStatusDto
-{
-    public string Key { get; set; } = "";
-    public bool IsEnabled { get; set; }
+    [JsonPropertyName("logo_url")] public string? LogoUrl { get; set; }
+    [JsonPropertyName("display_name")] public string DisplayName { get; set; } = "";
+    [JsonPropertyName("primary_color")] public string PrimaryColor { get; set; } = "";
+    [JsonPropertyName("secondary_color")] public string SecondaryColor { get; set; } = "";
+    [JsonPropertyName("default_theme")] public string DefaultTheme { get; set; } = "dark";
+    [JsonPropertyName("enabled_modules")] public List<string> EnabledModules { get; set; } = new();
 }
 
 public class AtualizarEmpresaSettingsRequest
 {
-    public string DisplayName { get; set; } = "";
-    public string PrimaryColor { get; set; } = "";
-    public string SecondaryColor { get; set; } = "";
-    public string DefaultTheme { get; set; } = "dark";
+    [JsonPropertyName("display_name")] public string DisplayName { get; set; } = "";
+    [JsonPropertyName("primary_color")] public string PrimaryColor { get; set; } = "";
+    [JsonPropertyName("secondary_color")] public string SecondaryColor { get; set; } = "";
+    [JsonPropertyName("default_theme")] public string DefaultTheme { get; set; } = "dark";
 }
 
 public class AtualizarEmpresaModulosRequest
 {
-    public List<ModuloStatusDto> Modules { get; set; } = new();
+    /// <summary>Chaves dos módulos que devem ficar ativos (fixos são sempre incluídos).</summary>
+    [JsonPropertyName("enabled_modules")] public List<string> EnabledModules { get; set; } = new();
 }
 
 public class LogoUploadResponse
 {
-    public string LogoUrl { get; set; } = "";
+    [JsonPropertyName("logo_url")] public string LogoUrl { get; set; } = "";
 }

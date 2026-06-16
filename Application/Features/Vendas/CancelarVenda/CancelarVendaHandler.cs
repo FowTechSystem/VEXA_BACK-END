@@ -1,5 +1,6 @@
 using System;
 using System.Security.Claims;
+using CRMVEXA.Application.Exceptions;
 using CRMVEXA.Application.Features.Vendas.CancelarVenda;
 using CRMVEXA.Application.Services;
 using CRMVEXA.Domain.Entities;
@@ -36,12 +37,12 @@ namespace CRMVEXA.Application.Features.Vendas.CancelarVenda
 
             if (venda == null)
             {
-                throw new Exception($"Venda com ID {request.Id} não encontrada");
+                throw new InvalidOperationException($"Venda com ID {request.Id} não encontrada");
             }
 
             if (venda.Status == "Cancelada")
             {
-                throw new Exception("Venda já está cancelada");
+                throw new InvalidOperationException("Venda já está cancelada");
             }
 
             var usuarioIdMov = request.UsuarioId > 0
@@ -58,6 +59,17 @@ namespace CRMVEXA.Application.Features.Vendas.CancelarVenda
                         .FirstOrDefaultAsync(p => p.Id == item.BazarProdutoId.Value && p.EmpresaId == empresaId, cancellationToken);
                     if (pecaBazar != null && pecaBazar.VendaId == venda.Id)
                     {
+                        var emRepasse = await _context.BazarRepasseItens.AnyAsync(ri =>
+                            ri.ProdutoId == pecaBazar.Id &&
+                            _context.BazarRepasses.Any(r => r.Id == ri.RepasseId && r.DeletadoEm == null),
+                            cancellationToken);
+                        if (emRepasse)
+                        {
+                            throw BazarException.Conflict(
+                                $"A peça '{pecaBazar.Descricao}' já entrou em um repasse ao consignante. " +
+                                "Cancele o repasse antes de cancelar esta venda.");
+                        }
+
                         pecaBazar.Status = Domain.Enums.BazarProdutoStatus.Disponivel;
                         pecaBazar.DataVenda = null;
                         pecaBazar.VendaId = null;

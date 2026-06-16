@@ -10,6 +10,10 @@
 	  <Compile Remove="scripts\**" />
 	  <None Remove="tests\**" />
 	  <None Remove="scripts\**" />
+	  <!-- SDK.Web inclui tudo como Content por padrão; sem isto o build copia
+	       recursivamente o bin/ dos testes e estoura MSB3030 (pastas aninhadas). -->
+	  <Content Remove="tests\**" />
+	  <Content Remove="scripts\**" />
 	  <Compile Remove="Application\Commands\**" />
 	  <Compile Remove="Application\DTOs\**" />
 	  <Compile Remove="Application\Handlers\**" />
