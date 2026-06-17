@@ -8,22 +8,26 @@ namespace CRMVEXA.Presentation.Middleware;
 /// </summary>
 public class ModuloAtivoMiddleware
 {
-    private static readonly (string Prefix, string ModuleKey)[] RotasModulos =
+    // Cada rota libera se QUALQUER um dos módulos listados estiver ativo.
+    private static readonly (string Prefix, string[] ModuleKeys)[] RotasModulos =
     {
-        ("/api/bazar", "bazar"),
-        ("/api/vendas", "vendas"),
-        ("/api/caixa", "caixa"),
-        ("/api/caixas", "caixa"),
-        ("/api/catalogos", "catalogo"),
-        ("/api/condicional", "condicional"),
-        ("/api/compras", "compras"),
-        ("/api/estoque", "estoque"),
-        ("/api/produtos", "produtos"),
-        ("/api/clientes", "clientes"),
-        ("/api/fornecedor", "fornecedores"),
-        ("/api/fornecedores", "fornecedores"),
-        ("/api/relatorios", "relatorios"),
-        ("/api/dashboard", "relatorios")
+        ("/api/bazar", new[] { "bazar" }),
+        ("/api/vendas", new[] { "vendas" }),
+        ("/api/caixa", new[] { "caixa" }),
+        ("/api/caixas", new[] { "caixa" }),
+        ("/api/catalogos", new[] { "catalogo" }),
+        ("/api/condicional", new[] { "condicional" }),
+        ("/api/compras", new[] { "compras" }),
+        ("/api/estoque", new[] { "estoque" }),
+        // O PDV (vendas) e o Bazar listam itens vendáveis por esta rota; liberar
+        // quando qualquer um deles estiver ativo, não só o módulo "produtos".
+        // Assim uma loja só-bazar (produtos off) consegue vender no PDV.
+        ("/api/produtos", new[] { "produtos", "vendas", "bazar" }),
+        ("/api/clientes", new[] { "clientes" }),
+        ("/api/fornecedor", new[] { "fornecedores" }),
+        ("/api/fornecedores", new[] { "fornecedores" }),
+        ("/api/relatorios", new[] { "relatorios" }),
+        ("/api/dashboard", new[] { "relatorios" })
     };
 
     private readonly RequestDelegate _next;
@@ -40,15 +44,25 @@ public class ModuloAtivoMiddleware
             return;
         }
 
-        var moduleKey = ResolverModulo(path);
-        if (moduleKey == null)
+        var moduleKeys = ResolverModulo(path);
+        if (moduleKeys == null)
         {
             await _next(context);
             return;
         }
 
         var modulos = context.RequestServices.GetRequiredService<EmpresaModuloAccessService>();
-        if (!await modulos.EstaAtivoAsync(moduleKey, context.RequestAborted))
+        var algumAtivo = false;
+        foreach (var key in moduleKeys)
+        {
+            if (await modulos.EstaAtivoAsync(key, context.RequestAborted))
+            {
+                algumAtivo = true;
+                break;
+            }
+        }
+
+        if (!algumAtivo)
         {
             context.Response.StatusCode = StatusCodes.Status403Forbidden;
             context.Response.ContentType = "application/json";
@@ -56,7 +70,7 @@ public class ModuloAtivoMiddleware
             {
                 sucesso = false,
                 error = "MODULE_DISABLED",
-                message = $"O módulo '{moduleKey}' não está habilitado para esta empresa."
+                message = $"O módulo '{moduleKeys[0]}' não está habilitado para esta empresa."
             }, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase }));
             return;
         }
@@ -79,12 +93,12 @@ public class ModuloAtivoMiddleware
         return false;
     }
 
-    private static string? ResolverModulo(string path)
+    private static string[]? ResolverModulo(string path)
     {
-        foreach (var (prefix, key) in RotasModulos)
+        foreach (var (prefix, keys) in RotasModulos)
         {
             if (path.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
-                return key;
+                return keys;
         }
         return null;
     }
